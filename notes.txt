@@ -1,0 +1,153 @@
+	parse command line
+	open (file, process, disk, NTFS stream)
+	error handling
+	save
+x	mouse wheel and middle button scroll support
+	status bar
+x	font
+	fix byte positioning
+x	box around selection
+	mouse selection
+x	keyboard selection
+x	keyboard commands
+	save/restore settings, window position, recent files, etc.
+	edit settings
+	multithreaded write/find/replace/encrypt/whatever
+x	different number bases for addresses, data
+	Don't allow selection across range boundaries (until we get new "data engine")
+	open resources
+x	what does it read before calling WinMain?  Use FileMon.  (It's Windows\Prefetch\ahed...exe.  Ignore it.)
+	allow keyboard focus on expansion buttons and section headings
+	allow clicking in middle of byte
+	CTRL + Left/Right -- move one digit or one large block?
+	option: grid lines
+	option: highlight address of current line
+	option: update address to show cursor position?
+	option: allow file size change (can we just outlaw insert mode?)
+	option: map ESC key to command
+	HHD allows X-scrolling of data with addresses locked
+	block select mode
+	tool window: text display with line breaks
+	option: show column headings with byte numbers
+	file overview, showing available ranges, modified ranges, read-only, current position
+	file comparison
+	open NTFS streams
+	file map (FlexHex)
+	 - option: resolution (1px, 2px, 5px, fraction of line, whole line)
+	option: multiple character views (ANSI, Unicode) (FlexHex)
+	option: clipboard formats
+	option: select block after paste (010)
+	adjust address digits for what's on screen? (010 Editor)
+	macros
+	bookmarks
+	templates
+	LNK files
+	cmd: revert
+	Drag & drop
+	backups
+	memory management
+	highlights: '\r', '\n'   'a'..'z', 'A'..'Z', '0'..'9'   0..31   128..255  (010 Editor)
+	scripts?
+	plugins?
+	auto-save?
+	read/write gzip/bzip2 files?
+	goto address dialog should have "extend selection" option, and fseek() origin equivalents
+	gzip undo data
+	xor undo data
+	allow expressions in goto address dialogs?  in data view dialogs?
+	collect (highlight?) strings
+	realloc() for growing memory blocks
+	fix MouseDown/MouseUp code when removing ScrollOriginWindow -- selection doesn't follow curByte
+	ask to save file on close.  If error, don't close.
+	show file modified status in title bar, tab(?), status bar, toolbar save button, menu
+	docking toolbars
+	change all options based on file extension or `file` output
+	 - color, highlight, endianness, base, screen layout
+	built-in draggable sash between panes
+	sparse/zero/pattern fill blocks (1, 2, 4, 8 bytes repeated)
+	floating-point formats
+	regex search
+	printing
+	monitor process memory for changes
+	show multiple bases at once (WitchEd)
+	
+x	add Matrix-style colors
+	add color scheme chooser
+	Add Undo feature
+	position history
+x	add large file support
+x	add process memory support
+x	allow collapsable ranges a la HxD
+	color columns?
+	if file opened read-only, option to allow writes and update immediately
+x	full-screen mode
+	see 010EditorOpenDlg.png
+	
+	PSPad's hex editor is very similar to AEdiHEX -- what gives?
+	
+context menu: region 4
+	Expand/Collapse
+	collapse all
+	expand all
+	expand only this (collapse others)
+	select region
+
+::: Work Log :::
+
+Sunday, 2006-05-07
+Created "ahed" project.  Started HexWnd class?
+
+Monday, 2006-05-08
+Got window creation, basic painting, scrolling working.  Added ATimer class and tested
+graphics primatives.  (The ones that don't draw anything are pretty fast, usually <3us.
+20x small rectangles take about 20x longer than one big one.  FillRect() is faster than
+Rectangle().)  Cursor positioning with mouse done today? (maybe tomorrow)
+
+Tuesday, 2006-05-09
+Added QString class.  Added VisualRange class.  Got ReadProcessMemory() working, with multiple
+DLLs displayed in separate ranges.  Reviewed progress, comparing to other editors.  Filled out
+to-do list.  Added collapsable ranges.
+
+Wednesday, 2006-05-10
+Moved stored settings to HexWndSettings class.  Added HexWndCmd.cpp and implemented simple
+keyboard commands.  Fixed HitTest() to return region.  Added GetLineInfo().  Added
+VisualRange.stored_address and display_address.  Finished ProcMemDataSource class.
+Integrated DataView class from my frhed modification.  Added OpenFile(), OpenProcess(), and
+an absolute basic command-line parser.  Sent a copy to Peter.
+
+Thursday, 2006-05-11
+Made SNV repository and checked in code.  Added basic WM_COMMAND handling.  Added
+HexWnd::SetFont().  Added mouse selection.  Improved selection drawing.  Added flags to
+GetByteRect().  Fixed m_pCurRange not getting set at start-up.  Added mouse wheel scrolling
+and calls to Increase/DecreaseFontSize(), which are still empty.
+
+Friday, 2006-05-12
+Added s.iAddressBase and s.iByteBase.  Added keyboard selection.  Fought with font sizes.
+Added clipboard functions.  Still not ready to edit real data.
+
+Saturday, 2006-05-13
+Researched undo facilities.  Decided to write my own.
+Here's a good article: http://www.codeproject.com/cpp/transactions.asp
+Added full-screen option.
+
+Sunday, 2006-05-14
+Undo.  Converted MoveCursor() to CmdMoveCursor() and worked on other Cmd stuff.
+
+Monday, 2006-05-15
+Started middle-button scroll stuff.
+
+Tuesday, 2006-05-16
+Worked on middle-button scroll stuff.
+
+Wednesday, 2006-05-17
+Finished middle-button scrolling.
+Code is getting large and hard to work with.  Needs cleaning and focus.
+Added CmdDigit(), WaitObjectList, status bar, and file map.
+
+Thursday, 2006-05-18
+Wrote AhedWindow class and decided to look into wxWidgets.  Finally got
+minimal.cpp compiling with wxWidgets-2.6.3.
+
+Friday, 2006-05-19
+Oh, the agony of indecision.  Do I keep going, or build my features into
+somebody else's program?  What framework is best for prototyping?  Will this be GPL?  Who is the target audience?

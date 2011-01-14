@@ -1,0 +1,72 @@
+Questions:
+
+1. What is my goal in writing this software?
+
+2. Who is the target audience?
+
+3. Should I try to sell the finished product?
+
+4. Should I use an existing project, or start my own?
+
+5. Am I writing a prototype or the real thing?
+
+6. What language/framework should I use?
+
+7. What should I call the project?
+
+
+Responses:
+
+1. What is my goal in writing this software?
+
+I am writing this software because I have always wanted to, and I need something to do.  I hate paying for software.  I have not found a hex editor with all the features I want.
+
+I want to be able to instantly open any file, disk, device, process, socket, pipe, port, NTFS stream, or whatever, and find out what is in it.  I want to be able to find strings in EXE's.  It should make viewing SVM files a piece of cake.  Maybe open gzipped files?  Should display Unicode characters.  Must have smart color coding.
+
+
+2. Who is the target audience?
+
+First of all: myself.  Second: friends.  Third: potential employers.  Fourth: developers.  Fifth: general users.  Sixth: your cat.
+
+
+3. Should I try to sell the finished product?
+
+I hate paying for software, but I don't mind getting paid for my software.  If somebody else thinks my program is worth their money, I would be happy to sell it to them.  However, it would take months of effort to be able to compete with 010, FlexHex, Hex Workshop, and WinHex.  Maybe that market is saturated.
+
+Is there an open-source license that allows you to turn around and go closed-source later?
+
+*** Using an open-source framework doesn't mean the end result must be GPL...
+
+
+4. Should I use an existing project, or start my own?
+
+This really depends on the previous question -- am I going to sell this?
+If I sell it, I need my own.
+If I don't sell it, I would like to use someone else's code if we as developers can get along, and our ideas are similar.  The world doesn't need Yet Another Hex Editor.  But maybe I do.
+
+
+5. Am I writing a prototype or the real thing?
+
+Let's make this easy:  I am writing a prototype.  With this statement comes the danger of having yet another project never make it past alpha, but that's a risk we'll have to take.  It should make development much easier.
+
+
+6. What language/framework should I use?
+
+wxWidgets: cross-platform, familiar, large, clumsy
+.NET: easy UI, but lots to learn
+Win32: lots of work for advanced features, but fast, small, and flexible
+Gtk#: ???
+wxPython: portable but slow; would make scripting EASY
+
+I think Gtk or other primarily linux toolkits are a bad idea for this project, whose main target is Windows.
+Which is easier to port to another framework: wxWidgets or Win32?
+probably wxWidgets.
+** big sigh **
+
+I wonder if it's merely a coincidence that my two favorite existing free hex editors used straight Win32...
+
+
+
+7. What should I call the project?
+
+Sarah suggested "Tyrannosaurus Hex."  That's quite a mouthful and long to type, but it certainly is bold and distinctive.

@@ -1,0 +1,371 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="IO">
+      <UniqueIdentifier>{8f045624-4a4e-4f0e-8836-8862a54efe34}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Library Headers">
+      <UniqueIdentifier>{58fc9ca3-b989-4d6b-86bc-8917757afbfc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Library Headers\libdisasm">
+      <UniqueIdentifier>{a87aa66f-dfaa-47f3-aeae-5615c03b7a13}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Library Headers\libdisasm-new">
+      <UniqueIdentifier>{24decb9d-3c57-4edd-b369-e53f4df081a4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Library Sources">
+      <UniqueIdentifier>{40717285-37b5-4e2a-9ab3-f44db8bd7d5f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Library Sources\libdisasm">
+      <UniqueIdentifier>{1546103b-95b9-4e67-acdf-196861134de9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Library Sources\libdisasm-new">
+      <UniqueIdentifier>{a94c0ee2-5186-4036-9c02-a3cb3207c9a2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav</Extensions>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="atimer.cpp">
+      <Filter>Library Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="BarViewCtrl.cpp">
+      <Filter>Library Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="bigint.cpp">
+      <Filter>Library Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="blockdevs.cpp">
+      <Filter>Library Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="clipboard.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="datahelp.cpp">
+      <Filter>IO</Filter>
+    </ClCompile>
+    <ClCompile Include="datasource.cpp">
+      <Filter>IO</Filter>
+    </ClCompile>
+    <ClCompile Include="dialogs.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="FatInfo.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="HexDoc.cpp">
+      <Filter>IO</Filter>
+    </ClCompile>
+    <ClCompile Include="hexwnd.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="HexWndCmd.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="hwpaint.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="libdisasm-old\i386.c">
+      <Filter>Library Sources\libdisasm</Filter>
+    </ClCompile>
+    <ClCompile Include="libdisasm-old\i386_invariant.c">
+      <Filter>Library Sources\libdisasm</Filter>
+    </ClCompile>
+    <ClCompile Include="libdisasm-old\libdis.c">
+      <Filter>Library Sources\libdisasm</Filter>
+    </ClCompile>
+    <ClCompile Include="libdisasm\ia32_implicit.c">
+      <Filter>Library Sources\libdisasm-new</Filter>
+    </ClCompile>
+    <ClCompile Include="libdisasm\ia32_insn.c">
+      <Filter>Library Sources\libdisasm-new</Filter>
+    </ClCompile>
+    <ClCompile Include="libdisasm\ia32_invariant.c">
+      <Filter>Library Sources\libdisasm-new</Filter>
+    </ClCompile>
+    <ClCompile Include="libdisasm\ia32_modrm.c">
+      <Filter>Library Sources\libdisasm-new</Filter>
+    </ClCompile>
+    <ClCompile Include="libdisasm\ia32_opcode_tables.c">
+      <Filter>Library Sources\libdisasm-new</Filter>
+    </ClCompile>
+    <ClCompile Include="libdisasm\ia32_operand.c">
+      <Filter>Library Sources\libdisasm-new</Filter>
+    </ClCompile>
+    <ClCompile Include="libdisasm\ia32_reg.c">
+      <Filter>Library Sources\libdisasm-new</Filter>
+    </ClCompile>
+    <ClCompile Include="libdisasm\ia32_settings.c">
+      <Filter>Library Sources\libdisasm-new</Filter>
+    </ClCompile>
+    <ClCompile Include="libdisasm\x86_disasm.c">
+      <Filter>Library Sources\libdisasm-new</Filter>
+    </ClCompile>
+    <ClCompile Include="libdisasm\x86_format.c">
+      <Filter>Library Sources\libdisasm-new</Filter>
+    </ClCompile>
+    <ClCompile Include="libdisasm\x86_imm.c">
+      <Filter>Library Sources\libdisasm-new</Filter>
+    </ClCompile>
+    <ClCompile Include="libdisasm\x86_insn.c">
+      <Filter>Library Sources\libdisasm-new</Filter>
+    </ClCompile>
+    <ClCompile Include="libdisasm\x86_misc.c">
+      <Filter>Library Sources\libdisasm-new</Filter>
+    </ClCompile>
+    <ClCompile Include="libdisasm\x86_operand_list.c">
+      <Filter>Library Sources\libdisasm-new</Filter>
+    </ClCompile>
+    <ClCompile Include="links.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="palette.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="precomp.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="profile.cpp">
+      <Filter>Library Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="scroll.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="search.cpp">
+      <Filter>Library Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="settings.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="spawn.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="statusbar.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="struct.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="struct_lex.cpp">
+      <Filter>Library Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="struct_par.cpp">
+      <Filter>Library Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="thFrame.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="toolwnds.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="undo.cpp">
+      <Filter>IO</Filter>
+    </ClCompile>
+    <ClCompile Include="utils.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="wx\treelistctrl.cpp">
+      <Filter>Library Sources</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="questions.txt" />
+    <None Include="todo.txt" />
+    <None Include="work log.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="atimer.h">
+      <Filter>Library Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="BarViewCtrl.h">
+      <Filter>Library Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="bigint.h">
+      <Filter>Library Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="blockdevs.h">
+      <Filter>Library Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="clipboard.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="datahelp.h">
+      <Filter>IO</Filter>
+    </ClInclude>
+    <ClInclude Include="datasource.h">
+      <Filter>IO</Filter>
+    </ClInclude>
+    <ClInclude Include="defs.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="dialogs.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="FatInfo.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="flexlexer.h">
+      <Filter>Library Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="hexdoc.h">
+      <Filter>IO</Filter>
+    </ClInclude>
+    <ClInclude Include="hexwnd.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="iprof\prof.h">
+      <Filter>Library Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="iprof\prof_gather.h">
+      <Filter>Library Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="iprof\prof_internal.h">
+      <Filter>Library Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="iprof\prof_win32.h">
+      <Filter>Library Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="libdisasm-old\bastard.h">
+      <Filter>Library Headers\libdisasm</Filter>
+    </ClInclude>
+    <ClInclude Include="libdisasm-old\extension.h">
+      <Filter>Library Headers\libdisasm</Filter>
+    </ClInclude>
+    <ClInclude Include="libdisasm-old\i386.h">
+      <Filter>Library Headers\libdisasm</Filter>
+    </ClInclude>
+    <ClInclude Include="libdisasm-old\i386_opcode.h">
+      <Filter>Library Headers\libdisasm</Filter>
+    </ClInclude>
+    <ClInclude Include="libdisasm-old\libdis.h">
+      <Filter>Library Headers\libdisasm</Filter>
+    </ClInclude>
+    <ClInclude Include="libdisasm-old\vm.h">
+      <Filter>Library Headers\libdisasm</Filter>
+    </ClInclude>
+    <ClInclude Include="libdisasm\ia32_implicit.h">
+      <Filter>Library Headers\libdisasm-new</Filter>
+    </ClInclude>
+    <ClInclude Include="libdisasm\ia32_insn.h">
+      <Filter>Library Headers\libdisasm-new</Filter>
+    </ClInclude>
+    <ClInclude Include="libdisasm\ia32_invariant.h">
+      <Filter>Library Headers\libdisasm-new</Filter>
+    </ClInclude>
+    <ClInclude Include="libdisasm\ia32_modrm.h">
+      <Filter>Library Headers\libdisasm-new</Filter>
+    </ClInclude>
+    <ClInclude Include="libdisasm\ia32_opcode_tables.h">
+      <Filter>Library Headers\libdisasm-new</Filter>
+    </ClInclude>
+    <ClInclude Include="libdisasm\ia32_operand.h">
+      <Filter>Library Headers\libdisasm-new</Filter>
+    </ClInclude>
+    <ClInclude Include="libdisasm\ia32_reg.h">
+      <Filter>Library Headers\libdisasm-new</Filter>
+    </ClInclude>
+    <ClInclude Include="libdisasm\ia32_settings.h">
+      <Filter>Library Headers\libdisasm-new</Filter>
+    </ClInclude>
+    <ClInclude Include="libdisasm\inttypes.h">
+      <Filter>Library Headers\libdisasm-new</Filter>
+    </ClInclude>
+    <ClInclude Include="libdisasm\libdis.h">
+      <Filter>Library Headers\libdisasm-new</Filter>
+    </ClInclude>
+    <ClInclude Include="libdisasm\qword.h">
+      <Filter>Library Headers\libdisasm-new</Filter>
+    </ClInclude>
+    <ClInclude Include="libdisasm\stdint.h">
+      <Filter>Library Headers\libdisasm-new</Filter>
+    </ClInclude>
+    <ClInclude Include="libdisasm\x86_imm.h">
+      <Filter>Library Headers\libdisasm-new</Filter>
+    </ClInclude>
+    <ClInclude Include="libdisasm\x86_operand_list.h">
+      <Filter>Library Headers\libdisasm-new</Filter>
+    </ClInclude>
+    <ClInclude Include="links.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="listfiles.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="palette.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="precomp.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="QString.h">
+      <Filter>Library Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="scroll.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="settings.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="spawn.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="statusbar.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="struct.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="struct_par.hpp">
+      <Filter>Library Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="thex.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="thFrame.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="thIPC.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="toolwnds.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ucs4_t.h">
+      <Filter>Library Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="undo.h">
+      <Filter>IO</Filter>
+    </ClInclude>
+    <ClInclude Include="utils.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="wx\treelistctrl.h">
+      <Filter>Library Headers</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="thex.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="struct.l" />
+    <CustomBuild Include="struct.y" />
+  </ItemGroup>
+</Project>

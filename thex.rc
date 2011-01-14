@@ -1,0 +1,107 @@
+#include "resource.h"
+#include <winresrc.h>
+
+// THESE ACCELERATORS ARE NOT USED!!!
+// Do it with wxAccel instead.
+
+//THEXACCEL ACCELERATORS 
+//BEGIN
+//    //"F",        IDM_FontDlg,        CONTROL, SHIFT, VIRTKEY      ; CTRL+SHIFT++F
+//    //"G",        IDM_GotoDlg,        CONTROL, VIRTKEY      ; CTRL+G
+//    VK_UP,      IDM_ViewLineUp,     CONTROL, VIRTKEY    ; Ctrl-Up
+//    VK_DOWN,    IDM_ViewLineDown,   CONTROL, VIRTKEY    ; Ctrl-Down
+//    VK_LEFT,    IDM_PrevBlock,      CONTROL, VIRTKEY    ; Ctrl-Left
+//    VK_RIGHT,   IDM_NextBlock,      CONTROL, VIRTKEY    ; Ctrl-Right
+//    VK_PRIOR,   IDM_ViewPageUp,     CONTROL, VIRTKEY    ; Ctrl-PageUp
+//    VK_NEXT,    IDM_ViewPageDown,   CONTROL, VIRTKEY    ; Ctrl-PageDown
+//    VK_TAB,     IDM_NextView,       VIRTKEY             ; Tab
+//    VK_TAB,     IDM_PrevView,       VIRTKEY, SHIFT      ; Shift-Tab
+//    //VK_ADD,     IDM_IncreaseFontSize, VIRTKEY, CONTROL  ; Ctrl-Plus // doesn't work -- should be VK_OEM_PLUS
+//    //VK_SUBTRACT,IDM_DecreaseFontSize, VIRTKEY, CONTROL  ; Ctrl-Minus
+//    //"X",        IDM_Cut,            VIRTKEY, CONTROL    ; Ctrl-X
+//    //"C",        IDM_Copy,           VIRTKEY, CONTROL    ; Ctrl-C
+//    //"V",        IDM_Paste,          VIRTKEY, CONTROL    ; Ctrl-V
+//    //VK_DELETE,  IDM_Delete,         VIRTKEY             ; Delete
+//    VK_INSERT,  IDM_ToggleInsert,   VIRTKEY             ; Insert
+//    //VK_F11,     IDM_FullScreen,     VIRTKEY             ; F11
+//    //"Z",        IDM_Undo,           VIRTKEY, CONTROL    ; Ctrl-Z
+//    //"Y",        IDM_Redo,           VIRTKEY, CONTROL    ; Ctrl-Y
+//    //"A",        IDM_SelectAll,      VIRTKEY, CONTROL    ; Ctrl-A
+//    "M",        IDM_ViewFileMap,    VIRTKEY, CONTROL    ; Ctrl-M
+//    //"I",        IDM_InsertRange,    VIRTKEY, CONTROL    ; Ctrl-I
+//END
+
+IDI_THEX  ICON res\T_Hex.ico
+IDI_SIZE1 ICON res\size1.ico
+
+IDC_U  CURSOR res\u.cur
+IDC_UR CURSOR res\ur.cur
+IDC_R  CURSOR res\r.cur
+IDC_DR CURSOR res\dr.cur
+IDC_D  CURSOR res\d.cur
+IDC_DL CURSOR res\dl.cur
+IDC_L  CURSOR res\l.cur
+IDC_UL CURSOR res\ul.cur
+IDC_UD CURSOR res\ud.cur
+IDC_LR CURSOR res\lr.cur
+IDC_UDLR CURSOR res\udlr.cur
+
+//
+//IDD_GOTO DIALOG 0, 0, 230, 100
+//STYLE DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+//EXSTYLE WS_EX_DLGMODALFRAME | WS_EX_WINDOWEDGE
+//CAPTION "Go to"
+//LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
+//FONT 8, "MS Shell Dlg"
+//{
+//   CONTROL "&Address", IDC_ADDR_LBL, STATIC, SS_LEFT | WS_CHILD | WS_VISIBLE | WS_GROUP, 8, 8, 100, 9
+//   CONTROL "Prefix with ""+"", ""-"", or ""x""", -1, STATIC, SS_LEFT | WS_CHILD | WS_VISIBLE | WS_GROUP, 8, 20, 100, 9
+//   CONTROL "", IDC_ADDRESS, COMBOBOX, CBS_DROPDOWN | CBS_HASSTRINGS | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 8, 32, 100, 13
+//   CONTROL "&Get Cursor Position", IDC_GET_CURSOR, BUTTON, WS_CHILD | WS_VISIBLE | WS_TABSTOP, 8, 44, 80, 14
+//   CONTROL "E&xtend selection", IDC_EXTEND_SEL, BUTTON, BS_AUTOCHECKBOX | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 8, 62, 69, 14
+//   CONTROL "Origin", 5, BUTTON, BS_GROUPBOX | WS_CHILD | WS_VISIBLE, 120, 8, 100, 66
+//   CONTROL "&Beginning of file", IDC_ORIGIN_BOF, BUTTON, BS_AUTORADIOBUTTON | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 125, 20, 80, 13
+//   CONTROL "&Cursor (Forward)", IDC_ORIGIN_CF, BUTTON, BS_AUTORADIOBUTTON | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 125, 32, 80, 13
+//   CONTROL "Cursor (Bac&kward)", IDC_ORIGIN_CB, BUTTON, BS_AUTORADIOBUTTON | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 125, 44, 80, 13
+//   CONTROL "&End of file", IDC_ORIGIN_EOF, BUTTON, BS_AUTORADIOBUTTON | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 125, 56, 80, 13
+//   CONTROL "&OK", IDOK, BUTTON, BS_DEFPUSHBUTTON | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 93, 80, 44, 14, 0x00000004
+//}
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 0,0,0,3
+ PRODUCTVERSION 0,0,0,1
+ FILEFLAGSMASK 0x17L
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x4L
+ FILETYPE 0x1L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904b0"
+        BEGIN
+            VALUE "FileDescription", "thex Application"
+            VALUE "FileVersion", "0, 0, 0, 2"
+            VALUE "InternalName", "thex"
+            VALUE "LegalCopyright", "Copyright (C) 2006"
+            VALUE "OriginalFilename", "thex.exe"
+            VALUE "ProductName", " thex Application"
+            VALUE "ProductVersion", "0, 0, 0, 1"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1200
+    END
+END
+
+//#include "wx/msw/wx.rc" //! causes problems with manifest file
+// Try wxUSE_NO_MANIFEST=1 in config.vc

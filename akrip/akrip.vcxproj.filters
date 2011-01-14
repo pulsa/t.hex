@@ -1,0 +1,73 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{83acb591-8c7b-402b-99df-91b55324d969}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{2b643ce9-e9da-4488-a429-1ed771ad1a50}</UniqueIdentifier>
+      <Extensions>ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe</Extensions>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{f4bda52e-6b86-4153-b90b-9fc9c0467069}</UniqueIdentifier>
+      <Extensions>cpp;c;cxx;rc;def;r;odl;idl;hpj;bat</Extensions>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="akrip32.def">
+      <Filter>Resource Files</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="akrip32.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="akrip32.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="aspilib.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="cdcache.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="myaspi32.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="scsidefs.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="scsipt.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="aspilib.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="atapi.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cdcache.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="handles.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="read10.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="readd4.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="readd8.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="scsipt.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

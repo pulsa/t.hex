@@ -1,0 +1,648 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug Unicode Static|Win32">
+      <Configuration>Debug Unicode Static</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug Unicode|Win32">
+      <Configuration>Debug Unicode</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release Unicode|Win32">
+      <Configuration>Release Unicode</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGUID>{6DA2905D-739D-42B2-889A-5C2DEEF0A739}</ProjectGUID>
+    <RootNamespace>thex</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Debug Unicode|Win32'">
+    <ConfigurationType>Application</ConfigurationType>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Release Unicode|Win32'">
+    <ConfigurationType>Application</ConfigurationType>
+    <CharacterSet>Unicode</CharacterSet>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Debug Unicode Static|Win32'">
+    <ConfigurationType>Application</ConfigurationType>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets">
+    <Import Project="$(LocalAppData)\Microsoft\VisualStudio\10.0\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(LocalAppData)\Microsoft\VisualStudio\10.0\Microsoft.Cpp.$(Platform).user.props')" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.20506.1</_ProjectFileVersion>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(Configuration)\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</LinkIncremental>
+    <EmbedManifest Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</EmbedManifest>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(Configuration)\</IntDir>
+    <EmbedManifest Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</EmbedManifest>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug Unicode|Win32'">$(SolutionDir)$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug Unicode|Win32'">$(Configuration)\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug Unicode|Win32'">true</LinkIncremental>
+    <EmbedManifest Condition="'$(Configuration)|$(Platform)'=='Debug Unicode|Win32'">true</EmbedManifest>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release Unicode|Win32'">$(SolutionDir)$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release Unicode|Win32'">$(Configuration)\</IntDir>
+    <EmbedManifest Condition="'$(Configuration)|$(Platform)'=='Release Unicode|Win32'">true</EmbedManifest>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug Unicode Static|Win32'">$(SolutionDir)$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug Unicode Static|Win32'">$(Configuration)\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug Unicode Static|Win32'">true</LinkIncremental>
+    <EmbedManifest Condition="'$(Configuration)|$(Platform)'=='Debug Unicode Static|Win32'">true</EmbedManifest>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>.;$(WX)\lib\vc_lib\mswd;$(WX)\include;$(WX)\contrib\include;./iprof;./libdisasm;./akrip;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_DEBUG;WIN32;_CRT_SECURE_NO_DEPRECATE;INCLUDE_LIBDISASM;wxUSE_NO_MANIFEST;PROFILE;ATIMER_USE_TICKCOUNT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ExceptionHandling>
+      </ExceptionHandling>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>precomp.h</PrecompiledHeaderFile>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>_DEBUG;wxUSE_NO_MANIFEST;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(WX)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Link>
+      <AdditionalDependencies>user32.lib;gdi32.lib;rpcrt4.lib;advapi32.lib;comctl32.lib;comdlg32.lib;ole32.lib;oleaut32.lib;shell32.lib;winmm.lib;ws2_32.lib;psapi.lib;version.lib;setupapi.lib;wxbase28d.lib;wxmsw28d_core.lib;wxmsw28d_aui.lib;akrip.lib;wxmsw28d_adv.lib;wxregexd.lib;wxbase28d_net.lib;wxzlibd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(WX)/lib/vc_lib;./akrip/debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <DelayLoadDLLs>akrip.dll; psapi.dll; version.dll; shell32.dll; comdlg32.dll; ws2_32.dll;%(DelayLoadDLLs)</DelayLoadDLLs>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <GenerateMapFile>true</GenerateMapFile>
+      <SubSystem>Windows</SubSystem>
+      <LargeAddressAware>true</LargeAddressAware>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention>
+      </DataExecutionPrevention>
+    </Link>
+    <Manifest>
+      <VerboseOutput>true</VerboseOutput>
+    </Manifest>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <Optimization>Full</Optimization>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <WholeProgramOptimization>true</WholeProgramOptimization>
+      <AdditionalIncludeDirectories>.;$(WX)\lib\vc_lib\msw;$(WX)\include;$(WX)\contrib\include;./iprof;./akrip;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_CRT_SECURE_NO_DEPRECATE;INCLUDE_LIBDISASM;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <StringPooling>true</StringPooling>
+      <ExceptionHandling>
+      </ExceptionHandling>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <BufferSecurityCheck>false</BufferSecurityCheck>
+      <FloatingPointModel>Fast</FloatingPointModel>
+      <RuntimeTypeInfo>false</RuntimeTypeInfo>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>precomp.h</PrecompiledHeaderFile>
+      <WarningLevel>Level4</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>user32.lib;gdi32.lib;rpcrt4.lib;advapi32.lib;comctl32.lib;comdlg32.lib;ole32.lib;oleaut32.lib;shell32.lib;winmm.lib;ws2_32.lib;psapi.lib;version.lib;setupapi.lib;wxbase28.lib;wxmsw28_core.lib;wxmsw28_aui.lib;akrip.lib;wxmsw28_adv.lib;wxmsw28_wxflatnotebook.lib;wxregex.lib;wxbase28_net.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(WX)/lib/vc_lib;./akrip/release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <DelayLoadDLLs>akrip.dll; libdisasm.dll; psapi.dll; opengl32.dll; version.dll; shell32.dll; comdlg32.dll; ws2_32.lib;%(DelayLoadDLLs)</DelayLoadDLLs>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <GenerateMapFile>true</GenerateMapFile>
+      <SubSystem>Windows</SubSystem>
+      <LargeAddressAware>true</LargeAddressAware>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention>
+      </DataExecutionPrevention>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug Unicode|Win32'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>.;$(WX)\lib\vc_lib\mswud;$(WX)\include;$(WX)\contrib\include;./iprof;./libdisasm;./akrip;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_DEBUG;WIN32;_CRT_SECURE_NO_DEPRECATE;INCLUDE_LIBDISASM;PROFILE;ATIMER_USE_TICKCOUNT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ExceptionHandling>
+      </ExceptionHandling>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>precomp.h</PrecompiledHeaderFile>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>_DEBUG;wxUSE_NO_MANIFEST;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(WX)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Link>
+      <AdditionalDependencies>user32.lib;gdi32.lib;rpcrt4.lib;advapi32.lib;comctl32.lib;comdlg32.lib;ole32.lib;shell32.lib;winmm.lib;ws2_32.lib;psapi.lib;version.lib;setupapi.lib;wxbase28ud.lib;wxmsw28ud_core.lib;wxmsw28ud_aui.lib;akrip.lib;wxmsw28ud_adv.lib;wxregexud.lib;wxbase28ud_net.lib;wxzlibd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(WX)/lib/vc_lib;./akrip/debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <DelayLoadDLLs>akrip.dll; psapi.dll; version.dll; shell32.dll; comdlg32.dll; ws2_32.dll;%(DelayLoadDLLs)</DelayLoadDLLs>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <GenerateMapFile>true</GenerateMapFile>
+      <SubSystem>Windows</SubSystem>
+      <LargeAddressAware>true</LargeAddressAware>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention>
+      </DataExecutionPrevention>
+    </Link>
+    <Manifest>
+      <VerboseOutput>true</VerboseOutput>
+    </Manifest>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release Unicode|Win32'">
+    <ClCompile>
+      <Optimization>Full</Optimization>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <WholeProgramOptimization>true</WholeProgramOptimization>
+      <AdditionalIncludeDirectories>.;$(WX)\lib\vc_lib\mswu;$(WX)\include;$(WX)\contrib\include;./iprof;./akrip;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_CRT_SECURE_NO_DEPRECATE;INCLUDE_LIBDISASM;ATIMER_USE_TICKCOUNT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <StringPooling>true</StringPooling>
+      <ExceptionHandling>
+      </ExceptionHandling>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <BufferSecurityCheck>false</BufferSecurityCheck>
+      <FloatingPointModel>Fast</FloatingPointModel>
+      <RuntimeTypeInfo>false</RuntimeTypeInfo>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>precomp.h</PrecompiledHeaderFile>
+      <WarningLevel>Level4</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>user32.lib;gdi32.lib;rpcrt4.lib;advapi32.lib;comctl32.lib;comdlg32.lib;ole32.lib;oleaut32.lib;shell32.lib;winmm.lib;ws2_32.lib;psapi.lib;version.lib;setupapi.lib;wxbase28u.lib;wxmsw28u_core.lib;wxmsw28u_aui.lib;akrip.lib;wxmsw28u_adv.lib;wxregexu.lib;wxbase28u_net.lib;wxzlib.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(WX)/lib/vc_lib;./akrip/release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <DelayLoadDLLs>akrip.dll; libdisasm.dll; psapi.dll; opengl32.dll; version.dll; shell32.dll; comdlg32.dll; ws2_32.lib;%(DelayLoadDLLs)</DelayLoadDLLs>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <GenerateMapFile>true</GenerateMapFile>
+      <SubSystem>Windows</SubSystem>
+      <LargeAddressAware>true</LargeAddressAware>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention>
+      </DataExecutionPrevention>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug Unicode Static|Win32'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>.;$(WX)\lib\vc_lib\mswud;$(WX)\include;$(WX)\contrib\include;./iprof;./libdisasm;./akrip;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_DEBUG;WIN32;_CRT_SECURE_NO_DEPRECATE;INCLUDE_LIBDISASM;ATIMER_USE_TICKCOUNT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>precomp.h</PrecompiledHeaderFile>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>_DEBUG;wxUSE_NO_MANIFEST;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(WX)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Link>
+      <AdditionalDependencies>user32.lib;gdi32.lib;rpcrt4.lib;advapi32.lib;comctl32.lib;comdlg32.lib;ole32.lib;shell32.lib;winmm.lib;ws2_32.lib;psapi.lib;version.lib;setupapi.lib;wxbase29ud.lib;wxmsw29ud_core.lib;wxmsw29ud_aui.lib;akrip.lib;wxmsw29ud_adv.lib;wxregexud.lib;wxbase29ud_net.lib;wxzlibd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(WX)/lib/vc_lib;./akrip/$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <DelayLoadDLLs>akrip.dll; psapi.dll; version.dll; comdlg32.dll; ws2_32.dll;%(DelayLoadDLLs)</DelayLoadDLLs>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <GenerateMapFile>true</GenerateMapFile>
+      <SubSystem>Windows</SubSystem>
+      <LargeAddressAware>true</LargeAddressAware>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention>
+      </DataExecutionPrevention>
+    </Link>
+    <Manifest>
+      <VerboseOutput>true</VerboseOutput>
+    </Manifest>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="atimer.cpp" />
+    <ClCompile Include="BarViewCtrl.cpp" />
+    <ClCompile Include="bigint.cpp" />
+    <ClCompile Include="blockdevs.cpp" />
+    <ClCompile Include="clipboard.cpp">
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug Unicode|Win32'">/Gh /GH %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <ClCompile Include="datahelp.cpp" />
+    <ClCompile Include="datasource.cpp" />
+    <ClCompile Include="dialogs.cpp" />
+    <ClCompile Include="FatInfo.cpp" />
+    <ClCompile Include="HexDoc.cpp">
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug Unicode|Win32'">/Gh /GH %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <ClCompile Include="hexwnd.cpp">
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug Unicode|Win32'">/Gh /GH %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <ClCompile Include="HexWndCmd.cpp">
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug Unicode|Win32'">/Gh /GH %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <ClCompile Include="hwpaint.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug Unicode|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release Unicode|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug Unicode Static|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="libdisasm-old\i386.c">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug Unicode|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release Unicode|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug Unicode Static|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="libdisasm-old\i386_invariant.c">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug Unicode|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release Unicode|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug Unicode Static|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="libdisasm-old\libdis.c">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug Unicode|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release Unicode|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug Unicode Static|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="libdisasm\ia32_implicit.c">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug Unicode|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release Unicode|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug Unicode Static|Win32'">
+      </PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="libdisasm\ia32_insn.c">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug Unicode|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release Unicode|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug Unicode Static|Win32'">
+      </PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="libdisasm\ia32_invariant.c">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug Unicode|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release Unicode|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug Unicode Static|Win32'">
+      </PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="libdisasm\ia32_modrm.c">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug Unicode|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release Unicode|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug Unicode Static|Win32'">
+      </PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="libdisasm\ia32_opcode_tables.c">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug Unicode|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release Unicode|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug Unicode Static|Win32'">
+      </PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="libdisasm\ia32_operand.c">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug Unicode|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release Unicode|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug Unicode Static|Win32'">
+      </PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="libdisasm\ia32_reg.c">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug Unicode|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release Unicode|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug Unicode Static|Win32'">
+      </PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="libdisasm\ia32_settings.c">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug Unicode|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release Unicode|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug Unicode Static|Win32'">
+      </PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="libdisasm\x86_disasm.c">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug Unicode|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release Unicode|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug Unicode Static|Win32'">
+      </PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="libdisasm\x86_format.c">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug Unicode|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release Unicode|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug Unicode Static|Win32'">
+      </PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="libdisasm\x86_imm.c">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug Unicode|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release Unicode|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug Unicode Static|Win32'">
+      </PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="libdisasm\x86_insn.c">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug Unicode|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release Unicode|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug Unicode Static|Win32'">
+      </PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="libdisasm\x86_misc.c">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug Unicode|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release Unicode|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug Unicode Static|Win32'">
+      </PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="libdisasm\x86_operand_list.c">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug Unicode|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release Unicode|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug Unicode Static|Win32'">
+      </PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="links.cpp" />
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="palette.cpp" />
+    <ClCompile Include="precomp.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug Unicode|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release Unicode|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug Unicode Static|Win32'">Create</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="profile.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Full</Optimization>
+      <BufferSecurityCheck Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BufferSecurityCheck>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </PrecompiledHeader>
+      <DebugInformationFormat Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">ProgramDatabase</DebugInformationFormat>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug Unicode|Win32'">Full</Optimization>
+      <OmitFramePointers Condition="'$(Configuration)|$(Platform)'=='Debug Unicode|Win32'">true</OmitFramePointers>
+      <ExceptionHandling Condition="'$(Configuration)|$(Platform)'=='Debug Unicode|Win32'">
+      </ExceptionHandling>
+      <BufferSecurityCheck Condition="'$(Configuration)|$(Platform)'=='Debug Unicode|Win32'">false</BufferSecurityCheck>
+      <FunctionLevelLinking Condition="'$(Configuration)|$(Platform)'=='Debug Unicode|Win32'">false</FunctionLevelLinking>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug Unicode|Win32'">
+      </PrecompiledHeader>
+      <DebugInformationFormat Condition="'$(Configuration)|$(Platform)'=='Debug Unicode|Win32'">ProgramDatabase</DebugInformationFormat>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release Unicode|Win32'">true</ExcludedFromBuild>
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug Unicode Static|Win32'">Full</Optimization>
+      <OmitFramePointers Condition="'$(Configuration)|$(Platform)'=='Debug Unicode Static|Win32'">true</OmitFramePointers>
+      <ExceptionHandling Condition="'$(Configuration)|$(Platform)'=='Debug Unicode Static|Win32'">
+      </ExceptionHandling>
+      <BufferSecurityCheck Condition="'$(Configuration)|$(Platform)'=='Debug Unicode Static|Win32'">false</BufferSecurityCheck>
+      <FunctionLevelLinking Condition="'$(Configuration)|$(Platform)'=='Debug Unicode Static|Win32'">false</FunctionLevelLinking>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug Unicode Static|Win32'">
+      </PrecompiledHeader>
+      <DebugInformationFormat Condition="'$(Configuration)|$(Platform)'=='Debug Unicode Static|Win32'">ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <ClCompile Include="scroll.cpp" />
+    <ClCompile Include="search.cpp">
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug Unicode|Win32'">/Gh /GH %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <ClCompile Include="settings.cpp" />
+    <ClCompile Include="spawn.cpp" />
+    <ClCompile Include="statusbar.cpp" />
+    <ClCompile Include="struct.cpp" />
+    <ClCompile Include="struct_lex.cpp" />
+    <ClCompile Include="struct_par.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug Unicode|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release Unicode|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug Unicode Static|Win32'">
+      </PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="thFrame.cpp" />
+    <ClCompile Include="toolwnds.cpp" />
+    <ClCompile Include="undo.cpp" />
+    <ClCompile Include="utils.cpp" />
+    <ClCompile Include="wx\treelistctrl.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug Unicode|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release Unicode|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug Unicode Static|Win32'">
+      </PrecompiledHeader>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="struct.l">
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Running GNU flex...</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">flex -Sflex.skl -ostruct_lex.cpp -+ struct.l
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">struct_lex.cpp;%(Outputs)</Outputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug Unicode|Win32'">Running GNU flex...</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug Unicode|Win32'">flex -Sflex.skl -ostruct_lex.cpp -+ struct.l
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug Unicode|Win32'">struct_lex.cpp;%(Outputs)</Outputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug Unicode Static|Win32'">Running GNU flex...</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug Unicode Static|Win32'">flex -Sflex.skl -ostruct_lex.cpp -+ struct.l
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug Unicode Static|Win32'">struct_lex.cpp;%(Outputs)</Outputs>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="struct.y">
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Running GNU bison...</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">bison --skeleton=yacc.c -tvkdostruct_par.cpp --report=all struct.y
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">struct_par.cpp;struct_par.hpp";%(Outputs)</Outputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug Unicode|Win32'">Running GNU bison...</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug Unicode|Win32'">bison --skeleton=yacc.c -tvkdostruct_par.cpp --report=all struct.y
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug Unicode|Win32'">struct_par.cpp;struct_par.hpp";%(Outputs)</Outputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug Unicode Static|Win32'">Running GNU bison...</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug Unicode Static|Win32'">bison --skeleton=yacc.c -tvkdostruct_par.cpp --report=all struct.y
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug Unicode Static|Win32'">struct_par.cpp;struct_par.hpp</Outputs>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="atimer.h" />
+    <ClInclude Include="BarViewCtrl.h" />
+    <ClInclude Include="bigint.h" />
+    <ClInclude Include="blockdevs.h" />
+    <ClInclude Include="clipboard.h" />
+    <ClInclude Include="datahelp.h" />
+    <ClInclude Include="datasource.h" />
+    <ClInclude Include="defs.h" />
+    <ClInclude Include="dialogs.h" />
+    <ClInclude Include="FatInfo.h" />
+    <ClInclude Include="flexlexer.h" />
+    <ClInclude Include="hexdoc.h" />
+    <ClInclude Include="hexwnd.h" />
+    <ClInclude Include="iprof\prof.h" />
+    <ClInclude Include="iprof\prof_gather.h" />
+    <ClInclude Include="iprof\prof_internal.h" />
+    <ClInclude Include="iprof\prof_win32.h" />
+    <ClInclude Include="libdisasm-old\bastard.h" />
+    <ClInclude Include="libdisasm-old\extension.h" />
+    <ClInclude Include="libdisasm-old\i386.h" />
+    <ClInclude Include="libdisasm-old\i386_opcode.h" />
+    <ClInclude Include="libdisasm-old\libdis.h" />
+    <ClInclude Include="libdisasm-old\vm.h" />
+    <ClInclude Include="libdisasm\ia32_implicit.h" />
+    <ClInclude Include="libdisasm\ia32_insn.h" />
+    <ClInclude Include="libdisasm\ia32_invariant.h" />
+    <ClInclude Include="libdisasm\ia32_modrm.h" />
+    <ClInclude Include="libdisasm\ia32_opcode_tables.h" />
+    <ClInclude Include="libdisasm\ia32_operand.h" />
+    <ClInclude Include="libdisasm\ia32_reg.h" />
+    <ClInclude Include="libdisasm\ia32_settings.h" />
+    <ClInclude Include="libdisasm\inttypes.h" />
+    <ClInclude Include="libdisasm\libdis.h" />
+    <ClInclude Include="libdisasm\qword.h" />
+    <ClInclude Include="libdisasm\stdint.h" />
+    <ClInclude Include="libdisasm\x86_imm.h" />
+    <ClInclude Include="libdisasm\x86_operand_list.h" />
+    <ClInclude Include="links.h" />
+    <ClInclude Include="listfiles.h" />
+    <ClInclude Include="palette.h" />
+    <ClInclude Include="precomp.h" />
+    <ClInclude Include="QString.h" />
+    <ClInclude Include="resource.h" />
+    <ClInclude Include="scroll.h" />
+    <ClInclude Include="settings.h" />
+    <ClInclude Include="spawn.h" />
+    <ClInclude Include="statusbar.h" />
+    <ClInclude Include="struct.h" />
+    <ClInclude Include="struct_par.hpp" />
+    <ClInclude Include="thex.h" />
+    <ClInclude Include="thFrame.h" />
+    <ClInclude Include="thIPC.h" />
+    <ClInclude Include="toolwnds.h" />
+    <ClInclude Include="ucs4_t.h" />
+    <ClInclude Include="undo.h" />
+    <ClInclude Include="utils.h" />
+    <ClInclude Include="wx\treelistctrl.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="thex.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="questions.txt" />
+    <None Include="todo.txt" />
+    <None Include="work log.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="akrip\akrip.vcxproj">
+      <Project>{ec0ba393-1d1a-4bb3-a208-8ad7117b2056}</Project>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

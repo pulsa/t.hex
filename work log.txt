@@ -1,0 +1,877 @@
+Sunday, 2006-05-07
+Created "ahed" project.  Started HexWnd class?
+
+Monday, 2006-05-08
+Got window creation, basic painting, scrolling working.  Added ATimer class and tested
+graphics primatives.  (The ones that don't draw anything are pretty fast, usually <3us.
+20x small rectangles take about 20x longer than one big one.  FillRect() is faster than
+Rectangle().)  Cursor positioning with mouse done today? (maybe tomorrow)
+
+Tuesday, 2006-05-09
+Added QString class.  Added VisualRange class.  Got ReadProcessMemory() working, with multiple
+DLLs displayed in separate ranges.  Reviewed progress, comparing to other editors.  Filled out
+to-do list.  Added collapsable ranges.
+
+Wednesday, 2006-05-10
+Moved stored settings to HexWndSettings class.  Added HexWndCmd.cpp and implemented simple
+keyboard commands.  Fixed HitTest() to return region.  Added GetLineInfo().  Added
+VisualRange.stored_address and display_address.  Finished ProcMemDataSource class.
+Integrated DataView class from my frhed modification.  Added OpenFile(), OpenProcess(), and
+an absolute basic command-line parser.  Sent a copy to Peter.
+
+Thursday, 2006-05-11
+Made SVN repository and checked in code.  Added basic WM_COMMAND handling.  Added
+HexWnd::SetFont().  Added mouse selection.  Improved selection drawing.  Added flags to
+GetByteRect().  Fixed m_pCurRange not getting set at start-up.  Added mouse wheel scrolling
+and calls to Increase/DecreaseFontSize(), which are still empty.
+
+Friday, 2006-05-12
+Added s.iAddressBase and s.iByteBase.  Added keyboard selection.  Fought with font sizes.
+Added clipboard functions.  Still not ready to edit real data.
+
+Saturday, 2006-05-13
+Researched undo facilities.  Decided to write my own.
+Here's a good article: http://www.codeproject.com/cpp/transactions.asp
+Added full-screen option.
+
+Sunday, 2006-05-14
+Undo.  Converted MoveCursor() to CmdMoveCursor() and worked on other Cmd stuff.
+
+Monday, 2006-05-15
+Started middle-button scroll stuff.
+
+Tuesday, 2006-05-16
+Worked on middle-button scroll stuff.
+
+Wednesday, 2006-05-17
+Finished middle-button scrolling.
+Code is getting large and hard to work with.  Needs cleaning and focus.
+Added CmdDigit(), WaitObjectList, status bar, and file map.
+
+Thursday, 2006-05-18
+Wrote AhedWindow class and decided to look into wxWidgets.  Finally got
+minimal.cpp compiling with wxWidgets-2.6.3.
+
+Friday, 2006-05-19
+Oh, the agony of indecision.  Do I keep going, or build my features into
+somebody else's program?  What framework is best for prototyping?  Will this be GPL?
+Who is the target audience?
+Renamed to "Tyrannosaurus Hex" for now.  Got it to compile with wxWidgets-2.6.3 and wxAUI-0.9.2.
+Runs reasonably well, minus keyboard input.
+
+Saturday, 2006-05-20
+Not much time spent today.  Tried (unsuccessfully) to add keyboard accelerators.
+
+Sunday, 2006-05-21
+Got accelerators working.  Added timer for scrolling when mouse selecting.  Fixed
+ScrollOriginWindow problem deactivating main window.  Cleaned up code a little.
+
+Tuesday/Wednesday
+Looked at bless's source code (http://home.gna.org/bless/).  It's very reassuring to see
+the same data structures as I used, with different names.
+Downloaded and installed mono (http://www.mono-project.com/).
+
+Thursday, 2006-05-25
+Compiled bless with mono.  It's huge and ugly.  I can't use it.  I'll stick to C++.
+Renamed and refactored data storage classes.
+
+Friday, 2006-05-26
+Finished integrating newly rewritten data storage classes.
+I was having some trouble deciding whether to allow the collapsable regions after all.
+I came up with two reasons to do it that way:
+  1. Easy searching through an entire memory space
+  2. Coolness
+The main argument against it is the unnecessary complexity it adds to the code and the display.
+As an alternative, we could do something like 010 Editor, and show a list box with available
+regions, one of which can be active at a time.  This is probably the way to go.  But I
+concluded that the data structures (particularly DataRegion and Segment) would have to be
+almost identical for both designs, and the GUI code isn't finished but it allows multiple
+regions, so I'll leave that alone and work on something else for now.
+
+Saturday, 2006-05-27
+Worked on selection and digit-level cursor positioning.
+Changed some data types to 64 bits and finally was able to read end of 10GB sparse file.
+
+Sunday, 2006-05-28  *wxPatch*
+Installed wxGlade.  Worked on Goto dialog.
+Changed wxCharCodeWXToMSW() in order to use "+" and "-" as accelerators.
+
+Monday, 2006-05-29
+Combined DataRegion with HexDoc class.  Now the names are funny, but HexWnd is much simpler.
+Messed around with accelerators some more.  What a lot of events.
+
+Tuesday, 2006-05-30
+Worked on serializing data for clipboard and undo.
+
+Wednesday, 2006-05-31
+Decided this undo business was getting out of hand.  Wrote some more quick-and-dirty code
+that I'll have to clean up later, but it works.
+Added Selection class and stored one in HexDoc for doc switching.
+
+Thursday, 2006-06-01
+Messed around with wx library some more.  It turns out I wasn't using the library I thought,
+and it's amazing that it worked at all.  From now on, delete %wx%/lib/vc_*/msw*/wx/setup.h
+before rebuilding.
+Added CmdOpenFile(), CmdOpenProcess(), and ProcessDialog.
+
+Saturday, 2006-06-03
+Messed around with undo code some more.  I can't find any system that is clearly the best.
+Worked on digit grouping and smarter byte drawing.  Added HexWnd::GetByteX().
+
+Monday, 2006-06-05
+Made DisplayPane class do something useful.  Added PaintPaneLine().
+Got font size code mostly working.
+
+Thursday, 2006-06-08
+Added basic grid drawing.
+
+Friday, 2006-06-09
+Got Dad's advice on structures/scripts/macros/operations:
+ Make a C-like structure viewer that gives you a few basic options on how to display data.
+ Compile in a few basic operations.
+ Don't worry about macros or scripts.  There's no reason that has to be part of an editor.
+He also suggested that I could show the data as numbers of certain data type, which would
+be useful looking at 16-bit PCM data for example.
+Added colors for different panes, context menu that does nothing, and a toolbar.
+Added skeletons of find feature and settings dialog.
+
+Saturday, 2006-06-10
+Worked on getting MadEdit to compile with Unicode WX.  Boost is enormous! (and unnecessary)
+
+Sunday, 2006-06-11
+Installed Ubuntu 6.06
+
+Monday, 2006-06-12
+Got MadEdit to compile under linux
+
+Tuesday, 2006-06-13
+Went back to Windows to be productive.  Added 64-bit scroll bars.
+Finished mksparse.cpp.  My maximum file size is 4TB with data, or 16TB-64KB with no data.
+Added basic find feature (exact bytes, forward and backward).  Optimized code searches
+rougly 43MB/s from a sparse file.  (Next day I get 65MB/s.  Weird.)
+
+Wednesday, 2006-06-14
+Added thClipboard class with 20-slot clipboard ring and delayed rendering.
+Added minimal histogram and string collection to stdout only.
+Fixed mouseover highlighting for Unicode pane.
+
+Thursday, 2006-06-15
+Added CmdViewStatusBar() and status bar fields.
+Made DataView windows smarter about whether to update.
+Added context menu and fixed orientation code for FileMap.
+Added palettes and HexWndSettings::Load()/Save().
+
+Friday, 2006-06-16
+Wrote MyTokenizer to replace wxStringTokenizer for palette parsing.
+Moved string collection to a dialog with controls for search parameters.
+Worked on status bar.  Added FormatXXX().
+
+Tuesday, 2006-06-20
+Wrote thStatusBar class.  Added IBM floating point code from
+http://groups.google.com/group/comp.lang.c/browse_thread/thread/8bb23299e8553c4c/c1ea8f1de18eea9%23c1ea8f1de18eea9
+
+Wednesday, 2006-06-21
+Started changing ReadUserNumber() to accept HTML-style colors (#RRGGBB instead of 0xBBGGRR),
+but decided that was a waste of time for now since I'm not sure we're sticking to INI files.
+Added HexWnd::MoveCursorIntoView() for Ctrl+Up/Down.  Fixed document titles (for now).
+Fixed number display for signed ints.  Started working on structure viewer.
+
+Thursday, 2006-06-22
+Started working with Spirit parsing framework (part of boost).
+
+Friday, 2006-06-23
+Added flex/bison struct grammer parser.  Not compiling yet.
+
+Monday, 2006-06-26
+Flex/bison struct parser now works.  Added useful controls to StructureView.
+
+Tuesday, 2006-06-27
+Added custom flex/bison skeleton files to add precomp.h and fix iostream declaration.
+Expanded parser for multiple structure definitions.  Added IDM_ViewToolBar.
+
+Wednesday, 2006-06-28
+Added bigint class to simplify relative file offsets.  Got a little farther with StructureView.
+
+Friday, 2006-06-30
+Added wxTreeListCtrl code (not used yet).  Got file offsets in structure viewer working.
+Added HexWndSettings.clrHighlight.  It doesn't really highlight, because we have too many
+colors already, and trying to decide what order of precedence they should take was hard.
+Instead it just draws a box of that color.
+Added thAppSettings.bDocList, bNumberView, bStringView, and bStructureView, and relevant
+code in thFrame.
+Intellisense works again, somehow.  Now if I never touch a header file, maybe it will stay.
+
+Saturday, 2006-07-01
+Added dumb Unicode string collection.
+
+Saturday, 2006-07-08
+Worked on opening LNK (shortcut) files.  Still need OFN_NODEREFERENCELINKS in wxFileDialog
+and better message dialogs.
+
+Sunday, 2006-07-09
+Added HexWnd::GetColRect() and fixed drawing and selecting again.
+Temporarily fixed horizontal resizing bug (forgot extra pixel for right-edge divider line).
+
+Saturday, 2006-07-29
+Made DocList use wxListCtrl instead of wxList.  Added Range and Size columns.
+
+Sunday, 2006-07-30
+Added process heaps enumerated with ToolHelp32.
+
+Monday, 2006-07-31
+Used VirtualQueryEx() to map all pages of a process's address space.
+Added settings.bAbsoluteAddresses.  Added address context menu items to control it.
+Added binary display pane.  Made panes more independent.
+Started working on showing ruler.
+
+Tuesday, 2006-08-01
+Researched tree structures.
+
+Wednesday, 2006-08-02
+Started implementing AVL tree for data storage.
+Fixed automatic column count adjustment.  Added debug new.
+Worked on string collection.  Fixed some bugs, added character set and case sensitivity options.
+
+Thursday, 2006-08-03
+Wrote ProtectFlagsAsStrings() to show access column of DocList.
+Worked on smooth drawing around ruler when panning.
+
+Thursday, 2006-08-10
+Worked on smooth drawing around ruler when panning.
+
+Friday, 2006-08-11
+Tried to get real maximum font width of all code points by using DrawText().
+The number that we can read easily doesn't include synthesized characters like 0xBCC.
+At least, I think that's what's going on.  Still not clear.
+Cleaned up OnPaint(), moved offset stuff into Y<=>Line functions.  Made PaintRect().
+Drawing works great now.
+
+Tuesday, 2006-08-15
+Paste CF_UNICODETEXT.  Fixed several small problems and cleaned up some "//!" stuff.
+
+Wednesday, 2006-08-16
+Downloaded wxWidgets 2.7.0 for testing.
+I think I'll have to accept using the numpad to change font sizes for now; see
+http://blogs.msdn.com/michkap/archive/2006/04/02/567003.aspx
+http://www.eternallyconfuzzled.com/tuts/andersson.html
+How does an AA tree (or a red-black tree) resemble a B-tree?
+
+Thursday, 2006-08-17
+Discovered that wx-2.7.0 has its own implementation of vsnprintf() that it uses
+by wxString::Format() unless you tell it not to.  It is broken for int64.
+See http://wxforum.shadonet.com/viewtopic.php?p=29091&sid=8ff21efa34c2481ba980494a638be333.
+Can now read COLORREF's from the config file in any reasonable format.
+Selection rectangle now has rounded corners, thanks to new DrawSides().
+Added m_iAddressOffset and everything that uses it.
+
+Pondered data structure for Segments.  AA trees, red-black trees, AVL trees,
+and B-trees all seem complicated and not quite right for this job.  I'm thinking
+maybe just a std::vector<Segment*> would work.  A binary search would be blazin' fast
+if you stored beginning ranges too.
+
+Friday, 2006-08-18
+Tried different timing (hopefully fewer long delays) in scroll wndproc.
+Paint timing and small optimizations.  Still room for improvement, esp. Unicode pane.
+Changed HexDoc to use vector<Segment*>.  Not quite working yet.
+
+Saturday, 2006-08-19
+Fixed HexDoc data insertion and replacement.  Added MarkModified().
+
+Sunday, 2006-08-20
+Fixed data insertion and replacement some more.  Worked on Mark(Un)Modified.
+Added UnsavedDataSource.  Fixed FileMap painting for small regions.
+Added ProcList class.  Played with pasting CF_DIB and raw data.
+
+Monday, 2006-08-21
+Added IPROF code and wxFrameManager::SavePerspective().
+Assuming I'm using it correctly, the perspectives feature of wxFrameManager seems
+to be not what I'm looking for.  If you try to restore with a pane that wasn't there
+when you saved, all your windows go away.  It doesn't save sizes, either.
+Added libdisasm for i386 disassembly.  Library adds 76 kB to release build.
+
+Tuesday, 2006-08-22
+Investigated wxDialog button handling and discovered two things:
+1. wxButton::SetDefault() includes parent->SetDefaultItem().
+2. A hidden cancel button makes ESC trigger the default button instead.
+Wrote Prof_draw_GDI().
+
+Friday, 2006-09-08
+Messed around with text drawing and profiling some more.
+Added IDM_ViewRuler.  Pondered MDI/TDI.  Fixed RemoveSegment(), case "---xxx---".
+Started HistogramView.  Moved utility functions to utils.cpp.
+
+Saturday, 2006-09-09
+Added DblBufWindow class and redid HistogramView.  How fast is wxClientDC vs. wxMemoryDC?
+Added DisplayPane::NUMERIC.  I think this can replace HEX, DEC, OCT, and BIN types.
+
+Monday, 2006-09-11
+Added HistogramDialog class and made the whole business work right.
+Added HexWndSettings::GetFontQuality() and the utility MoveInside().
+Added thFrame::OnActivate() to handle full-screen app switching.
+
+Tuesday, 2006-09-12
+Added FontSizeChooserDialog for better control of "Terminal" font.
+Added WM_MBUTTONUP handler to scroll origin window.
+
+Wednesday, 2006-10-25
+Ahh, back at it again with the laptop and no internet connection.
+Had problems with wxWidgets 2.7.1 configurations.
+
+Thursday, 2006-10-26
+Finally fixed config problems.  Made Next/Prev buttons and spin control in
+StructureView do something useful.  Added minimal thRecentChoiceDialog and
+function to open a file without the common dialog, for shortcut files.
+Wrote FastWriteBuffer class.  Maybe it will come in handy someday.
+
+Friday, 2006-10-27
+Fixed netcat to not block waiting for CR on pipe input.  Now I can use it.
+Started pipe-to-file stuff: event, dialog, procedure, etc.
+I think it works.  Sweet.  Needs serious documentation and UI improvements.
+
+Saturday, 2006-10-28
+Finally figured out how to handle wxEVT_AUI_PANECLOSE, removing one UI annoyance.
+
+Sunday, 2006-10-29
+Tried to get offset of file mapping views, and concluded it's impossible.
+Why doesn't Heap32First() work on VCExpress.exe?
+Added GetLastErrorMsg().
+
+Tuesday, 2006-10-31
+Moved code for spawning child process into spawn.cpp.
+Added write thread.  Still needs work.
+
+Thursday, 2006-11-09
+Spruced up SpawnHandler::Notify().  Added selection-only option.
+
+Monday, 2006-11-13
+Added wxConnection classes for IPC, so one process can do all the work.
+
+Tuesday, 2006-11-14
+Added tabs.  Hello, multiple-document mayhem.
+Read some more about piece tables:
+http://www.catch22.net/tuts/editor17.asp
+http://e98cuenc.free.fr/wordprocessor/piecetable.html
+http://www.chiark.greenend.org.uk/%7Esgtatham/tweak/btree.html
+http://www.oberon.ethz.ch/books.html ("Project Oberon")
+http://home.gna.org/bless/downloads.html
+How should we store direct user input, or from CF_TEXT on the clipboard?
+One heap block per insert, or something more central?
+Consider using James Brown's HexView code.  It's free, and it already works.
+But remember to change that one size_t to size_w.
+
+Saturday, 2006-11-18
+Made smaller cursor for insert mode.
+Upgraded to wxWidgets-2.8.0-rc1.  *yawn*
+
+Sunday, 2006-12-03
+Noticed that before the app window is resized or maximized, the client area is
+offset by (1, 1).  Tried to fix it and got nowhere.
+
+Tuesday, 2006-12-05
+Replaced global HexWndSettings instance with one per HexWnd.
+
+Friday, 2006-12-08
+Worked on CmdFullScreen.  Now it behaves more like Firefox, with less code.
+
+Wednesday, 2006-12-13
+Fixed autopanning overflow bug.
+Installed wxMSW-2.8.0 final.  Still need _CRT_SECURE_NO_DEPRECATE in config.vc.
+
+Friday, 2006-12-15
+Added thFrame::UpdateUI().  Made DocList and FileMap behave like other DataViews.
+Upgraded ProcessDialog from single-sel listbox to multi-sel listctrl.
+
+Saturday, 2006-12-16
+Added number base selection to status bar context menu.
+Changed all scrolling functions.  Now they can go horizontally to find the cursor.
+Added floating-point format to DisplayPane.
+Added my_ftoa() and my_dtoa().  Is there something better out there?
+
+Sunday, 2006-12-17  *wxPatch*
+wxFlatNotebookSizer keeps putting a 1-pixel border around its sizer items,
+but not using the flags to show the border.  Stupid.  I had to add line 1485 again:
+render->DrawDropDownArrow(this, dc);
+
+Saturday, 2006-12-23
+Explored copy/paste.  This is a complicated business.
+
+Tuesday, 2006-12-26  *wxPatch*
+Hide wxFlatNotebook when only one document is open.  Added appSettings.bReuseWindow.
+Changed renderer.cpp to center unselected tab titles.  Played with tab styles & colors.
+
+Wednesday, 2006-12-27
+Added word wrap option to StringView.  It doesn't work.
+
+Early January, 2007
+Played with James Brown's HexViewCtrl.  I managed to get something running with
+his Sequence class and IDataObject stuff running in my wxWidgets framework
+with my own painting code.  It worked alright, but I feel more comfortable in
+my own code.
+One really nice thing about HexViewLib is size_w/size_t.  I'll have to copy that.
+The modify buffer is another great idea.  It solves the problem of fragmented
+data when you insert several things.  But Sequence.cpp needs a lot of work to
+be used with a DataSource class.  So for now I'll stick to the old project.
+
+I e-mailed with Simon Tatham, who wrote Tweak, a Unix hex editor, to show off
+his B-tree data structure for editor back ends.  He could not recommend that
+I adopt it for this project, because we agreed that linked lists were nearly as
+effective, and much easier to implement and debug.
+
+Wednesday, 2007-01-10
+Added DiskDataSource to read Windows' logical disks.
+Played with ASPI.
+
+Thursday, 2007-01-11
+Extended DiskDataSource using akrip32 to read audio CDs.
+
+Friday, 2007-01-12
+Added thBarViewCtrl as base class for thColorRampCtrl (new) and HistogramView (old).
+Added thPalette class.
+
+Saturday, 2007-01-13
+Added thPalette::GetPalette().  Fixed GetBase() and thBarViewCtrl::HitTest().
+Laid out controls in SettingsDialog.  Messed with colors.
+
+Monday, 2007-01-15
+Implemented reference counting for thPalette, now derived from wxObject.
+Added typedef syntax to struct parser, and fixed some other small things.
+
+Tuesday, 2007-01-16  *wxPatch*
+Worked with new wxTreeListCtrl from "http://wxforum.shadonet.com/viewtopic.php?t=9584".
+Fixed some bugs, so keep the source.
+Added wxUSE_NO_MANIFEST to config.vc, CL and RC property pages.
+
+Wednesday, 2007-01-17
+Looked into wxDataViewCtrl.  It was started in March and only halfway works
+with the list model; nobody has done anything with the tree model yet.
+I sorta volunteered on wx-dev to make the tree model work for wxMSW.
+
+Thursday, 2007-01-18
+Wrote a profiler.  Compile source modules to be profiled with "/Gh /GH".
+
+Sunday, 2007-01-21
+Removed DisplayPane::m_iEndianness.
+Worked on SettingsDialog.  Got to work with data in HexWndSettings.
+
+Tuesday, 2007-01-30
+I've been looking at GtkTreeView.  Learning much.  I think I can do what I want
+for the structure viewer with wxTreeListCtrl, but its drawing is ugly,
+and I can't stand to use wxTreeItemData.
+Tweaked grammar for specifying struct member base.  Changed "offset" to
+"pointer".  Messed around with structure viewer some more.
+
+Wednesday, 2007-01-31
+Search m_treeIDs, so we can look up struct members.  I don't understand STL.
+
+Thursday, 2007-02-01
+Added "Color by rows" setting, although it does nothing yet.
+Added thPaletteData::Realize() and Import().  Can now read palette from
+a JASC PAL file or a BMP file.  Need some options:
+number of colors, 3 or 4 bytes, RGB or BGR, byte or float.
+
+Friday, 2007-02-02
+Fixed thFrame::OpenFile() to handle LNK files.
+
+Friday, 2007-04-13
+Added an awful hack for a fixed-width font check box.  As far as I can tell,
+there isn't really a better way.  SlickEdit uses its own dialog, which might
+not be that hard with WX.  Maybe fixed-width fonts should just be a global option.
+
+Saturday, 2007-04-14
+Started building in James Brown's latest public sequence class.
+
+Monday, 2007-04-16
+Got data displayed from a file through much hacking of class sequence.
+
+Wednesday, 2007-04-18
+Gave up on James Brown's code.  Decided to do it all myself for now.
+
+Saturday, 2007-04-21
+Tried to list hard drive partitions.  Got some almost working code from Frhed.
+
+Sunday, 2007-04-22
+Threw mydata.cpp in the blender.  When it came out as datasource.cpp,
+datahelp.cpp, hexdoc.cpp, and all their headers, everything magically worked again.
+Added HexDoc::Cache().
+
+Monday, 2007-04-23  *wxPatch*
+Discovered and partly fixed problem where context menu interferes with ScrollOriginWindow.
+Still needs attention.  Hacked $WX/src/msw/textctrl.cpp to process EN_SELCHANGE for highlighting.
+Discovered memory leaks caused by singleton class way down inside wxFlatNotebook::SetSelection().
+
+Friday, 2007-04-27
+Cleaned up selection drawing a bit.
+
+Next week
+Worked on block device list.
+
+Friday, 2007-05-04
+Wrote thBlockDevices and finished OpenDriveDialog.  What a job.  But man, it's slick.
+
+Sunday, 2007-05-06
+Finally got wxAuiFrameManager::LoadPerspective() to work.
+
+Monday, 2007-05-07
+Used wxCmdLineParser to finish IPC feature.  Now I use a shortcut to "T. Hex" in SendTo.  Awesome.
+
+Sunday, 2007-05-20
+Have been working on thCopyFormat, figuring out what makes sense.  It's finally getting somewhere.
+
+Monday, 2007-05-21
+Got pasting mostly worked out.
+Started switching from wxFlatNotebook to wxAuiNotebook.
+Connected CopyFormatDialog HexWnd::DoCopy().  Now we can copy Python-style escaped strings.
+
+Tuesday, 2007-05-22
+Investigated problem where I can't read the last 4K of a CD.  FSCTL_ALLOW_EXTENDED_DASD_IO
+didn't seem to help, so I memset() the data to FF.  Need to display "--" or something.
+Found a problem with wxAuiNotebook using window size instead of client size.
+wxNO_BORDER fixed that one.  Ctrl-Tab navigation was in wxFlatNotebook but not wxAuiNotebook,
+so I'll have to add that.  Is wxAuiNotebook really the way to go?
+Upgraded to wxFlatNotebook 2.2 for testing.  Luckily I remembered my changes this time.
+
+Thursday, 2007-05-24
+Added save function.  Fixed CmdChar() for Unicode and single-byte numeric panes.
+Got better names for memory-mapped network files in ProcMemDataSource.
+Chained together consecutive inserts in modbuf (doesn't work where m_iColChars > 1).
+
+Friday, 2007-05-25
+wxWidgets 2.8.4.
+Added icons to list view in ProcessDialog.
+
+Saturday, 2007-05-26
+Actually used T.Hex in an (unsuccessful) attempt to break XP activation.  It's awesome.
+
+Tuesday, 2007-05-29
+Added "weirdness filter" to string collection, which just looks for repeated characters right now.
+Experimented with HexDoc read speeds.  ByteIterator2 is faster than building an iterator into
+HexDoc that uses its cache, since there's less 64-bit arithmetic for each byte (I assume).
+
+Wednesday, 2007-05-30
+Added VecMemDataSource.
+
+Friday, 2007-06-01
+Added DisplayPane::VECMEM and DecodeVecMem().  Maybe I should go work on memedwx instead.
+
+Wednesday, 2007-06-06
+Worked on undo.  Made all changes to HexDoc go through ReplaceAt() or ReplaceSerialized().
+
+Thursday, 2007-06-07
+Realized yesterday's work wasn't as cool as I thought, because I had already moved the undo stuff
+to HexWnd, which knows about the new selection.  Added DocHistoryView and tested some things.
+I think I like undo stuff better inside HexDoc.  But then you have to avoid it inside Undo()
+and Redo().
+
+Thursday, 2007-07-10
+Used T. Hex to remove several viruses from an old Win2k machine at work.
+Added ProcessDialog::chkReadOnly.  It didn't help the clean-up, but it's still a good idea.
+
+Tuesday, 2007-07-17
+Added appSettings.DisasmOptions so you can set CPU real mode and look at boot sectors.
+
+Friday, 2007-08-17
+Added FAT32 recovery stuff for Marty.
+Successfully recovered some data over the weekend.  Later added patch to recover correct dates.
+
+Tuesday, 2007-08-21
+Experimented with loading DLLs.
+Delay-load akrip.dll; psapi.dll; setupapi.dll; ws2_32.dll; comdlg32.dll; shell32.dll; version.dll
+Opengl32.dll is never used, and should go away.  Loading it maps video memory into our address space.
+
+Wednesday, 2007-08-22
+Made HexWnd paint less text off the screen.  Made thRecentChoice useful.
+
+Thursday, 2007-08-23
+Expanded DiskDataSource::Write() for non-aligned data.
+
+Friday, 2007-08-24
+Finished HexWndSettings.bStickyAddr option started yesterday.  Pretty darn slick.
+Horizontal scrolling is still slow, especially drawing control characters.  Gotta work on that.
+
+Early September, 2007
+Worked on better font drawing.  Added code page stuff.  Now pretty much any font can look good
+with no code changes.  Maybe an INI tweak.
+
+Thursday, 2007-09-06
+Discovered font linking.  This may be useful someday.
+http://www.microsoft.com/globaldev/getwr/steps/wrg_font.mspx
+http://blogs.msdn.com/michkap/archive/2005/06/18/430507.aspx
+http://msdn2.microsoft.com/en-us/library/Aa767872.aspx
+Added chkExactSize to OpenDriveDialog.
+
+Wednesday, 2007-09-12  *wxPatch*
+Patched %WX%/src/generic/progdlgg.cpp to use a better dialog width.
+Upgraded to wxMSW-2.8.5.
+
+Thursday, 2007-10-11
+Tried reading my new flash drive from Peter.  Some sectors were 00, some were FC..FB.
+Added HexWnd::CmdFindDiffRec() to skip to the next spot where more than half the bytes
+in a block have changed from the last block.  Works beautifully, except when it doesn't.
+
+Friday, 2007-10-12
+This flash drive behaved strangely where it hadn't been initialized.
+Reading 0x2000 bytes from 0x776f7000 returned all zeros, but reading 0x1000 bytes from
+0x7768000 returned FC..FF 00..FB etc.  Except at about +1200, where 4 bytes were different.
+So I added rudimentary 1-byte fill data support, improved HexDoc::Save() to handle consecutive
+segments, wrote zeroes to the entire data area at 7MB/s, replaced the data I had read,
+and now it behaves normally.
+Hmm.  Should have tried reading one sector at a time before I wiped it.  Oh, well.
+
+Monday, 2007-10-15
+Got Hexplorer to run.
+Messed around with histogram view.  Now you can sort columns.
+Try this palette:
+0(200 0 0)-40(255 128 0)-80(255 255 0)-120(0 230 0)-160(0 255 255)-200(0 0 255)-255(230 0 255)
+was 0(0 60 30)-128(0 124 30)-255(127 187 157); 10 13(255 192 0); 65 97(80 80 255)-90 122(155 155 255)
+
+Tuesday, 2007-10-16
+Fat12 and backspace.
+
+Wednesday, 2007-10-17  *wxPatch*
+Added wxFD_READONLY, wxFD_HIDE_READONLY, wxFD_NO_FOLLOW_LINKS.
+Changed CHistogram::Calc() to use HexDoc::Load() instead of ByteIterator2.  It sped up by
+nearly a factor of 2, and uses half the CPU time.  (Debug mode only; didn't test Release.)
+Load() is great for single-threaded apps, but multi-threading needs some serious thought.
+Think about separate read/write locking for HexDoc.
+Really need a color scheme chooser, and some thRecentChoice settings saved.
+
+Wednesday, 2007-11-07
+Added "Unicode" and "Search all regions" check boxes to FindDlg.
+Made DocList move the selection when someone else calls HexWnd::SetDoc().
+Scanning through memory can be dangerous.  Should test mem reads with SEH or something.
+
+Thursday, 2007-11-15
+Added a quick way to save small files, reading in the entire doc and overwriting the original.
+Is there any benefit to this?
+Small changes for LC-1.  Doesn't handle ECC memory layout yet.
+
+Wednesday, 2007-12-12
+Made GotoDlg2 and made thFrame use it like FindDlg, reusing a single instance.
+Messed around with Shoutcast streams captured by Thiefer.py.  Fun.
+
+Sunday, 2007-12-23
+Tried to use T.Hex + netcat + gzip to transfer files.  Messed with spawn.cpp.
+I think the problem is that you can't tell nc to close when stdin does.
+
+Tuesday, 2008-01-01
+Tried to recover data from Peter's memory stick.
+It would be REALLY HANDY to have a sector editing mode if you can't even attempt to read some.
+
+Tuesday, 2008-02-26
+Added thScrollWindow() to reduce repainting.  Mouseover highlight handling is still not that great.
+Updated Qstring.h and added it back into the project for text view updates.  It really helps,
+but custom text controls would be even better for speed and customized output, like color-coded
+disassembly.  That would rock.  Let's see... I've already got mccLogWin2 somewhere...
+
+Monday, 2008-03-03
+Found a problem in libdisasm when reading long strings of F2 (the REPNE prefix).
+Upgraded to the latest libdisasm, and the problem went away.
+Fixed libdisasm to not allocate memory for each disassembled instruction.
+
+Tuesday, 2008-03-04
+These are the numbers to beat:
+21 MB/s, 37% CPU (74% of one core)
+searching the middle of D: for 16 bytes with the release build.
+Wow, that was easy.  Maxed out the disk @ 57 MB/s & 2% CPU with the debug build.
+Added case-insensitive search.  Now we need a separate thread, or at least a progress dialog.
+
+Wednesday, 2008-03-05
+Fixed remaining problems with libdisasm by clearing more memory and calling x86_disasm correctly.
+Found why I was having problems with reusing dialogs -- it's not my fault.
+wxDialog::Create() calls FindFocus(), saves it to a private member variable, and restores the focus
+inside ShowModal() after the dialog is closed.
+If you ::SetFocus(0) before creating the dialog, it uses the parent (thFrame) instead.
+Then in thFrame::OnSetFocus(), redirect input to the active HexWnd.  Ugly.  Works with stock wx.
+Or we could change wxDialog to save the focus at the beginning of ShowModal... also not perfect.
+Maybe I should just not reuse dialogs.
+
+Thursday, 2008-03-06
+New libdisasm-0.23 adds 203kB to the Release EXE size.  Ick.
+String pooling and full optimization helps a little.  Why was this turned off?
+Maybe make libdisasm a DLL like akrip32... done... and undone.  No DLLs for now.
+x86_disasm_range() does the same stupid thing with memory as the simple code, so keep what we got.
+
+Sunday, 2008-03-09
+Moved DoFind() into HexWnd class.  Fixed find-next and find-previous.  Added AppSettings::find.
+Added partion table display to FatView.
+
+Monday, 2008-03-10
+Made DriveListInfo class and finally got chkExactSize to work for partition offsets.
+It appears that bitmap creation and selection into a wxMemoryDC are faster than I thought.
+I smell new performance boosts for HexWnd::OnPaint()...
+
+Tuesday, 2008-03-11
+Finished new painting code, except for selection.
+
+Sometime this week I finished the selection code too.
+
+Monday, 2008-03-24
+Messed with StringCollectDialog, combining ANSI and Unicode searches.
+Made list control "virtual," supplying data only when we draw a row.  Uses 18 bytes per row.
+We need a 2-dimensional array for storing this stuff.
+Built Debug Unicode and Release Unicode versions.
+
+Tuesday, 2008-03-25  *wxPatch*
+Terminate string buffer in %WX%/src/msw/listctrl.cpp, LVN_GETDISPINFO handler.
+Character set conversion in wxString constructor looks inefficient.  Can we do better?
+Added FastAppendVector, notebook pages, and minimum letter count to StringCollectDialog.
+Now our output looks more like Process Explorer's, but out of order.  Are they multi-threading?
+(Probably just using a more efficient search that reads a block of ANSI, then Unicode.)
+Fixed find dialog for Unicode.  (Sort of.  Not very well thought out.)
+Clipboard still needs much work.  (Even before yesterday, it was a mess.)
+
+Wednesday, 2008-03-26
+Added Save button to StringCollectDialog.
+
+Friday, 2008-03-28
+Added about box.
+
+Friday, 2008-04-04
+Messed around with StringCollectDialog.  I don't think it can do its job any faster.
+Added UI for minimum letter count.
+
+Saturday, 2008-04-05
+Added AutoSizeVirtualWxListColumn() and StringCollectDialog::AutoSizeColumns().
+
+Sunday, 2008-04-06
+Added thString class, a wrapper around wxString that stores the size in bytes.
+Fixed some Unicode paste formatting problems and segment corruption in HexDoc::DoInsertSegment().
+Added HexDoc::RejoinSegments().  Changed IPC connection to use two transactions and no data.
+Reverted GotoDialog2 so it gets destroyed and not hidden.  This fixes the notebook page problem.
+
+Tuesday, 2008-04-08
+FormatBytes().  Human.c from GNU coreutils would be good here -- it's portable and tested.
+
+Friday, 2008-04-11
+Added ProcessFileDataSource to read locked temp files in other processes.
+
+Monday, 2008-04-14
+Worked on finding foriegn file by name instead of using Process Explorer.
+I learned all about NT's object namespace using 
+	WinObj from SysInternals
+	http://www.ddj.com/database/184416468, and
+	WalkObjects from http://forum.sysinternals.com/forum_posts.asp?TID=3577&PN=2
+Still don't know how to list files without the 80 kinds of weirdness in WalkObjects.
+SysInternals' "Handles" loads a driver... maybe I should just give up on this one.
+
+Sometime in here...
+Gave histogram dialog a reasonable default size.
+Started working on smarter screen positioning around programatically controlled cursor movements.
+Added PROCESS_VM_OPERATION flag so we can save to other process' memory.
+
+Saturday, 2008-05-10
+Tore apart Segment class and threw out the old code about different types.
+Fixed implementation of fill data.  Not complete yet, but at least workable.
+Told HexDoc::Cache() how to reuse data it already has.
+Patched up the code to highlight modified bytes.  Calls SetBkMode() too many times, but it works.
+
+Monday, 2008-05-12
+Added thStatusBar::SetDynamicPane().  Guess what -- constantly resizing SB panes isn't that great.
+
+Wednesday, 2008-05-14
+Worked on Cache() again.  Apparently still broken -- inserting/modifying text doesn't work.
+
+Wednesday, 2008-05-21
+Fixed the way FileMap colors segments moved around in one document.
+
+Tuesday, 2008-05-26
+Messed around with HexToText because copying documents was slow.  Did I finish this?
+Fixed some Unicode conversions.
+
+Friday, 2008-06-13
+Added CmdNextBinChar().
+
+Thursday, 2008-07-24
+Fixed cache resizing and segment serialization bugs.
+
+Friday, 2008-07-25
+Added IPC request for HWND so calling app can set the foreground window.  (No, can't use FindWindow).
+Moved IPC stuff to thIPC.h.  Added basic file drag-n-drop support.
+
+Thursday, 2008-07-31
+Added progress dialog with cancel button and speedometer to HexDoc::FindHex().
+
+Monday, 2008-08-04
+Built with wxMSW-2.8.8.
+
+Wednesday, 2008-08-06
+Fixed histogram count of zero in logarithmic scale mode.
+Wrote new formatting code for profile output (MyTable.h).  Where else could I use this... VecUtil?
+
+Thursday, 2008-08-07
+Thought it would be neat if Ctrl+PgUp/Dn worked like Visual Studio and moved to top/bottom of page.
+Turns out I had already used them to scroll a page without moving the cursor.  Keyboard needs work.
+
+Monday, 2008-08-11
+Fixed break statement in ATimer::GetCount().  This problem showed up after I started using GetTickCount().
+Fixed termination of Unicode strings when copying to clipboard.
+Move selection box by m_iScrollX.  (Didn't I already do this once?)
+
+Thursday, 2008-08-28
+libdisasm: Print the offset in "mov [0x0], eax" even when it is zero.
+Handle the special case in CmdFindDiffRec() where len==1 for 100x speed-up.
+Pass file names through DDE as data, not topic name where the maximum size is 255 characters.
+
+Friday, 2008-09-19
+Added DLL Exports view.
+
+Monday, 2008-09-22
+New code in thFrame::CmdNextBinChar() -- find all non-ANSI characters in 2-byte Unicode pane.
+Copied specialized code for 1-byte search in HexWnd::FindDiffRecBack().
+
+Tuesday, 2008-09-23
+Added thFrame::CmdZipRecover().  Still needs debugger assistance, so it's not done yet.
+Extended ExportView for DLLs already loaded into memory.
+
+Wednesday, 2008-09-24
+Added thFrame::GetDocsFromUser() to make comparison more useful.
+CompareBuffers() now counts this case as a single difference, where a block was filled with one value:
+    File 1: 11002200330044005500660077008800
+    File 2: 11002200330044000000000000008800
+Wrote thDocInputStream class for ZIP recovery.
+
+Wednesday, 2008-10-01
+Skipped useless updates to DocList.
+Tried to speed up ProcMemDataSource(), but ran into trouble with region overlap.
+So I left out all separately allocated sections of loaded modules, eliminating document overlap.
+Crammed more code of questionable value into profile.cpp.
+
+Thursday, 2008-10-02
+Fixed histogram dialog and FormatNumber() for 4GB of zero input.
+
+Saturday, 2008-10-04
+Added thProgressDialog and Confirm().
+
+Week of 2008-10-12
+Removed sub-module sections from region list, in order to use more efficient access algorithms.
+Makes a huge difference opening firefox.exe.
+Put the code back to its original state (with #ifdef's) to see sections when testing profiler.
+
+Lots of profiler work.  Check into CVS at MCC, in /lab/mccProfiler.
+Is there a better name for this?
+
+Tuesday, 2008-10-21
+Added HexWnd::CmdViewPrevRegion() and CmdViewNextRegion()
+
+Wednesday, 2008-10-22
+Added progress bar to thFrame::CmdCompressability().
+
+Thursday, 2009-03-12
+Fixed partition number in device list.
+
+Wednesday, 2009-04-15
+Added WriteArray() to save thRecentChoice entries (especially command lines for pipes).
+Added custom message option to thProgressDialog.
+
+Monday, 2009-04-20
+Added ReadArray() to retrieve the user's choices we saved.
+
+July-August, 2009
+Tweaked mpg123 and T.Hex to work together.  Now I can pipe a section of a document to a music player.
+
+Friday, 2009-08-21
+Patched FatInfo to allow root directory in FAT16 as valid cluster.
+
+Monday, 2009-09-07
+Put together a Debug Unicode Static build and uploaded it to http://t-hex.com/hex, as I posted at
+http://lifehacker.com/5352885/check-out-early-in-this-weeks-open-thread#c15200258

@@ -1,0 +1,35 @@
+Where do we move the file view around?
+
+Shortest possible
+    mouse selection
+
+Always center
+    clicking the FileMap (CenterByte)
+    FileMap::OnCommand(IDM_SELECTBLOCK)
+
+Center if big jump; else shortest with pad
+    CmdGotoCluster
+    CmdJumpToFromFat
+
+    Undo/Redo (ScrollToCursor)
+    Cut/Paste (CmdSetSelection)
+    on any keyboard input or movement (ScrollToCursor)
+    StringView::OnSetSelection
+    OnKey(WXK_RETURN)
+    StringCollectDialog::OnSelect
+    CmdDelete
+    DoPaste
+    CmdMoveCursor
+    CmdCursorLeft
+    CmdNextView/CmdPrevView
+    CmdBackspace
+    CmdFindDiffRec
+    DoFind
+    StructureView::OnActivateMember
+
+Exact position    
+    restore position when switching documents (ScrollToLine)
+
+Others
+    CmdSetSelection (passes jumpiness to ScrollToRange)
+    CmdSelectAll
