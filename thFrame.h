@@ -38,7 +38,7 @@ class thPipeOutDialog;
 class thFrame : public wxFrame
 {
 public:
-    thFrame(wxString commandLine, bool useIPC);
+    thFrame(bool useIPC);
     ~thFrame();
 
     virtual wxStatusBar* CreateStatusBar();
@@ -182,7 +182,7 @@ public:
     wxString strWP;
     virtual bool Show(bool show = true);
 
-    void ProcessCommandLine(wxString cmdLine, wxString cwd = wxEmptyString);
+    void ProcessCommandLine(wxString cmdLine = wxEmptyString, wxString cwd = wxEmptyString);
 
     //! placeholder methods for ExitSaveDialog
     void SaveAll() {}

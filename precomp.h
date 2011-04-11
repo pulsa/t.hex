@@ -63,6 +63,8 @@
 #include <wx/wfstream.h> // same.
 #include <wx/zstream.h>  // zlib compressability test, 2008-09-29
 
+//#include <wx/stringimpl.h>  // for debugging wxStringData with C::B  (didn't work)
+
 template <class T>
 inline T fnmax(const T& a, const T& b)
 {
@@ -74,7 +76,7 @@ inline T fnmax(const T& a, const T& b)
 #include <windows.h>
 #include <commctrl.h>
 #include <commdlg.h>
-#include <tlhelp32.h> 
+#include <tlhelp32.h>
 #include <shlobj.h>
 #include <psapi.h>
 

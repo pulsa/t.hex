@@ -1,5 +1,5 @@
 /* XPM */
-static char *T_Hex[] = {
+static const char *T_Hex[] = {
 /* columns rows colors chars-per-pixel */
 "16 16 256 2 ",
 "   c #FFFFFF",

@@ -11,10 +11,11 @@
 				<Option object_output="obj/Debug/" />
 				<Option type="0" />
 				<Option compiler="gcc" />
+				<Option parameters="data/code.bin" />
 				<Option projectLinkerOptionsRelation="2" />
 				<Compiler>
 					<Add option="-g" />
-					<Add option="`wx-config  --version=2.9 --static=no --unicode=yes --debug=yes --cflags`" />
+					<Add option="-I/usr/local/lib/wx/include/gtk2-unicode-2.9 -I/usr/local/include/wx-2.9 -D_FILE_OFFSET_BITS=64 -DWXUSINGDLL -D__WXGTK__ -pthread" />
 				</Compiler>
 				<Linker>
 					<Add option="`wx-config  --version=2.9 --static=no --unicode=yes --debug=yes --libs std,aui`" />
@@ -44,55 +45,55 @@
 			<Add directory="." />
 		</Compiler>
 		<Unit filename="BarViewCtrl.cpp" />
+		<Unit filename="BarViewCtrl.h" />
 		<Unit filename="HexDoc.cpp" />
 		<Unit filename="HexWndCmd.cpp" />
 		<Unit filename="atimer.cpp" />
+		<Unit filename="atimer.h" />
+		<Unit filename="clipboard.h" />
 		<Unit filename="datahelp.cpp" />
+		<Unit filename="datahelp.h" />
 		<Unit filename="datasource.cpp" />
+		<Unit filename="datasource.h" />
+		<Unit filename="defs.h" />
 		<Unit filename="dialogs.cpp" />
+		<Unit filename="dialogs.h" />
+		<Unit filename="hexdoc.h" />
 		<Unit filename="hexwnd.cpp" />
+		<Unit filename="hexwnd.h" />
 		<Unit filename="hwpaint.cpp" />
 		<Unit filename="main.cpp" />
 		<Unit filename="palette.cpp" />
+		<Unit filename="palette.h" />
 		<Unit filename="precomp.h">
 			<Option compile="1" />
 			<Option weight="0" />
 		</Unit>
-		<Unit filename="search.cpp" />
-		<Unit filename="settings.cpp" />
-		<Unit filename="statusbar.cpp" />
-		<Unit filename="struct.cpp" />
-		<Unit filename="struct_lex.cpp" />
-		<Unit filename="struct_par.cpp" />
-		<Unit filename="thFrame.cpp" />
-		<Unit filename="toolwnds.cpp" />
-		<Unit filename="undo.cpp" />
-		<Unit filename="utils.cpp" />
-		<Unit filename="wx/treelistctrl.cpp" />
-		<Unit filename="atimer.h" />
-		<Unit filename="BarViewCtrl.h" />
-		<Unit filename="clipboard.h" />
-		<Unit filename="datahelp.h" />
-		<Unit filename="datasource.h" />
-		<Unit filename="defs.h" />
-		<Unit filename="dialogs.h" />
-		<Unit filename="hexdoc.h" />
-		<Unit filename="hexwnd.h" />
-		<Unit filename="palette.h" />
+		<Unit filename="res/thex.xpm" />
 		<Unit filename="resource.h" />
 		<Unit filename="scroll.h" />
+		<Unit filename="search.cpp" />
+		<Unit filename="settings.cpp" />
 		<Unit filename="settings.h" />
+		<Unit filename="statusbar.cpp" />
 		<Unit filename="statusbar.h" />
+		<Unit filename="struct.cpp" />
 		<Unit filename="struct.h" />
+		<Unit filename="struct_lex.cpp" />
+		<Unit filename="struct_par.cpp" />
 		<Unit filename="struct_par.hpp" />
-		<Unit filename="thex.h" />
+		<Unit filename="thFrame.cpp" />
 		<Unit filename="thFrame.h" />
 		<Unit filename="thIPC.h" />
+		<Unit filename="thex.h" />
+		<Unit filename="toolwnds.cpp" />
 		<Unit filename="toolwnds.h" />
+		<Unit filename="undo.cpp" />
 		<Unit filename="undo.h" />
+		<Unit filename="utils.cpp" />
 		<Unit filename="utils.h" />
+		<Unit filename="wx/treelistctrl.cpp" />
 		<Unit filename="wx/treelistctrl.h" />
-
 		<Extensions>
 			<code_completion />
 			<debugger />

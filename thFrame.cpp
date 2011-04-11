@@ -27,7 +27,6 @@
 //HexWndSettings s;
 thAppSettings appSettings;
 
-static bool testflag = false;  //! for debugging window messages
 
 BEGIN_EVENT_TABLE(thFrame, wxFrame)
     EVT_CLOSE(thFrame::OnClose)
@@ -107,7 +106,7 @@ EVT_FLATNOTEBOOK_CONTEXT_MENU(-1, thFrame::OnPageContextMenu)
 
 END_EVENT_TABLE()
 
-thFrame::thFrame(wxString commandLine, bool useIPC)
+thFrame::thFrame(bool useIPC)
 : wxFrame(NULL, -1, wxGetEmptyString(),
           wxDefaultPosition, wxSize(600,500),
           wxDEFAULT_FRAME_STYLE)/*,
@@ -144,10 +143,12 @@ thFrame::thFrame(wxString commandLine, bool useIPC)
     CoInitialize(NULL);
 #endif
 
-#ifndef WIN32
-const char *IDI_THEX_xpm = "res/thex.xpm";  //! probably wrong.
-#endif
+    #ifdef WIN32
     SetIcon(wxICON(IDI_THEX));
+    #else
+    #include "res/thex.xpm"
+    SetIcon(wxIcon(T_Hex));
+    #endif
 
     // Get name of configuration file.
     wxFileName fn(wxGetApp().argv[0]);
@@ -289,6 +290,7 @@ const char *IDI_THEX_xpm = "res/thex.xpm";  //! probably wrong.
     menu->Append(-1, _T("&Operations"), sub);
     menuBar->Append(menu, _T("&Tools"));
 
+#ifdef TBDL
     // FAT menu
     menu = new wxMenu();
     menu->Append(IDM_GotoPath, _T("Go to &path\tF4"));
@@ -298,6 +300,7 @@ const char *IDI_THEX_xpm = "res/thex.xpm";  //! probably wrong.
     menu->Append(IDM_LastCluster, _T("&Last cluster of file\tAlt+End"));
     menu->Append(IDM_FatAutoSave, _T("FAT Auto-save\tCtrl+F1"));  // formerly F1 for Marty
     menuBar->Append(menu, _T("F&AT"));
+#endif
 
     // window menu
     menu = new wxMenu();
@@ -343,7 +346,7 @@ const char *IDI_THEX_xpm = "res/thex.xpm";  //! probably wrong.
 
     tabs->Hide();
 
-    ProcessCommandLine(commandLine);
+    ProcessCommandLine();
 
     //if (m_hw == NULL) // nothing to open from the command line?
     if (pendingWindows.size() == 0)
@@ -506,47 +509,28 @@ thFrame::~thFrame()
 
 void thFrame::ProcessCommandLine(wxString cmdLine, wxString cwd /*= wxEmptyString*/)
 {
-    HexWnd *hw = NULL;
-
     if (cwd != wxEmptyString)
         ::wxSetWorkingDirectory(cwd);
 
-    // First try to open entire argument list as a single file.
-    int i = 0;
-    if (cmdLine[0] == '"') // if first character is '"', look for its partner
-    {
-        for (i = 1; cmdLine[i]; i++)
-        {
-            if (cmdLine[i] == '"')
-            {
-                i++;
-                break;
-            }
-        }
-    }
+static const wxCmdLineEntryDesc cmdLineDesc[] =
+{  //!WX29 WTF... wxCmdLineParser only takes char* now?
+	{ wxCMD_LINE_SWITCH, ("h"), ("help"), ("show this help message"),
+	    wxCMD_LINE_VAL_NONE, wxCMD_LINE_OPTION_HELP },
+	{ wxCMD_LINE_OPTION, ("p"), ("pid"),  ("Process ID"), wxCMD_LINE_VAL_NUMBER },
+	{ wxCMD_LINE_OPTION, ("e"), ("exe"),  ("Process name") },
+	{ wxCMD_LINE_PARAM,  NULL,    NULL,       ("File"), wxCMD_LINE_VAL_STRING,
+	    wxCMD_LINE_PARAM_OPTIONAL | wxCMD_LINE_PARAM_MULTIPLE },
+	{ wxCMD_LINE_NONE }
+};
+
+    wxCmdLineParser parser(cmdLineDesc);
+    if (cmdLine.Len())
+        parser.SetCmdLine(cmdLine);
     else
-        for (i = 0; cmdLine[i] && cmdLine[i] != ' '; i++)
-            ;
-    while (cmdLine[i] == ' ')
-        i++;
-    if (cmdLine[i] && cmdLine[i] != '"' && (wxFile::Exists(cmdLine.Mid(i)) || !cmdLine.Mid(i, 4).Cmp("\\\\.\\")))
     {
-        OpenFile(cmdLine.Mid(i), appSettings.bDefaultReadOnly);
-        return; // skip normal arg processing loop
+        wxApp &app = wxGetApp();
+        parser.SetCmdLine(app.argc, app.argv);
     }
-
-    static const wxCmdLineEntryDesc cmdLineDesc[] =
-    {  //!WX29 WTF... wxCmdLineParser only takes char* now?
-        { wxCMD_LINE_SWITCH, ("h"), ("help"), ("show this help message"),
-            wxCMD_LINE_VAL_NONE, wxCMD_LINE_OPTION_HELP },
-        { wxCMD_LINE_OPTION, ("p"), ("pid"),  ("Process ID"), wxCMD_LINE_VAL_NUMBER },
-        { wxCMD_LINE_OPTION, ("e"), ("exe"),  ("Process name") },
-        { wxCMD_LINE_PARAM,  NULL,    NULL,       ("File"), wxCMD_LINE_VAL_STRING,
-            wxCMD_LINE_PARAM_OPTIONAL | wxCMD_LINE_PARAM_MULTIPLE },
-        { wxCMD_LINE_NONE }
-    };
-
-    wxCmdLineParser parser(cmdLineDesc, cmdLine.Mid(i));
     if (parser.Parse())
        return;
 
@@ -578,9 +562,9 @@ void thFrame::ProcessCommandLine(wxString cmdLine, wxString cwd /*= wxEmptyStrin
     }
     #endif
 
-    for (i = 0; i < (int)parser.GetParamCount(); i++)
+    for (size_t j = 0; j < parser.GetParamCount(); j++)
     {
-        OpenFile(parser.GetParam(i), appSettings.bDefaultReadOnly);
+        OpenFile(parser.GetParam(j), appSettings.bDefaultReadOnly);
     }
 }
 
@@ -1096,117 +1080,14 @@ bool MarkFullScreenWindow(HWND hWnd, bool fullscreen)
 
 void thFrame::CmdFullScreen(wxCommandEvent &event)
 {
-    //static bool bFullScreen = false;
     appSettings.bFullScreen = !appSettings.bFullScreen;
 
-    // wow.  Now I feel silly.
     ShowFullScreen(appSettings.bFullScreen,
        wxFULLSCREEN_NOCAPTION |
        wxFULLSCREEN_NOBORDER |
        wxFULLSCREEN_NOMENUBAR |
        wxFULLSCREEN_NOSTATUSBAR );
     return;
-
-#if 0
-    HWND hWnd = GetHwnd();
-
-    static DWORD orig_style = WS_VISIBLE;
-
-    if (appSettings.bFullScreen)
-    {
-        GetWindowPlacement(GetHwnd(), &m_wndPlacement);
-
-        //HWND hTray = ::FindWindow(_T("Shell_TrayWnd"), NULL);
-        //ShowWindow(hTray, SW_HIDE);
-
-        //! Make the taskbar appear automatically.
-        //! This doesn't work without DoEvents(), and makes all other apps resize.
-        //! That's pretty ugly.  IE6 apparently does its own mouse tracking and
-        //  shows or hides the taskbar as appropriate. (No SetCapture(), though.)
-        //APPBARDATA ab = { sizeof(ab) };
-        //ab.lParam = ABS_AUTOHIDE;
-        //SHAppBarMessage(ABM_SETSTATE, &ab);
-        //wxGetApp().DoEvents();
-
-        //! todo: track mouse.  if it gets close to the edge of the screen with the
-        // taskbar, show the taskbar.  If the mouse moves away again, hide the taskbar.
-        // We only have to do anything if ABS_ALWAYSONTOP bit is set,
-        // because if it's not, then the user probably isn't expecting a start menu.
-        // But IE always pops it up when you get close.  Maybe that's okay too.
-        // Can we do this all with SHAppBarMessage, or do we need an HWND?
-
-        //DWORD style = GetWindowLong(hWnd, GWL_STYLE);
-        //SetWindowLong(hWnd, GWL_STYLE, style & ~WS_CAPTION);
-        orig_style = (DWORD)GetWindowLong(hWnd, GWL_STYLE);
-        SetWindowLong(GetHwnd(), GWL_STYLE, WS_VISIBLE); // remove title bar
-        //SetWindowPos(hWnd, 0, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_FRAMECHANGED);
-
-        //SetWindowPos(GetHwnd(), HWND_TOPMOST,
-        //    0,
-        //    0,
-        //    GetSystemMetrics(SM_CXSCREEN),
-        //    GetSystemMetrics(SM_CYSCREEN),
-        //    SWP_SHOWWINDOW | SWP_FRAMECHANGED);
-
-        //! testing:
-        //MarkFullScreenWindow(hWnd, true);
-
-        HMONITOR hMonitor = MonitorFromWindow(hWnd, MONITOR_DEFAULTTOPRIMARY);
-        MONITORINFO mi = { sizeof(mi) };
-        GetMonitorInfo(hMonitor, &mi);
-        //SetWindowPos(GetHwnd(), HWND_TOPMOST,
-        SetWindowPos(GetHwnd(), HWND_TOP,
-            mi.rcMonitor.left,
-            mi.rcMonitor.top,
-            mi.rcMonitor.right - mi.rcMonitor.left,
-            mi.rcMonitor.bottom - mi.rcMonitor.top,
-            SWP_FRAMECHANGED | SWP_NOSENDCHANGING);
-
-        //InvalidateRect(GetHwnd(), NULL, 0);
-
-        // Hide status bar when going full-screen.  Removed 2007-09-05.
-        // This conflicts with CmdViewStatusBar and leaves the main window in a weird state.
-        //if (m_status)
-        //{
-        //    //m_status->SetWindowStyle(0);
-        //    SetStatusBar(NULL);
-        //    m_status->Hide();
-        //    Layout();
-        //}
-    }
-    else
-    {
-        //APPBARDATA ab = { sizeof(ab) };
-        //ab.lParam = ABS_ALWAYSONTOP;
-        //SHAppBarMessage(ABM_SETSTATE, &ab);
-
-        //HWND hTray = ::FindWindow(_T("Shell_TrayWnd"), NULL);
-        //ShowWindow(hTray, SW_SHOW);
-
-        //MarkFullScreenWindow(hWnd, false);
-
-        //SetWindowLong(GetHwnd(), GWL_STYLE, WS_OVERLAPPEDWINDOW); // restore title bar
-        //DWORD style = GetWindowLong(hWnd, GWL_STYLE);
-        //SetWindowLong(hWnd, GWL_STYLE, style | WS_CAPTION);
-        SetWindowLong(hWnd, GWL_STYLE, orig_style);
-        SetWindowPos(hWnd, 0, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_FRAMECHANGED);
-        SetWindowPlacement(GetHwnd(), &m_wndPlacement);
-        //SetWindowPos(GetHwnd(), HWND_NOTOPMOST, 0, 0, 0, 0,
-        //    SWP_NOMOVE | SWP_NOSIZE | SWP_FRAMECHANGED);
-
-        //InvalidateRect(NULL, NULL, 0);
-
-        // Hide status bar when going full-screen.  Removed 2007-09-05
-        //if (m_status)
-        //{
-        //    //m_status->SetWindowStyle(wxST_SIZEGRIP);
-        //    m_status->Show();
-        //    SetStatusBar(m_status);
-        //    Layout();
-        //}
-    }
-    InvalidateRect(NULL, NULL, 0);
-#endif // 0
 }
 
 void thFrame::CmdToggleInsert(wxCommandEvent &event)
@@ -1313,11 +1194,6 @@ void thFrame::UpdateViews(HexWnd *hw, int flags)
 #ifdef _WINDOWS
 WXLRESULT thFrame::MSWWindowProc(WXUINT message, WXWPARAM wParam, WXLPARAM lParam)
 {
-    if (testflag && (message == WM_WINDOWPOSCHANGING))
-    {
-        message = message; //! breakpoint
-    }
-
     if (message == WM_RENDERALLFORMATS)
     {
          //! todo: ask user whether to leave on clipboard?
@@ -2388,12 +2264,12 @@ void thFrame::CmdZipRecover(wxCommandEvent &event)
         if (wxFile::Exists(newname))
         {
             int result = wxMessageBox(name + _T(" exists.  Overwrite?"), _T("ZIP recovery"), wxYES_NO | wxCANCEL);
-            if (result == wxYES)
-                if (wxFile::Exists(newname) && !wxRemoveFile(newname))  // user may delete it himself.
-                {
-                    wxMessageBox(_T("Couldn't delete ") + name);
-                    write = false;
-                }
+            if (result == wxYES &&
+                wxFile::Exists(newname) && !wxRemoveFile(newname))  // user may delete it himself.
+            {
+                wxMessageBox(_T("Couldn't delete ") + name);
+                write = false;
+            }
             else if (result == wxNO)
                 write = false;
             else if (result == wxCANCEL)

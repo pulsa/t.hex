@@ -5,6 +5,22 @@
 
 #define new New
 
+// Return a space-separated list of argv[1:end].
+// Internal spaces are escaped with backslash.
+wxString ConvertArgsToString(int argc, wxChar** argv)
+{
+    wxString s;
+    for (int i = 1; i < argc; i++)
+    {
+        wxString arg(argv[i]);
+        arg.Replace(" ", "\\ ");
+        if (i > 1)
+            s += " ";
+        s += arg;
+    }
+    return s;
+}
+
 //thApp::thApp()
 //{
 //    CreateTraits();
@@ -27,7 +43,7 @@ bool thApp::OnInit()
             // The topic name must be less than 255 characters on Windows.
             wxString data = wxGetCwd();
             conn->Poke(_T("dir"), (const wxChar*)data.c_str());
-            data = GetCommandLine();
+            data = ConvertArgsToString(argc, argv));
             conn->Poke(_T("cmd"), (const wxChar*)data.c_str());  //! What if this fails?
 
             char *swnd = (char*)conn->Request(_T("HWND"), NULL, wxIPC_TEXT);
@@ -55,20 +71,7 @@ bool thApp::OnInit()
     CreateConsole(_T("TH Console"));
 #endif
 
-    wxString commandLine;
-    #ifdef WIN32
-    commandLine = GetCommandLine();
-    #else
-    for (int i = 1; i < argc; i++)
-    {
-        if (i > 1)
-            commandLine += ' ';
-        commandLine += argv[i];
-    }
-    #endif
-
-    wxFrame* frame = new thFrame(commandLine, useIPC);
-
+    wxFrame* frame = new thFrame(useIPC);
     SetTopWindow(frame);
     frame->Show();
     //::PostMessage((HWND)frame->GetHWND(), WM_CLOSE, 0, 0); // close immediately for profiling

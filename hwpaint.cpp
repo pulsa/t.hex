@@ -9,7 +9,7 @@
 //    calls PaintRuler
 //    calls PaintRect for each region
 //    calls BitBlt
-//    
+//
 //PaintRuler does what it says
 //
 //PaintRect
@@ -450,7 +450,7 @@ void HexWnd::PaintPaneLine(wxDC &dc, uint64 line, int nPane, size_t offset,
             CenterTextOut(dc, x + s.iPanePad, top + y, text, width_hex);
         else
             dc.DrawText(text, x + s.iPanePad, top + y);
-        
+
         return;
     }
 
@@ -506,7 +506,7 @@ void HexWnd::PaintPaneLine(wxDC &dc, uint64 line, int nPane, size_t offset,
         {
             charCount = 1;
             uint16 val16 = charMap256[val = pData[col]];
-            *(uint16*)buf = val16;
+            buf[0] = val16;
             lead = iLeftLead[val16];
         }
         else if (pane.id == DisplayPane::ID_UNICODE)
@@ -517,7 +517,7 @@ void HexWnd::PaintPaneLine(wxDC &dc, uint64 line, int nPane, size_t offset,
             {
                 buf8[0] = pData[col * 2];
                 buf8[1] = pData[col * 2 + 1];
-            }   
+            }
             else
             {
                 buf8[0] = pData[col * 2 + 1];

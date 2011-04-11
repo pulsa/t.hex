@@ -114,7 +114,7 @@ HexWnd::HexWnd(thFrame *frame, HexWndSettings *ps /*= NULL*/)
     if (ps)
         s = *ps;
     this->frame = frame;
-    m_ok = Create(frame, -1, wxDefaultPosition, wxSize(0, 0), wxWANTS_CHARS, _T("HexWnd"));
+    m_ok = Create(frame, -1, wxDefaultPosition, wxSize(0, 0), wxHSCROLL | wxVSCROLL | wxWANTS_CHARS, _T("HexWnd"));
     Init();
 
     wxAcceleratorEntry entries[16];
@@ -140,7 +140,6 @@ HexWnd::HexWnd(thFrame *frame, HexWndSettings *ps /*= NULL*/)
 
 void HexWnd::Init()
 {
-    m_ok = false;
     m_iFirstLine = 0;
     m_iScrollX = 0;
     m_iCurByte = 0;
@@ -422,9 +421,9 @@ void HexWnd::CalcLineWidth()
     m_pane[p].Init(this, DisplayPane::ANSI, m_iCharWidth, extra);
     m_pane[p].Position(m_pane[p-1].GetRight() + 1, s.iPanePad);
     p++;
-    m_pane[p].Init(this, DisplayPane::ID_UNICODE, width_all, extra);
-    m_pane[p].Position(m_pane[p-1].GetRight() + 1, s.iPanePad);
-    p++;
+    //m_pane[p].Init(this, DisplayPane::ID_UNICODE, width_all, extra);
+    //m_pane[p].Position(m_pane[p-1].GetRight() + 1, s.iPanePad);
+    //p++;
     //m_pane[p].Init(DisplayPane::BIN, m_iCharWidth);
     //m_pane[p].Position(m_pane[p-1].GetRight() + 1, s.iPanePad);
     //p++;
@@ -595,7 +594,13 @@ void HexWnd::OnSize(wxSizeEvent &event)
     //! Did I get this right?  Test.
     m_iScrollPageX = width;
     m_iScrollMaxX = m_iLineWidth - width;
-    SetScrollbar(wxHORIZONTAL, m_iScrollX, width, m_iLineWidth);
+    if (m_iLineWidth > width)
+    {
+        SetWindowStyleFlag(wxHSCROLL);
+        SetScrollbar(wxHORIZONTAL, m_iScrollX, width, m_iLineWidth);
+    }
+    else
+        SetWindowStyle(GetWindowStyle() & ~wxHSCROLL);
 
     if (QueuedSize)
     {
@@ -1950,6 +1955,8 @@ void HexWnd::SetFont(wxFont &newFont)
     m_tm.tmMaxCharWidth = 10;
     width_all = width_hex = m_iCharWidth = 10;
     m_iDefaultChar = ' ';
+    for (int i = 0; i < 256; i++)
+        charMap256[i] = i;
     #endif
 
     m_iLineHeight = m_tm.tmHeight + s.iExtraLineSpace;
@@ -2295,9 +2302,7 @@ int HexWnd::OnSmoothScroll(int dx, int dy)
     {
         //SetScrollPos(wxVERTICAL, m_iFirstLine, true);
         SetScrollbar64(wxVERTICAL, m_iFirstLine, m_iVisibleLines, m_iTotalLines, true);
-        #ifdef TBDL
         UpdateViews(DataView::DV_SCROLL);
-        #endif
     }
     if (updateHScroll)
         SetScrollPos(wxHORIZONTAL, m_iScrollX, true);
@@ -2859,7 +2864,14 @@ void HexWnd::SetScrollbar64(int orientation, THSIZE nPos64, int nPage, THSIZE nM
         // page size probably won't matter
     }
 
-    SetScrollbar(orientation, nPos32, nPage, nMax32, refresh);
+    //! Need to test this.  How do we make a window scrollable or not?
+    if (GetVisibleLines() < GetLines())
+    {
+        SetWindowStyleFlag(wxVSCROLL);
+        SetScrollbar(orientation, nPos32, nPage, nMax32, refresh);
+    }
+    else
+        SetWindowStyle(GetWindowStyle() & ~wxVSCROLL);
 }
 
 THSIZE HexWnd::GetScrollPos64(int nPos32)
