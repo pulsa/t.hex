@@ -54,15 +54,15 @@ void DataView::OnKillFocus(wxFocusEvent &event)
 //****************************************************************************
 
 BEGIN_EVENT_TABLE(FileMap, wxWindow)
-    EVT_PAINT(OnPaint)
-    EVT_SIZE(OnSize)
-    EVT_LEFT_DOWN(OnMouseDown)
-    EVT_MOTION(OnMouseMove)
-    EVT_LEFT_UP(OnMouseUp)
-    EVT_CONTEXT_MENU(OnContextMenu)
-    EVT_COMMAND_RANGE(100, 200, wxEVT_COMMAND_MENU_SELECTED, OnCommand)
+    EVT_PAINT(FileMap::OnPaint)
+    EVT_SIZE(FileMap::OnSize)
+    EVT_LEFT_DOWN(FileMap::OnMouseDown)
+    EVT_MOTION(FileMap::OnMouseMove)
+    EVT_LEFT_UP(FileMap::OnMouseUp)
+    EVT_CONTEXT_MENU(FileMap::OnContextMenu)
+    EVT_COMMAND_RANGE(100, 200, wxEVT_COMMAND_MENU_SELECTED, FileMap::OnCommand)
 #if wxCHECK_VERSION(2, 7, 0)
-    EVT_MOUSE_CAPTURE_LOST(OnCaptureLost)
+    EVT_MOUSE_CAPTURE_LOST(FileMap::OnCaptureLost)
 #endif
 END_EVENT_TABLE()
 
@@ -120,7 +120,7 @@ void FileMap::OnPaint(wxPaintEvent &event)
 void FileMap::UpdateView(HexWnd *hw, int flags /*= -1*/)
 {
     this->m_hw = hw;
-    if (!hw)
+    if (!hw || !m_bmp.Ok())
         return;
 
     wxRect rc;
@@ -345,7 +345,7 @@ void FileMap::OnMouseMove(wxMouseEvent &event)
 
 void FileMap::OnMouseUp(wxMouseEvent &event)
 {
-    ReleaseCapture();
+    ReleaseMouse();
 }
 
 int FileMap::HitTest(const wxPoint pt, THSIZE &pos)
@@ -512,13 +512,13 @@ int wxCALLBACK wxListCompareFunction(long item1, long item2, wxIntPtr data)
 
 
 BEGIN_EVENT_TABLE(DocList, wxPanel)
-    EVT_LIST_ITEM_SELECTED(IDC_DOC_LIST, OnSelChange)
-    EVT_LIST_ITEM_ACTIVATED(IDC_DOC_LIST, OnActivate)
-    EVT_LIST_COL_CLICK(IDC_DOC_LIST, OnColumnClick)
-    EVT_LIST_COL_RIGHT_CLICK(IDC_DOC_LIST, OnColumnRightClick)
-    EVT_LIST_ITEM_RIGHT_CLICK(IDC_DOC_LIST, OnItemRightClick)
-    EVT_CONTEXT_MENU(OnContextMenu)
-    EVT_MENU(IDM_ActiveDoc, CmdActiveDoc)
+    EVT_LIST_ITEM_SELECTED(IDC_DOC_LIST, DocList::OnSelChange)
+    EVT_LIST_ITEM_ACTIVATED(IDC_DOC_LIST, DocList::OnActivate)
+    EVT_LIST_COL_CLICK(IDC_DOC_LIST, DocList::OnColumnClick)
+    EVT_LIST_COL_RIGHT_CLICK(IDC_DOC_LIST, DocList::OnColumnRightClick)
+    EVT_LIST_ITEM_RIGHT_CLICK(IDC_DOC_LIST, DocList::OnItemRightClick)
+    EVT_CONTEXT_MENU(DocList::OnContextMenu)
+    EVT_MENU(IDM_ActiveDoc, DocList::CmdActiveDoc)
 END_EVENT_TABLE()
 
 DocList::DocList(wxWindow *parent)
@@ -691,7 +691,7 @@ void DocList::OnColumnClick(wxListEvent &event)
         m_hw->DocListSortOrder[col] = sortOrder[col] *= -1;
     else
         m_hw->DocListSortColumn = sortColumn = col;
-    
+
     list->SortItems(wxListCompareFunction, (long)this);
 
     if (m_hw) {
@@ -751,7 +751,7 @@ void DocList::OnContextMenu(wxContextMenuEvent &event)
     wxMenu menu;
     //menu.AppendSeparator();
     menu.Append(IDM_ActiveDoc, _T("&Active document"));
-    
+
     PopupMenu(&menu, ScreenToClient(pt));
     m_menuSource = NONE;
 }
@@ -770,20 +770,20 @@ void DocList::CmdActiveDoc(wxCommandEvent &event)
 
 #define EVT_TEXT_SELCHANGE(winid, func) wx__DECLARE_EVT1(wxEVT_COMMAND_TEXT_SELCHANGE, winid, wxCommandEventHandler(func))
 
-BEGIN_EVENT_TABLE(StringView, wxTextCtrl)
-    EVT_CONTEXT_MENU(OnContextMenu)
-    EVT_MENU(IDM_FontDlg,       OnFont)
-    EVT_MENU(IDM_ViewAuto,      OnEncoding)
-    EVT_MENU(IDM_ViewASCII,     OnEncoding)
-    EVT_MENU(IDM_ViewUTF8,      OnEncoding)
-    EVT_MENU(IDM_ViewUTF16,     OnEncoding)
-    EVT_MENU(IDM_ViewUTF32,     OnEncoding)
-    EVT_MENU(IDM_WordWrap,      OnWordWrap)
+BEGIN_EVENT_TABLE(StringView, StringView::wxTextCtrl)
+    EVT_CONTEXT_MENU(StringView::OnContextMenu)
+    EVT_MENU(IDM_FontDlg,       StringView::OnFont)
+    EVT_MENU(IDM_ViewAuto,      StringView::OnEncoding)
+    EVT_MENU(IDM_ViewASCII,     StringView::OnEncoding)
+    EVT_MENU(IDM_ViewUTF8,      StringView::OnEncoding)
+    EVT_MENU(IDM_ViewUTF16,     StringView::OnEncoding)
+    EVT_MENU(IDM_ViewUTF32,     StringView::OnEncoding)
+    EVT_MENU(IDM_WordWrap,      StringView::OnWordWrap)
 #ifdef WX_AEB_MOD
-    EVT_TEXT_SELCHANGE(-1, OnSelChange)
+    EVT_TEXT_SELCHANGE(-1, StringView::OnSelChange)
 #endif
     EVT_SET_FOCUS(StringView::OnSetFocus)
-    EVT_KILL_FOCUS(OnKillFocus)
+    EVT_KILL_FOCUS(StringView::OnKillFocus)
 END_EVENT_TABLE()
 
 StringView::StringView(wxWindow *parent)
@@ -930,7 +930,7 @@ void StringView::ProcessUpdates()
         if (str.Len() == 0)
             charBytes = 1; // try as MB string
     }
-    
+
     if (charBytes == 1 && selSize)
         str = m_hw->doc->ReadString(addr, selSize, true);
 
@@ -975,7 +975,7 @@ void StringView::OnContextMenu(wxContextMenuEvent &event)
     menu.Append(IDM_FontDlg, _T("&Font..."));
     //menu.AppendCheckItem(IDM_WordWrap, "&Word wrap");
     //menu.Check(IDM_WordWrap, bWordWrap);
-    PopupMenu(&menu, ScreenToClient(event.GetPosition()));    
+    PopupMenu(&menu, ScreenToClient(event.GetPosition()));
 }
 
 void StringView::OnFont(wxCommandEvent &WXUNUSED(event))
@@ -1070,7 +1070,7 @@ void NumberView::ProcessUpdates()
     m_hw->GetSelection().Get(addr, selSize);
     if (selSize > 8)
         selSize = 8;
-    
+
     if (!(m_queuedUpdates & DV_DATA) &&
         addr == m_iSelStart &&
         selSize == m_iSelSize)
@@ -1093,8 +1093,13 @@ void NumberView::ProcessUpdates()
     txt += wxString::Format(_T("u16: %u\r\n"), i16);
     txt += wxString::Format(_T("s32: %d\r\n"), (int32)i32);
     txt += wxString::Format(_T("u32: %u\r\n"), i32);
+    #ifdef WIN32
     txt += wxString::Format(_T("s64: %I64d\r\n"), (int64)i64);
     txt += wxString::Format(_T("u64: %I64u\r\n"), i64);
+    #else
+    txt += wxString::Format(_T("s64: %lld\r\n"), (int64)i64);
+    txt += wxString::Format(_T("u64: %llu\r\n"), i64);
+    #endif
     txt += wxString::Format(_T("float: %hg\r\n"), f);
     txt += wxString::Format(_T("double: %g\r\n"), d);
 
@@ -1111,15 +1116,15 @@ void NumberView::ProcessUpdates()
 //****************************************************************************
 
 BEGIN_EVENT_TABLE(StructureView, wxPanel)
-    EVT_CHOICE(IDC_STRUCT, OnSetStruct)
-    //EVT_LIST_ITEM_SELECTED(IDC_LIST, OnSelectMember)
-    //EVT_LIST_ITEM_ACTIVATED(IDC_LIST, OnActivateMember)
-    EVT_TREE_SEL_CHANGED(IDC_LIST, OnSelectMemberTree)
-    EVT_TREE_ITEM_ACTIVATED(IDC_LIST, OnActivateMemberTree) 
-    EVT_BUTTON(IDC_NEXT, OnNextStruct)
-    EVT_BUTTON(IDC_PREV, OnPrevStruct)
-    EVT_SET_FOCUS(OnSetFocus)
-    EVT_KILL_FOCUS(OnKillFocus)
+    EVT_CHOICE(IDC_STRUCT, StructureView::OnSetStruct)
+    //EVT_LIST_ITEM_SELECTED(IDC_LIST, StructureView::OnSelectMember)
+    //EVT_LIST_ITEM_ACTIVATED(IDC_LIST, StructureView::OnActivateMember)
+    EVT_TREE_SEL_CHANGED(IDC_LIST, StructureView::OnSelectMemberTree)
+    EVT_TREE_ITEM_ACTIVATED(IDC_LIST, StructureView::OnActivateMemberTree)
+    EVT_BUTTON(IDC_NEXT, StructureView::OnNextStruct)
+    EVT_BUTTON(IDC_PREV, StructureView::OnPrevStruct)
+    EVT_SET_FOCUS(StructureView::OnSetFocus)
+    EVT_KILL_FOCUS(StructureView::OnKillFocus)
 END_EVENT_TABLE()
 
 StructureView::StructureView(wxWindow *parent)
@@ -1137,7 +1142,7 @@ wxPanel(parent, -1)
     //list->InsertColumn(3, "Value");
 
     list = new wxTreeListCtrl(this, IDC_LIST, wxDefaultPosition, wxDefaultSize,
-        wxTR_HAS_BUTTONS | wxTR_FULL_ROW_HIGHLIGHT | wxTR_EDIT_LABELS | wxTR_HIDE_ROOT | wxTR_VRULE);
+        wxTR_HAS_BUTTONS | wxTR_FULL_ROW_HIGHLIGHT | wxTR_EDIT_LABELS | wxTR_HIDE_ROOT | wxTR_COLUMN_LINES);
     //! This is stupid.  You shouldn't have to insert columns backwards.
     list->AddColumn(_T("Value"));
     list->InsertColumn(0, _T("Type"));
@@ -1169,7 +1174,7 @@ wxPanel(parent, -1)
     fn.SetName(_T("structures")); // structures.ini in app directory
     fn.SetExt(_T("ini"));
 
-    std::ifstream istr((LPCTSTR)fn.GetFullPath());
+    std::ifstream istr(fn.GetFullPath());  //! Do we need to worry about locales?
     if (istr.is_open())
     {
         yyFlexLexer flex(&istr);
@@ -1286,8 +1291,8 @@ void StructureView::SetStruct(int nStruct)
 
 #if wxCHECK_VERSION(2, 7, 0)
         if (var.pointerType)
-            //list->SetItemFont(i, underlined); // SetItemFont() not available in wx 2.6.1 
-            list->SetItemFont(id, underlined); // SetItemFont() not available in wx 2.6.1 
+            //list->SetItemFont(i, underlined); // SetItemFont() not available in wx 2.6.1
+            list->SetItemFont(id, underlined); // SetItemFont() not available in wx 2.6.1
 #endif
         m_treeIDs.push_back(id);
     }
@@ -1403,6 +1408,7 @@ void StructureView::OnPrevStruct(wxCommandEvent &event)
     m_hw->CmdMoveRelative(0, -(int64)m_structs[m_nStruct].GetSize());
 }
 
+#if 0 //! We don't need this anymore.
 //****************************************************************************
 //****************************************************************************
 // ProfilerView
@@ -1415,8 +1421,8 @@ HGLRC ProfilerView::ghRC = 0;
 ProfilerView *ProfilerView::g_profView = NULL;
 
 BEGIN_EVENT_TABLE(ProfilerView, wxPanel)
-   EVT_PAINT(OnPaint)
-   EVT_SIZE(OnSize)
+   EVT_PAINT(ProfilerView::OnPaint)
+   EVT_SIZE(ProfilerView::OnSize)
 END_EVENT_TABLE()
 
 ProfilerView::ProfilerView(wxWindow *parent, wxSize size /*= wxDefaultSize*/)
@@ -1509,7 +1515,7 @@ void ProfilerView::OnPaint(wxPaintEvent &event)
    //Prof_update(1);
 #endif // PROFILE
 }
-
+#endif // 0
 
 //****************************************************************************
 //****************************************************************************
@@ -1679,6 +1685,7 @@ void DisasmView::ProcessUpdates()
 #endif
     SetValue(wxString((TCHAR*)strdata.data, strdata.length / sizeof(TCHAR)));
 }
+#endif // INCLUDE_LIBDISASM
 
 
 //****************************************************************************
@@ -1731,9 +1738,8 @@ void DocHistoryView::ProcessUpdates()
     }
 }
 
-#endif // INCLUDE_LIBDISASM
 
-
+#ifdef TBDL
 //****************************************************************************
 //****************************************************************************
 // FatView
@@ -1841,7 +1847,7 @@ bool DescribePartitionTable(HexWnd *hw, wxString &text)
         text += wxString::Format(_T(", type=0x%02X ("), data[4]) + GetPartitionType(data[4]) + _T(")");
         text += _T(", active=") + wxString((data[0] & 0x80) ? _T("Y") : _T("n"));
         //! todo: check CHS values against LBA values?
-        //text += 
+        //text +=
         //CHS_offset(data+5) - CHS_offset(data+1)
         if (i < 3)
             text += _T("\n");
@@ -2144,3 +2150,4 @@ void ExportView::OnGotoName(wxCommandEvent &event)
                           export_offset + name_rva - export_rva + list->GetItemText(n).Len());
     m_hw->SetFocus();
 }
+#endif // TBDL

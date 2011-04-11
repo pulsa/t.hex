@@ -103,8 +103,8 @@ public:
     THSIZE m_nFilePointer;
 
     bool Save();
-    bool SaveRange(LPCTSTR filename, THSIZE begin, THSIZE length);
-    bool WriteRange(HANDLE hOutput, THSIZE begin, THSIZE length, wxString msg = _T("Writing..."));
+    bool SaveRange(wxString filename, THSIZE begin, THSIZE length);
+    bool WriteRange(wxFile &hOutput, THSIZE begin, THSIZE length, wxString msg = _T("Writing..."));
     /*inline bool Save()
     {
         if (!OK()) return false;

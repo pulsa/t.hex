@@ -68,7 +68,9 @@ void HexWndSettings::LoadDefaults()
     clrEOBack[0] = RGB(255, 255, 255);
     clrEOBack[1] = RGB(240, 240, 240);
 
+    #ifdef WIN32
     iFontQuality = DRAFT_QUALITY;
+    #endif
     //iDefaultChar = 0x80;
     //iDefaultChar = 0xb7;
 }
@@ -259,7 +261,8 @@ bool HexWndSettings::ReadColor(wxFileConfig &cfg, wxString name, COLORREF &clr)
     wxString tmp;
     if (!cfg.Read(name, &tmp))
         return false;
-    return ::ReadColor(MyTokenizer(tmp, wxEmptyString), clr);
+    MyTokenizer t(tmp, wxEmptyString);
+    return ::ReadColor(t, clr);
 }
 
 bool HexWndSettings::WriteColor(wxFileConfig &cfg, wxString name, COLORREF clr)
@@ -268,6 +271,7 @@ bool HexWndSettings::WriteColor(wxFileConfig &cfg, wxString name, COLORREF clr)
         GetRValue(clr), GetGValue(clr), GetBValue(clr)));
 }
 
+#ifdef TBDL
 BYTE HexWndSettings::GetFontQuality()
 {
     if (iFontQuality >= 0)
@@ -292,6 +296,7 @@ BYTE HexWndSettings::GetFontQuality()
     // DEFAULT_QUALITY seems to imply anti-aliasing only if the font renderer
     // already has the anti-aliased font available.
 }
+#endif // TBDL
 
 void HexWndSettings::SetPalette(wxString pal)
 {
@@ -363,12 +368,14 @@ thAppSettings::thAppSettings()
     find.length = 0;
 
     DisasmOptions = 0;              // default = 32-bit protected mode
+#ifdef INCLUDE_LIBDISASM
 #ifdef LIBDISASM_OLD
     DisasmOptions |= LEGACY_MODE;   // 16-bit real mode
     DisasmOptions |= IGNORE_NULLS;  // don't disassemble sequences of > 4 NULLs
 #else
     DisasmOptions |= opt_ignore_nulls;
 #endif
+#endif // INCLUDE_LIBDISASM
 
     sb.bExactFileSize = false;
     sb.bFileSizeInKB = false;

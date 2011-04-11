@@ -11,7 +11,7 @@
 #include "settings.h"
 #include "utils.h"
 #include "datasource.h"
-#include "fatinfo.h"
+//#include "fatinfo.h"
 
 #define new New
 
@@ -25,84 +25,85 @@ struct T_VecMemDec
 };
 
 extern T_VecMemDec DecodeVecMem(const uint8 *pRow, int offset);
-#include "hwpaint.cpp"
 
 BEGIN_EVENT_TABLE(HexWnd, wxWindow)
-    EVT_PAINT(OnPaint)
-    EVT_ERASE_BACKGROUND(OnErase)
-    EVT_KEY_DOWN(OnKey)
-    EVT_KEY_UP(OnKeyUp)
-    //EVT_NAVIGATION_KEY(OnNavigationKey)
-    EVT_CHAR(OnChar)
-    EVT_LEFT_DOWN(OnLButtonDown)
-    EVT_LEFT_UP(OnLButtonUp)
-    EVT_MOUSE_CAPTURE_CHANGED(OnCaptureChange)
-    EVT_MOUSE_CAPTURE_LOST(OnCaptureLost)
-    EVT_MOTION(OnMouseMove)
-    EVT_ENTER_WINDOW(OnMouseEnter)
-    EVT_LEAVE_WINDOW(OnMouseLeave)
-    EVT_MOUSEWHEEL(OnMouseWheel)
-    EVT_MIDDLE_DOWN(OnMButtonDown)
-    EVT_SCROLLWIN(OnScroll)
-    EVT_CONTEXT_MENU(OnContextMenu)
-    EVT_SIZE(OnSize)
-    EVT_SET_FOCUS(OnSetFocus)
-    EVT_KILL_FOCUS(OnKillFocus)
+    EVT_PAINT(HexWnd::OnPaint)
+    EVT_ERASE_BACKGROUND(HexWnd::OnErase)
+    EVT_KEY_DOWN(HexWnd::OnKey)
+    EVT_KEY_UP(HexWnd::OnKeyUp)
+    //EVT_NAVIGATION_KEY(HexWnd::OnNavigationKey)
+    EVT_CHAR(HexWnd::OnChar)
+    EVT_LEFT_DOWN(HexWnd::OnLButtonDown)
+    EVT_LEFT_UP(HexWnd::OnLButtonUp)
+    EVT_MOUSE_CAPTURE_CHANGED(HexWnd::OnCaptureChange)
+    EVT_MOUSE_CAPTURE_LOST(HexWnd::OnCaptureLost)
+    EVT_MOTION(HexWnd::OnMouseMove)
+    EVT_ENTER_WINDOW(HexWnd::OnMouseEnter)
+    EVT_LEAVE_WINDOW(HexWnd::OnMouseLeave)
+    EVT_MOUSEWHEEL(HexWnd::OnMouseWheel)
+    //EVT_MIDDLE_DOWN(HexWnd::OnMButtonDown)
+    EVT_SCROLLWIN(HexWnd::OnScroll)
+    EVT_CONTEXT_MENU(HexWnd::OnContextMenu)
+    EVT_SIZE(HexWnd::OnSize)
+    EVT_SET_FOCUS(HexWnd::OnSetFocus)
+    EVT_KILL_FOCUS(HexWnd::OnKillFocus)
 
-    EVT_TIMER(ID_SCROLL_TIMER, OnScrollTimer)
+    EVT_TIMER(ID_SCROLL_TIMER, HexWnd::OnScrollTimer)
 
-    EVT_MENU(IDM_CursorStartOfLine, CmdCursorStartOfLine)
-    EVT_MENU(IDM_CursorEndOfLine,   CmdCursorEndOfLine)
-    EVT_MENU(IDM_CursorStartOfFile, CmdCursorStartOfFile)
-    EVT_MENU(IDM_CursorEndOfFile,   CmdCursorEndOfFile)
-    EVT_MENU(IDM_ViewLineUp,        CmdViewLineUp)     
-    EVT_MENU(IDM_ViewLineDown,      CmdViewLineDown)   
-    EVT_MENU(IDM_ViewPageUp,        CmdViewPageUp)     
-    EVT_MENU(IDM_ViewPageDown,      CmdViewPageDown)   
-    EVT_MENU(IDM_NextView,          CmdNextView)       
-    EVT_MENU(IDM_PrevView,          CmdPrevView)       
-    EVT_MENU(IDM_ViewFontSizeUp,    CmdIncreaseFontSize) 
-    EVT_MENU(IDM_ViewFontSizeDown,  CmdDecreaseFontSize) 
-    EVT_MENU(IDM_Cut,               CmdCut)            
-    EVT_MENU(IDM_Copy,              CmdCopy)           
-    EVT_MENU(IDM_Paste,             CmdPaste)
-    EVT_MENU(IDM_PasteDlg,          CmdPasteAs)
-    EVT_MENU(IDM_Delete,            CmdDelete)
-    EVT_MENU(IDM_Undo,              CmdUndo)
-    EVT_MENU(IDM_Redo,              CmdRedo)
-    EVT_MENU(IDM_SelectAll,         CmdSelectAll)
-    EVT_MENU(IDM_UndoAll,           CmdUndoAll)
-    EVT_MENU(IDM_RedoAll,           CmdRedoAll)
-    EVT_MENU(IDM_ToggleEndianMode,  CmdToggleEndianMode)
-    EVT_MENU(IDM_ViewAbsoluteAddresses, CmdAbsoluteAddresses)
-    EVT_MENU(IDM_ViewRelativeAddresses, CmdRelativeAddresses)
-    EVT_MENU(IDM_CopyAddress,       CmdCopyAddress)
-    EVT_MENU(IDM_CopyCurrentAddress,CmdCopyCurrentAddress)
-    EVT_MENU(IDM_ViewAdjustColumns, CmdViewAdjustColumns)
-    EVT_MENU(IDM_OffsetLeft,        CmdOffsetLeft)
-    EVT_MENU(IDM_OffsetRight,       CmdOffsetRight)
-    //EVT_MENU(IDM_FileNew,           CmdNewFile)
-    EVT_MENU(IDM_ViewRuler,         CmdViewRuler)
-    EVT_MENU(IDM_ViewStickyAddr,    CmdViewStickyAddr)
-    EVT_MENU(IDM_ReadPalette,       CmdReadPalette)
-    EVT_MENU(IDM_CopyCodePoints,    CmdCopyFontCodePoints)
-    EVT_MENU(IDM_FindDiffRec,       CmdFindDiffRec)
-    EVT_MENU(IDM_FindDiffRecBack,   CmdFindDiffRecBack)
-    EVT_MENU(IDM_ViewPrevRegion,    CmdViewPrevRegion)
-    EVT_MENU(IDM_ViewNextRegion,    CmdViewNextRegion)
+    EVT_MENU(IDM_CursorStartOfLine, HexWnd::CmdCursorStartOfLine)
+    EVT_MENU(IDM_CursorEndOfLine,   HexWnd::CmdCursorEndOfLine)
+    EVT_MENU(IDM_CursorStartOfFile, HexWnd::CmdCursorStartOfFile)
+    EVT_MENU(IDM_CursorEndOfFile,   HexWnd::CmdCursorEndOfFile)
+    EVT_MENU(IDM_ViewLineUp,        HexWnd::CmdViewLineUp)
+    EVT_MENU(IDM_ViewLineDown,      HexWnd::CmdViewLineDown)
+    EVT_MENU(IDM_ViewPageUp,        HexWnd::CmdViewPageUp)
+    EVT_MENU(IDM_ViewPageDown,      HexWnd::CmdViewPageDown)
+    EVT_MENU(IDM_NextView,          HexWnd::CmdNextView)
+    EVT_MENU(IDM_PrevView,          HexWnd::CmdPrevView)
+    #ifdef TBDL
+    EVT_MENU(IDM_ViewFontSizeUp,    HexWnd::CmdIncreaseFontSize)
+    EVT_MENU(IDM_ViewFontSizeDown,  HexWnd::CmdDecreaseFontSize)
+    #endif
+    EVT_MENU(IDM_Cut,               HexWnd::CmdCut)
+    EVT_MENU(IDM_Copy,              HexWnd::CmdCopy)
+    //EVT_MENU(IDM_Paste,             HexWnd::CmdPaste)
+    //EVT_MENU(IDM_PasteDlg,          HexWnd::CmdPasteAs)
+    EVT_MENU(IDM_Delete,            HexWnd::CmdDelete)
+    EVT_MENU(IDM_Undo,              HexWnd::CmdUndo)
+    EVT_MENU(IDM_Redo,              HexWnd::CmdRedo)
+    EVT_MENU(IDM_SelectAll,         HexWnd::CmdSelectAll)
+    EVT_MENU(IDM_UndoAll,           HexWnd::CmdUndoAll)
+    EVT_MENU(IDM_RedoAll,           HexWnd::CmdRedoAll)
+    EVT_MENU(IDM_ToggleEndianMode,  HexWnd::CmdToggleEndianMode)
+    EVT_MENU(IDM_ViewAbsoluteAddresses, HexWnd::CmdAbsoluteAddresses)
+    EVT_MENU(IDM_ViewRelativeAddresses, HexWnd::CmdRelativeAddresses)
+    EVT_MENU(IDM_CopyAddress,       HexWnd::CmdCopyAddress)
+    EVT_MENU(IDM_CopyCurrentAddress,HexWnd::CmdCopyCurrentAddress)
+    EVT_MENU(IDM_ViewAdjustColumns, HexWnd::CmdViewAdjustColumns)
+    EVT_MENU(IDM_OffsetLeft,        HexWnd::CmdOffsetLeft)
+    EVT_MENU(IDM_OffsetRight,       HexWnd::CmdOffsetRight)
+    //EVT_MENU(IDM_FileNew,           HexWnd::CmdNewFile)
+    EVT_MENU(IDM_ViewRuler,         HexWnd::CmdViewRuler)
+    EVT_MENU(IDM_ViewStickyAddr,    HexWnd::CmdViewStickyAddr)
+    EVT_MENU(IDM_ReadPalette,       HexWnd::CmdReadPalette)
+    //EVT_MENU(IDM_CopyCodePoints,    HexWnd::CmdCopyFontCodePoints)
+    EVT_MENU(IDM_FindDiffRec,       HexWnd::CmdFindDiffRec)
+    EVT_MENU(IDM_FindDiffRecBack,   HexWnd::CmdFindDiffRecBack)
+    EVT_MENU(IDM_ViewPrevRegion,    HexWnd::CmdViewPrevRegion)
+    EVT_MENU(IDM_ViewNextRegion,    HexWnd::CmdViewNextRegion)
 
-    EVT_MENU(IDM_GotoCluster,       CmdGotoCluster)
-    EVT_MENU(IDM_JumpToFromFat,     CmdJumpToFromFat)
-    EVT_MENU(IDM_GotoPath,          CmdGotoPath)
-    EVT_MENU(IDM_NextBlock,         CmdNextBlock)
-    EVT_MENU(IDM_PrevBlock,         CmdPrevBlock)
-    EVT_MENU(IDM_NextBlockTrack,    CmdNextBlock)
-    EVT_MENU(IDM_PrevBlockTrack,    CmdPrevBlock)
-    EVT_MENU(IDM_FirstCluster,      CmdFirstCluster)
-    EVT_MENU(IDM_LastCluster,       CmdLastCluster)
-    EVT_MENU(IDM_FatAutoSave,       CmdFatAutoSave)
-    EVT_MENU(IDM_CopySector,        CmdCopySector)
-    EVT_MENU(IDM_OpsCustom1,        CmdCustomOp1)
+    //EVT_MENU(IDM_GotoCluster,       HexWnd::CmdGotoCluster)
+    //EVT_MENU(IDM_JumpToFromFat,     HexWnd::CmdJumpToFromFat)
+    //EVT_MENU(IDM_GotoPath,          HexWnd::CmdGotoPath)
+    //EVT_MENU(IDM_NextBlock,         HexWnd::CmdNextBlock)
+    //EVT_MENU(IDM_PrevBlock,         HexWnd::CmdPrevBlock)
+    //EVT_MENU(IDM_NextBlockTrack,    HexWnd::CmdNextBlock)
+    //EVT_MENU(IDM_PrevBlockTrack,    HexWnd::CmdPrevBlock)
+    //EVT_MENU(IDM_FirstCluster,      HexWnd::CmdFirstCluster)
+    //EVT_MENU(IDM_LastCluster,       HexWnd::CmdLastCluster)
+    //EVT_MENU(IDM_FatAutoSave,       HexWnd::CmdFatAutoSave)
+    //EVT_MENU(IDM_CopySector,        HexWnd::CmdCopySector)
+    //EVT_MENU(IDM_OpsCustom1,        HexWnd::CmdCustomOp1)
 END_EVENT_TABLE()
 
 
@@ -113,8 +114,8 @@ HexWnd::HexWnd(thFrame *frame, HexWndSettings *ps /*= NULL*/)
     if (ps)
         s = *ps;
     this->frame = frame;
-    Init();
     m_ok = Create(frame, -1, wxDefaultPosition, wxSize(0, 0), wxWANTS_CHARS, _T("HexWnd"));
+    Init();
 
     wxAcceleratorEntry entries[16];
     entries[0].Set(wxACCEL_NORMAL, WXK_HOME, IDM_CursorStartOfLine);
@@ -241,15 +242,15 @@ void HexWnd::RepaintBytes(uint64 start_byte, uint64 end_byte, bool bUpdateNow /*
 
 void HexWnd::RepaintLines(uint64 start_line, uint64 end_line, bool bUpdateNow /*= true*/)
 {
-    uint64 tmp = min(start_line, end_line);
-    end_line = max(start_line, end_line);
+    uint64 tmp = wxMin(start_line, end_line);
+    end_line = wxMax(start_line, end_line);
     start_line = tmp;
 
     if (start_line > m_iFirstLine + m_iVisibleLines || end_line < m_iFirstLine)
         return;
 
-    start_line = max(start_line, m_iFirstLine);
-    end_line = min(end_line, m_iFirstLine + m_iVisibleLines);
+    start_line = wxMax(start_line, m_iFirstLine);
+    end_line = wxMin(end_line, m_iFirstLine + m_iVisibleLines);
 
     wxRect rc(
         0,
@@ -319,7 +320,7 @@ void HexWnd::SelectionHitTest(const wxPoint &pt, uint64 &mouseLine, int &col, in
     //else if (relativeLine < 0)
     //    mouseLine = m_iFirstLine - (uint64)(-relativeLine);
     //else
-    //    mouseLine = min(m_iFirstLine + (uint64)relativeLine, m_iTotalLines);
+    //    mouseLine = wxMin(m_iFirstLine + (uint64)relativeLine, m_iTotalLines);
     mouseLine = YToLine(pt.y);
     if (mouseLine >= m_iTotalLines)
         mouseLine = m_iTotalLines - 1;
@@ -563,7 +564,7 @@ void HexWnd::OnSize(wxSizeEvent &event)
     else
         m_iFirstLine = 0;
     if (m_iScrollX >= m_iLineWidth - width)
-        m_iScrollX = max(m_iLineWidth - width, 0);
+        m_iScrollX = wxMax(m_iLineWidth - width, 0);
 
     // See if we can get rid of scroll bars.
     const int winHeight = event.GetSize().GetHeight();
@@ -591,6 +592,9 @@ void HexWnd::OnSize(wxSizeEvent &event)
     // client area may have changed with addition of vertical scroll bar
     GetClientSize(&width, &height);
 
+    //! Did I get this right?  Test.
+    m_iScrollPageX = width;
+    m_iScrollMaxX = m_iLineWidth - width;
     SetScrollbar(wxHORIZONTAL, m_iScrollX, width, m_iLineWidth);
 
     if (QueuedSize)
@@ -599,7 +603,8 @@ void HexWnd::OnSize(wxSizeEvent &event)
         QueuedSize = 0;
         incr.p = NULL;
         InSize = 0;
-        OnSize(wxSizeEvent(GetSize()));
+        wxSizeEvent event2(GetSize());
+        OnSize(event2);
         return;
     }
 
@@ -614,7 +619,9 @@ void HexWnd::OnSize(wxSizeEvent &event)
     Refresh(false);  //! we may not need this here.  OK, we do if the font changes.
     //Update(); //! Without this, the background gets repainted with the default color.  Update() seems to fix it.
 
+#ifdef TBDL
     UpdateViews(DataView::DV_WINDOWSIZE);
+#endif
 }
 
 void HexWnd::OnScroll(wxScrollWinEvent &event)
@@ -664,26 +671,29 @@ void HexWnd::OnVScroll(wxScrollWinEvent &event)
     else // I don't think we will ever hit this -- there are no more scroll bar commands.
         return;
 
+    #ifdef TBDL
     thScrollWindow(m_iScrollX, oldLine);
+    #else
+    Refresh(false);
+    #endif
 
     //SetScrollPos(wxVERTICAL, m_iFirstLine, cmd != SB_THUMBTRACK);
-    SetScrollbar64(wxVERTICAL, m_iFirstLine, m_iVisibleLines, m_iTotalLines, cmd != SB_THUMBTRACK);
+    SetScrollbar64(wxVERTICAL, m_iFirstLine, m_iVisibleLines, m_iTotalLines, cmd != wxEVT_SCROLLWIN_THUMBTRACK);
     set_caret_pos();
+#ifdef TBDL
     UpdateViews(DataView::DV_SCROLL);
+#endif
 }
 
 void HexWnd::OnHScroll(wxScrollWinEvent &event)
 {
     int cmd = event.GetEventType(); //! is this right?
-    SCROLLINFO si = { sizeof(si) };
-    si.fMask = SIF_ALL;
-    GetScrollInfo(GetHwnd(), SB_HORZ, &si);
     int oldX = m_iScrollX;
 
     if (cmd == wxEVT_SCROLLWIN_TOP)
         m_iScrollX = 0;
     else if (cmd == wxEVT_SCROLLWIN_BOTTOM)
-        m_iScrollX = si.nMax - si.nPage;
+        m_iScrollX = m_iScrollMaxX - m_iScrollPageX;
     else if (cmd == wxEVT_SCROLLWIN_LINEUP)
     {
         if (m_iScrollX > 0)
@@ -691,25 +701,23 @@ void HexWnd::OnHScroll(wxScrollWinEvent &event)
     }
     else if (cmd == wxEVT_SCROLLWIN_LINEDOWN)
     {
-        if (m_iScrollX <= si.nMax - (int)si.nPage)
+        if (m_iScrollX <= m_iScrollMaxX - m_iScrollPageX)
             m_iScrollX++;
     }
     else if (cmd == wxEVT_SCROLLWIN_PAGEUP)
     {
-        m_iScrollX = max(m_iScrollX - (int)si.nPage, 0);
+        m_iScrollX = wxMax(m_iScrollX - m_iScrollPageX, 0);
     }
     else if (cmd == wxEVT_SCROLLWIN_PAGEDOWN)
     {
-        if (si.nMax >= 2 * (int)si.nPage && m_iScrollX <= si.nMax - 2 * (int)si.nPage)
-            m_iScrollX += si.nPage;
+        if (m_iScrollMaxX >= 2 * m_iScrollPageX && m_iScrollX <= m_iScrollMaxX - 2 * m_iScrollPageX)
+            m_iScrollX += m_iScrollPageX;
         else
-            m_iScrollX = si.nMax - si.nPage;
+            m_iScrollX = m_iScrollMaxX - m_iScrollPageX;
     }
     else if (cmd == wxEVT_SCROLLWIN_THUMBTRACK)
     {
-        si.fMask = SIF_TRACKPOS;
-        GetScrollInfo(GetHwnd(), SB_HORZ, &si);
-        m_iScrollX = si.nTrackPos;
+        m_iScrollX = event.GetPosition();  //! needs testing
     }
     else // I don't think we will ever hit this -- there are no more scroll bar commands.
         return;
@@ -717,7 +725,11 @@ void HexWnd::OnHScroll(wxScrollWinEvent &event)
     SetScrollPos(wxHORIZONTAL, m_iScrollX, true);
     set_caret_pos();
 
+    #ifdef TBDL
     thScrollWindow(oldX, m_iFirstLine);
+    #else
+    Refresh(false);
+    #endif
 }
 
 void HexWnd::OnLButtonDown(wxMouseEvent &event)
@@ -772,7 +784,7 @@ void HexWnd::OnLButtonDown(wxMouseEvent &event)
 
 void HexWnd::OnLButtonUp(wxMouseEvent &event)
 {
-    ReleaseCapture(); // other processing is done in OnCaptureChange()
+    ReleaseMouse(); // other processing is done in OnCaptureChange()
 }
 
 void HexWnd::OnCaptureChange(wxMouseCaptureChangedEvent &event)
@@ -781,7 +793,7 @@ void HexWnd::OnCaptureChange(wxMouseCaptureChangedEvent &event)
     if (m_bMouseSelecting)
     {
         m_bMouseSelecting = false;
-        ReleaseCapture();
+        ReleaseMouse();
         m_scrollTimer.Stop(); // mouse may be outside window, so timer would still be running
     }
 }
@@ -929,10 +941,12 @@ void HexWnd::OnScrollTimer(wxTimerEvent &event)
     OnSelectionMouseMove(mouseLine, col, half);
 }
 
+#ifdef TBDL
 void HexWnd::OnMButtonDown(wxMouseEvent &event)
 {
     CreateScrollOriginWnd(this, event.GetX(), event.GetY());
 }
+#endif
 
 //void HexWnd::OnNavigationKey(wxNavigationKeyEvent &event)
 //{
@@ -1116,6 +1130,7 @@ void HexWnd::OnKey(wxKeyEvent &event)
         doc->InvalidateCache();
         Refresh(false);
         break;
+#ifdef TBDL
     case WXK_F6: {
         THSIZE base = 0;
         for (Segment *s = doc->m_head; s; s = s->next)
@@ -1142,6 +1157,7 @@ void HexWnd::OnKey(wxKeyEvent &event)
             fatInfo.ReadDir(offset);
         }
         break;
+#endif
     case WXK_F8:
         doc->DumpCache();
         break;
@@ -1204,7 +1220,7 @@ void HexWnd::OnChar(wxKeyEvent &event)
     }
 
     if (!CmdChar(code))
-        MessageBeep((DWORD)-1);
+        wxBell();
     ScrollToCursor();
 }
 
@@ -1340,11 +1356,17 @@ bool HexWnd::ScrollToLine(uint64 line, int x /*= -1*/)
         SetScrollPos(wxHORIZONTAL, x, true);
     }
 
+#ifdef TBDL
     UpdateViews(DataView::DV_SCROLL);
+#endif
 
     m_bMousePosValid = false;
 
+    #ifdef TBDL
     thScrollWindow(oldX, oldLine);
+    #else
+    Refresh(false);
+    #endif
     set_caret_pos();
     return true;
 }
@@ -1537,28 +1559,33 @@ no_caret:  // Bad ass!  No caret for you!
 void HexWnd::OnMouseWheel(wxMouseEvent &event)
 {
     int delta = event.GetWheelRotation();
+    #ifdef TBDL
     if (event.ControlDown())
     {
+        wxCommandEvent dummy;
         if (delta > 0)
-            CmdIncreaseFontSize(wxCommandEvent());
+            CmdIncreaseFontSize(dummy);
         else if (delta < 0)
-            CmdDecreaseFontSize(wxCommandEvent());
+            CmdDecreaseFontSize(dummy);
     }
     else
+    #endif // TBDL
     {
         UINT ucNumLines = 1;
+        #ifdef WIN32 //! TBDL
         SystemParametersInfo(SPI_GETWHEELSCROLLLINES, 0, &ucNumLines, 0);
+        #endif
         if (ucNumLines == (UINT)-1)
-            ucNumLines = max(m_iVisibleLines - 1, 1);
-        ScrollPartialLine(delta * ucNumLines);
+            ucNumLines = wxMax(m_iVisibleLines - 1, 1);
+        ScrollPartialLine(delta * ucNumLines, event.GetWheelDelta());
     }
 }
 
-void HexWnd::ScrollPartialLine(int delta)
+void HexWnd::ScrollPartialLine(int delta, int wheelDelta)
 {
     m_iPartialScroll += delta;
-    int lines = m_iPartialScroll / -WHEEL_DELTA;
-    m_iPartialScroll %= WHEEL_DELTA;
+    int lines = m_iPartialScroll / -wheelDelta;
+    m_iPartialScroll %= wheelDelta;
     if (lines < 0)
     {
         if (m_iFirstLine > (uint32)-lines)
@@ -1623,13 +1650,17 @@ bool HexWnd::SetDoc(HexDoc *pDoc)
     //OnDataChange(0, 0, DocSize());
     m_iTotalLines = GetLines();
     AdjustForNewDataSize();
+#ifdef TBDL
     UpdateViews(DataView::DV_DATA | DataView::DV_DATASIZE | DataView::DV_NEWDOC);
+#endif
 
     SetSelection(docinfo[newdoc].sel);
     ScrollToLine(docinfo[newdoc].firstLine);
     SetModified(false); //! WRONG
 
+#ifdef TBDL
     fatInfo.Init(this);
+#endif
 
     curdoc = newdoc;
     return true;
@@ -1677,6 +1708,7 @@ bool HexWnd::OpenFile(LPCTSTR filename, bool bReadOnly)
     //!    g_wol.Add(m_hChange, s_FileChange, (DWORD_PTR)this);
 }
 
+#ifdef TBDL
 bool HexWnd::OpenDrive(LPCTSTR path, bool bReadOnly)
 {
     DataSource *pDS = new DiskDataSource(path, bReadOnly);
@@ -1714,7 +1746,7 @@ bool HexWnd::OpenLC1VectorMemory(wxString addr)
     wxIPV4address ipv4;
     ipv4.Hostname(addr);
     ipv4.Service(0x721F);
-    
+
     DataSource *pDS = new VecMemDataSource(ipv4, true);
     if (!pDS->IsOpen())
     {
@@ -1740,6 +1772,7 @@ bool HexWnd::OpenTestFile(LPCTSTR filename)
     SetDataSource(pDS);
     return true;
 }
+#endif // TBDL
 
 bool HexWnd::OpenDataSource(DataSource *pDS)
 {
@@ -1766,7 +1799,7 @@ bool HexWnd::Goto(uint64 offset, bool bExtendSel /*= false*/, int origin /*= 0*/
     else if (origin == 1) // forward from start of region
         address = offset;
     else if (origin ==2) // forward from cursor
-        address = min(offset + m_iCurByte, DocSize());
+        address = wxMin(offset + m_iCurByte, DocSize());
     else if (origin == 3) // backward from cursor
     {
         if (offset > m_iCurByte)
@@ -1791,6 +1824,7 @@ bool HexWnd::Goto(uint64 offset, bool bExtendSel /*= false*/, int origin /*= 0*/
     //  the desired location.  Allow user to pick one from a dialog box?
 }
 
+#ifdef WIN32
 UINT HexWnd::GetCharWidths(HDC hdc, UINT first, UINT count, bool bUseDrawText /*= false*/)
 {
     uint32 width = 0;
@@ -1842,7 +1876,7 @@ UINT HexWnd::GetCharWidths(HDC hdc, UINT first, UINT count, bool bUseDrawText /*
 
         for (UINT i = 0; i < count; i++)
         {
-            iCharWidths[first + i] = width = max((int)width, widths[i]);
+            iCharWidths[first + i] = width = wxMax((int)width, widths[i]);
             iLeftLead[first + i] = 0;
         }
         delete [] widths;
@@ -1863,7 +1897,7 @@ int GetDefaultCharGlyph(int codePage = CP_ACP)
     //        dw = GetLastError();  //! breakpoint
     //        glyph = '.';
     //    }
-    //    return glyph; 
+    //    return glyph;
     //}
     //else
     {
@@ -1880,9 +1914,11 @@ void HexWnd::SetFont(LOGFONT *plf)
     plf->lfQuality = m_settings.GetFontQuality();
     SetFont(wxCreateFontFromLogFont(plf));
 }
+#endif // WIN32
 
 void HexWnd::SetFont(wxFont &newFont)
 {
+#ifdef TBDL
     // First tweak the font (if necessary) to set lfQuality.
     //LOGFONT lf;
     LOGFONT &lf = m_lf;
@@ -1893,16 +1929,47 @@ void HexWnd::SetFont(wxFont &newFont)
         lf.lfQuality = desiredQuality;  //! Ignored when comparing newFont == m_font.
         newFont = wxCreateFontFromLogFont(&lf); //! Why doesn't this set the right info?  (family)
     }
+    if (lf.lfOutPrecision == OUT_STRING_PRECIS)
+        m_bFontCharsOnly = true;  // GDI doesn't step in for raster fonts, so draw dots instead.
+#endif // TBDL
 
     s.sFont = newFont.GetNativeFontInfoDesc();
 
     m_bFontCharsOnly = s.bFontCharsOnly;
-    if (lf.lfOutPrecision == OUT_STRING_PRECIS)
-        m_bFontCharsOnly = true;  // GDI doesn't step in for raster fonts, so draw dots instead.
-    m_bFixedWidthFont = ((lf.lfPitchAndFamily & 3) == FIXED_PITCH);
 
     wxWindow::SetFont(newFont);  //! Ignores font quality setting.
     m_iDesiredFontSize = -1; //! weirdness
+    m_bFixedWidthFont = newFont.IsFixedWidth();
+
+    #ifdef WIN32
+    GetCharacterSizes(newFont);
+    #else  //! LINUX TESTING
+    m_tm.tmHeight = 20;
+    m_tm.tmInternalLeading = 2;
+    m_tm.tmAveCharWidth = 10;
+    m_tm.tmMaxCharWidth = 10;
+    width_all = width_hex = m_iCharWidth = 10;
+    m_iDefaultChar = ' ';
+    #endif
+
+    m_iLineHeight = m_tm.tmHeight + s.iExtraLineSpace;
+    if (s.bGridLines)
+        m_iLineHeight++;
+    CalcLineWidth();
+
+    PRINTF(_T("New font height=%d IntLead=%d AveWidth=%d MaxWidth=%d w256=%d w16=%d w.all=%d\n"),
+        m_tm.tmHeight, m_tm.tmInternalLeading, m_tm.tmAveCharWidth, m_tm.tmMaxCharWidth, m_iCharWidth, width_hex, width_all);
+
+    set_caret_pos();
+
+    AdjustForNewDataSize();
+}
+
+#ifdef TBDL
+// Set m_tm, iLeftLead, iCharWidths, width_all, width_hex,
+//     charMap256, m_iCodePage, m_iDefaultChar
+void HexWnd::GetCharacterSizes(const wxFont &newFont)
+{
     HFONT hFont = (HFONT)newFont.GetHFONT();
 
     HDC hdc = GetDC(NULL);
@@ -1954,7 +2021,7 @@ void HexWnd::SetFont(wxFont &newFont)
             for (DWORD range = 0; range < pgs->cRanges; range++)
             {
                width = GetCharWidths(hdc, pgs->ranges[range].wcLow, pgs->ranges[range].cGlyphs);
-               width_all = max(width, width_all);
+               width_all = wxMax(width, width_all);
 
                int first = pgs->ranges[range].wcLow, count = pgs->ranges[range].cGlyphs, last = first + count - 1;
                //PRINTF(_T("Character range: %04X - %04X (%d)\n"), first, last, count);
@@ -1980,10 +2047,10 @@ void HexWnd::SetFont(wxFont &newFont)
             //delete [] pgs; //! was allocated as array of chars.  Is this OK?
 
             //width = GetCharWidths(hdc, 0, 0xD800, 0);
-            //width_all = max(width_all, width);
+            //width_all = wxMax(width_all, width);
 
             //width = GetCharWidths(hdc, 0xE000, 0x2000, 0);
-            //width_all = max(width_all, width);
+            //width_all = wxMax(width_all, width);
 
             timer.StopWatch();
             PRINTF(_T("GetCharWidths() took %0.6f seconds total.\n"), timer.GetSeconds());
@@ -1999,11 +2066,11 @@ void HexWnd::SetFont(wxFont &newFont)
 
         // Get maximum width of characters needed to display hexadecimal digits (hexits?)
         width = GetCharWidths(hdc, '0', 10);
-        width_hex = max(width_hex, width);
+        width_hex = wxMax(width_hex, width);
         width = GetCharWidths(hdc, 'A', 6);
-        width_hex = max(width_hex, width);
+        width_hex = wxMax(width_hex, width);
         //width = GetCharWidths(hdc, 'a', 6);
-        //width_hex = max(width_hex, width);
+        //width_hex = wxMax(width_hex, width);
 
         charMap256[0] = 0;
         //int cp = 437; //GetTextCharset(hdc);
@@ -2053,19 +2120,8 @@ void HexWnd::SetFont(wxFont &newFont)
             iLeftLead[i] = 0;
         m_iCharWidth = m_tm.tmAveCharWidth;
     }
-
-    m_iLineHeight = m_tm.tmHeight + s.iExtraLineSpace;
-    if (s.bGridLines)
-        m_iLineHeight++;
-    CalcLineWidth();
-
-    PRINTF(_T("New font height=%d IntLead=%d AveWidth=%d MaxWidth=%d w256=%d w16=%d w.all=%d\n"),
-        m_tm.tmHeight, m_tm.tmInternalLeading, m_tm.tmAveCharWidth, m_tm.tmMaxCharWidth, m_iCharWidth, width_hex, width_all);
-
-    set_caret_pos();
-
-    AdjustForNewDataSize();
 }
+#endif // TBDL
 
 void HexWnd::SetSelection(uint64 iSelStart, uint64 iSelEnd, int region /*= 0*/, int digit /*= 0*/)
 {
@@ -2105,9 +2161,12 @@ void HexWnd::SetSelection(uint64 iSelStart, uint64 iSelEnd, int region /*= 0*/, 
     iSelEndLine   = ByteToLineCol(m_iCurByte, NULL);
     RepaintLines(iSelStartLine, iSelEndLine);
 
+#ifdef TBDL
     UpdateViews(DataView::DV_SELECTION);
+#endif
 }
 
+#ifdef WIN32
 void HexWnd::thScrollWindowRaw(int dx, int dy, bool bUpdate /*= false*/)
 {
     RECT rcScroll, rcUpdate;
@@ -2157,10 +2216,10 @@ void HexWnd::thScrollWindow(int oldX, THSIZE oldLine, bool bUpdate /*= false*/)
     }
 }
 
-LRESULT HexWnd::OnSmoothScroll(int dx, int dy)
+int HexWnd::OnSmoothScroll(int dx, int dy)
 {
     bool updateVScroll = false, updateHScroll = false;
-    
+
     if (dy)
        m_iLastYScroll = dy;
 
@@ -2168,17 +2227,17 @@ LRESULT HexWnd::OnSmoothScroll(int dx, int dy)
     {
         RECT rc;
         ::GetClientRect(GetHwnd(), &rc);
-        dx = min(dx, m_iLineWidth - rc.right - m_iScrollX);
+        dx = wxMin(dx, m_iLineWidth - rc.right - m_iScrollX);
     }
     if (dx < 0)
-        dx = max(dx, -m_iScrollX);
+        dx = wxMax(dx, -m_iScrollX);
     m_iScrollX += dx;
 
     if (dx)
         updateHScroll = true;
 
     //int max_y_smooth = m_iVisibleLines * m_iLineHeight;
-    int max_y_smooth = min(3, m_iVisibleLines) * m_iLineHeight;
+    int max_y_smooth = wxMin(3, m_iVisibleLines) * m_iLineHeight;
     if (dy > max_y_smooth)
     {
         m_iYOffset = 0;
@@ -2195,14 +2254,14 @@ LRESULT HexWnd::OnSmoothScroll(int dx, int dy)
         if (m_iFirstLine == 0 && m_iYOffset == 0)
             dy = 0;
         else if ((uint64)(abs(dy + m_iYOffset) / m_iLineHeight) >= m_iFirstLine)
-            dy = -min(-dy, (int)m_iFirstLine * m_iLineHeight + m_iYOffset);
+            dy = -wxMin(-dy, (int)m_iFirstLine * m_iLineHeight + m_iYOffset);
     }
     else if (dy > 0)
     {
         if (m_iFirstLine + m_iVisibleLines >= m_iTotalLines)
             dy = 0;
         else if (m_iFirstLine + m_iVisibleLines + (m_iYOffset + dy) / m_iLineHeight >= m_iTotalLines)
-            dy = min((uint32)dy, (m_iTotalLines - m_iVisibleLines - m_iFirstLine) * m_iLineHeight - m_iYOffset);
+            dy = wxMin((uint32)dy, (m_iTotalLines - m_iVisibleLines - m_iFirstLine) * m_iLineHeight - m_iYOffset);
     }
     m_iYOffset += dy;
     while (m_iYOffset >= m_iLineHeight)
@@ -2236,14 +2295,16 @@ LRESULT HexWnd::OnSmoothScroll(int dx, int dy)
     {
         //SetScrollPos(wxVERTICAL, m_iFirstLine, true);
         SetScrollbar64(wxVERTICAL, m_iFirstLine, m_iVisibleLines, m_iTotalLines, true);
+        #ifdef TBDL
         UpdateViews(DataView::DV_SCROLL);
+        #endif
     }
     if (updateHScroll)
         SetScrollPos(wxHORIZONTAL, m_iScrollX, true);
 
     HideCaret(CHF_AUTOPAN);
 
-    return 0;    
+    return 0;
 }
 
 void HexWnd::FinishSmoothScroll()
@@ -2353,6 +2414,7 @@ void HexWnd::OnFileChange()
 
     FindNextChangeNotification(m_hChange);
 }
+#endif // WIN32
 
 void HexWnd::ShowCaret(int flags)
 {
@@ -2386,7 +2448,8 @@ bool HexWnd::DigitGranularity()
 
 void HexWnd::AdjustForNewDataSize()
 {
-    OnSize(wxSizeEvent());
+    wxSizeEvent dummy;
+    OnSize(dummy);
     return;
 
     ////! this is broken
@@ -2460,7 +2523,9 @@ void HexWnd::OnDataChange(THSIZE nAddress, THSIZE nOldSize, THSIZE nNewSize)
         AdjustForNewDataSize();
     }
 
+#ifdef TBDL
     UpdateViews(flags);
+#endif
 }
 
 bool HexWnd::SetModified(bool modified)
@@ -2484,7 +2549,12 @@ int HexWnd::FormatAddress(THSIZE address, TCHAR *buffer, int bufsize)
             return len;
         else
         {
+            #ifdef WIN32
             _tcscpy(buffer, _T("??"));
+            #else
+            buffer[0] = buffer[1] = '?';
+            buffer[2] = 0;
+            #endif
             return 2;
         }
     }
@@ -2560,7 +2630,7 @@ void DisplayPane::Init(HexWnd *hw, int id, int iCharWidth, int extra /*= 1*/)
     }
 
     m_iColWidth = m_iColChars * m_iCharWidth + m_extra * 2; // extra pixel to each side of each column
-    m_width1 = m_iCols * m_iColWidth + 
+    m_width1 = m_iCols * m_iColWidth +
         m_iGroupSpace * ((m_iCols - 1) / m_iColGrouping);
 }
 
@@ -2621,7 +2691,7 @@ void DisplayPane::InitNumeric(int iCharWidth, int iBytes, bool bSigned, bool bFl
 
     //m_iColWidth = m_iColChars * m_iCharWidth + 2; // 1 pixel to each side of each column
     m_iColWidth = m_iColChars * m_iCharWidth + m_extra * 2; // extra pixel to each side of each column
-    m_width1 = m_iCols * m_iColWidth + 
+    m_width1 = m_iCols * m_iColWidth +
         m_iGroupSpace * ((m_iCols - 1) / m_iColGrouping);
 }
 
@@ -2639,7 +2709,7 @@ void DisplayPane::InitVecMem(int iCharWidth)
     m_hbrBack = *wxTheBrushList->FindOrCreateBrush(s_pSettings->clrTextBack);
 
     m_iColWidth = m_iColChars * m_iCharWidth; // no extra pixels, so position may be off
-    m_width1 = m_iCols * m_iColWidth + 
+    m_width1 = m_iCols * m_iColWidth +
         m_iGroupSpace * ((m_iCols - 1) / m_iColGrouping);
 }
 
@@ -2814,7 +2884,7 @@ THSIZE HexWnd::GetLastVisibleByte()
 }
 
 THSIZE HexWnd::GetLastVisibleLine()
-{    
+{
     if (m_iVisibleLines > m_iTotalLines)
         return m_iTotalLines;
     return m_iFirstLine + m_iVisibleLines;
@@ -2825,9 +2895,9 @@ void HexWnd::MoveCursorIntoView()
     int col;
     THSIZE cursorLine = ByteToLineCol(m_iCurByte, &col);
     if (cursorLine >= m_iFirstLine + m_iVisibleLines)
-        SetSelection(Selection(LineColToByte(m_iFirstLine + m_iVisibleLines - 1, col)));
+        SetSelection(LineColToByte(m_iFirstLine + m_iVisibleLines - 1, col));
     else if (cursorLine < m_iFirstLine)
-        SetSelection(Selection(LineColToByte(m_iFirstLine, col)));
+        SetSelection(LineColToByte(m_iFirstLine, col));
     set_caret_pos();
 }
 
@@ -2880,6 +2950,7 @@ int HexWnd::GetPaneLeft(const DisplayPane &pane)
     return pane.m_left - m_iScrollX;
 }
 
+#ifdef TBD
 void DisplayPane::SetFont(wxFont &newFont, wxDC &dc, TEXTMETRIC &tm)
 {
     //! much to do here
@@ -2889,6 +2960,7 @@ void UnicodePane::SetFont(wxFont &newFont, wxDC &dc, TEXTMETRIC &tm)
 {
     this->m_iCharWidth = tm.tmMaxCharWidth;
 }
+#endif // TBD
 
 THSIZE HexWnd::GetLines() const
 { //! includes space at (size+1).  ok if !CanChangeSize?
@@ -2929,6 +3001,7 @@ void HexWnd::Hyperlink(THSIZE offset, THSIZE size, THSIZE target)
     m_linkTarget = target;
 }
 
+#ifdef WIN32
 // Force mono-spaced drawing of proportional font.  Test 2007-09-06
 void HexWnd::CenterTextOut(HDC hdc, int x, int y, int flags, RECT *pRC,
                            LPCTSTR text, int charCount, int cellWidth)
@@ -2952,6 +3025,19 @@ void HexWnd::CenterTextOut(HDC hdc, int x, int y, int flags, RECT *pRC,
         last = next;
     }
     ExtTextOut(hdc, x + lead, y, flags, pRC, text, charCount, m_pCharSpaces);
+}
+#endif // WIN32
+
+void HexWnd::CenterTextOut(wxDC &dc, int x, int y, wxString text, int cellWidth)
+{
+    int charCount = text.Len();
+
+    for (int i = 0; i < charCount; i++)
+    {
+        int lead = (cellWidth - iCharWidths[text[i]]) / 2;
+        dc.DrawText(text[i], x + lead, y);
+        x += cellWidth;
+    }
 }
 
 void HexWnd::RemoveMP3Metadata()
@@ -3073,13 +3159,16 @@ void HexWnd::NextOddMp3Frame()
 
 void HexWnd::UpdateSettings(HexWndSettings &ns)
 {
-   HexWndSettings os = s;
-   s = ns;
-   if (ns.sFont != os.sFont)
-      SetFont(GetFont());  // hey, it works.
-   AdjustForNewDataSize();  // And this should pretty much take care of the rest.
+    HexWndSettings os = s;
+    s = ns;
+    #ifdef TBDL
+    if (ns.sFont != os.sFont)
+        SetFont(GetFont());  // hey, it works.
+    #endif // TBDL
+    AdjustForNewDataSize();  // And this should pretty much take care of the rest.
 }
 
+#ifdef LC1VECMEM
 static const char ABES_V_Formats[17] = "XQLH01NP89ABCDEF";
 
 static const char * opcode_table[] =
@@ -3157,3 +3246,4 @@ T_VecMemDec DecodeVecMem(const uint8 *pRow, int offset)
     return ret;
 }
 
+#endif // LC1VECMEM

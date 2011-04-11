@@ -25,12 +25,12 @@
 DEFINE_EVENT_TYPE(wxEVT_BAR_SELECTED)
 
 BEGIN_EVENT_TABLE(thBarViewCtrl, wxWindow)
-    EVT_PAINT(OnPaint)
-    EVT_SIZE(OnSize)
-    EVT_MOTION(OnMouseMove)
-    EVT_LEFT_DOWN(OnMouseDown)
-    EVT_LEAVE_WINDOW(OnMouseLeave)
-    EVT_ERASE_BACKGROUND(OnErase)
+    EVT_PAINT(thBarViewCtrl::OnPaint)
+    EVT_SIZE(thBarViewCtrl::OnSize)
+    EVT_MOTION(thBarViewCtrl::OnMouseMove)
+    EVT_LEFT_DOWN(thBarViewCtrl::OnMouseDown)
+    EVT_LEAVE_WINDOW(thBarViewCtrl::OnMouseLeave)
+    EVT_ERASE_BACKGROUND(thBarViewCtrl::OnErase)
 END_EVENT_TABLE()
 
 void thBarViewCtrl::OnErase(wxEraseEvent &event)
@@ -234,8 +234,13 @@ void thBarViewCtrl::Mark(wxDC &dc, int bar)
     dc.SetPen(*wxTRANSPARENT_PEN);
 
     //! This looks bad with cross cursor.  But it's still useful.
+    #ifdef _WINDOWS
     RECT rcInvert = {bar_left, m_rcBorder.y, bar_left + bar_width, bottom};
     InvertRect((HDC)dc.GetHDC(), &rcInvert);
+    #else
+    wxRect rcInvert(bar_left, m_rcBorder.y, bar_left + bar_width, bottom);
+    //! TODO: invert rcInvert in X
+    #endif
 }
 
 int thBarViewCtrl::HitTest(wxPoint pt)

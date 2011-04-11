@@ -99,7 +99,9 @@ public:
     wxPoint m_mousePos;
     wxRect m_rcInside;
 
+    #ifdef TBDL
     bool HasCapture() { return ::GetCapture() == GetHwnd(); }
+    #endif
 
     wxBrush brFile, brMem, brFill, brBack, brBorder, brForward, brBackward;
     wxPen borderPen;
@@ -276,6 +278,7 @@ struct DataRange {
     THSIZE start, size;
 };
 
+#if 0  //! not needed anymore?
 class ProfilerView : public wxPanel, public DataView, public DblBufWindow
 {
 public:
@@ -298,6 +301,7 @@ public:
 
     static ProfilerView *g_profView;
 };
+#endif // 0
 
 class DocHistoryView : public wxListBox, public DataView
 {
@@ -317,6 +321,7 @@ public:
     }
 };
 
+#ifdef TBDL
 class FatView : public wxTextCtrl, public DataView
 {
 public:
@@ -365,5 +370,7 @@ public:
 
     DWORD export_rva, export_size, export_offset, names_offset;
 };
+
+#endif // TBDL
 
 #endif // _TOOLWNDS_H_

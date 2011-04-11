@@ -3,7 +3,9 @@
 #include "hexdoc.h"
 #include "atimer.h"
 #include "undo.h"
+#ifdef WIN32
 #include <wx/msw/private.h>
+#endif
 #include <wx/numdlg.h>
 #include "thFrame.h"
 #include "settings.h"
@@ -14,6 +16,40 @@
 #include "datahelp.h"
 
 #define new New
+
+#ifndef WIN32
+int StringCchLengthA(const char *psz, size_t cchMax, size_t *pcch)
+{
+    size_t i = 0;
+    if (psz == NULL || pcch == NULL)
+        return -1;  // bad parameter
+    for (i = 0; i < cchMax; i++)
+    {
+        if (*psz++ == 0)
+        {
+            *pcch = i;  // success.  Store string length.
+            return 0;
+        }
+    }
+    return -1;  // max length exceeded
+}
+
+int StringCchLengthW(const wchar_t *psz, size_t cchMax, size_t *pcch)
+{
+    size_t i = 0;
+    if (psz == NULL || pcch == NULL)
+        return -1;  // bad parameter
+    for (i = 0; i < cchMax; i++)
+    {
+        if (*psz++ == 0)  //! only works for UCS-2, not UTF-16
+        {
+            *pcch = i;  // success.  Store string length.
+            return 0;
+        }
+    }
+    return -1;  // max length exceeded
+}
+#endif
 
 void HexWnd::CmdSetSelection(THSIZE iSelStart, THSIZE iSelEnd,
                              int region /*= -1*/, int digit /*= 0*/,
@@ -324,6 +360,7 @@ void HexWnd::CmdGotoAgain(wxCommandEvent &event) { }
 //void HexWnd::CmdFindAgainForward(wxCommandEvent &event) { }
 //void HexWnd::CmdFindAgainBackward(wxCommandEvent &event) { }
 
+#ifdef TBDL
 void HexWnd::CmdNextBlock(wxCommandEvent &event)
 {
     THSIZE offset;
@@ -355,6 +392,7 @@ void HexWnd::CmdPrevBlock(wxCommandEvent &event)
     }
     CmdMoveCursor(tmp, ShiftDown());
 }
+#endif // TBDL
 
 void HexWnd::CmdSelectAll(wxCommandEvent &event)
 {
@@ -418,9 +456,11 @@ void HexWnd::DoCopy(thCopyFormat fmt)
     fmt.doc = doc;  //! maybe kinda temporary
     fmt.offset = iSelStart;
     fmt.srcLen = iSelEnd - iSelStart;
-    
+
+    #ifdef TBDL
     wxString data = doc->Serialize(iSelStart, iSelEnd - iSelStart);
     frame->clipboard.SetData(data, m_pane[m_iCurPane].id, fmt);
+    #endif
 }
 
 bool CanConvertAsHex(const char *pData, size_t len, UINT srcFormat)
@@ -471,7 +511,7 @@ thString HexWnd::FormatPaste(const char* pData, size_t newSize, UINT srcFormat, 
         size_t tmpSize;
         if (srcFormat == CF_TEXT)
         {
-            if (SUCCEEDED(StringCchLengthA((char*)pData, newSize, &tmpSize)))
+            if (StringCchLengthA((char*)pData, newSize, &tmpSize) == 0)
                 newSize = tmpSize;
             else if (newSize > 0)
                 newSize--;
@@ -481,7 +521,7 @@ thString HexWnd::FormatPaste(const char* pData, size_t newSize, UINT srcFormat, 
         else if (srcFormat == CF_UNICODETEXT)
         {
             newSize /= 2;
-            if (SUCCEEDED(StringCchLengthW((wchar_t*)pData, newSize, &tmpSize)))
+            if (StringCchLengthW((wchar_t*)pData, newSize, &tmpSize) == 0)
                 newSize = tmpSize;
             else if (newSize > 0)
                 newSize--;
@@ -521,6 +561,7 @@ thString HexWnd::FormatPaste(const char* pData, size_t newSize, UINT srcFormat, 
     return retval;
 }
 
+#ifdef TBDL
 void HexWnd::PasteWithFormat(int userFormat /*= -1*/)
 {
     thString tmpData;
@@ -634,9 +675,10 @@ bool HexWnd::DoPaste(thString byteData, SerialData *psData)
 
     return true;
 end:
-    MessageBeep((DWORD)-1);
+    wxBell();
     return false;
 }
+#endif // TBDL
 
 void HexWnd::CmdCut(wxCommandEvent &event)
 {
@@ -690,6 +732,7 @@ void HexWnd::CmdPrevView(wxCommandEvent &event)
     }
 }
 
+#ifdef TBDL
 static const int TT_fontPointSizes[] = {1,2,3,4,5,6,7,8,9,10,11,12,14,16,18,20,22,24,26,28,36,48,72};
 int fontCount;
 int *fontSizes;
@@ -839,17 +882,18 @@ void HexWnd::CmdDecreaseFontSize(wxCommandEvent &event)
     SetFont(&lf);
     m_iDesiredFontSize = height;
 }
+#endif // TBDL
 
 void HexWnd::CmdUndo(wxCommandEvent &event)
 {
     if (!doc->Undo())
-        MessageBeep((DWORD)-1);
+        wxBell();
 }
 
 void HexWnd::CmdRedo(wxCommandEvent &event)
 {
     if (!doc->Redo())
-        MessageBeep((DWORD)-1);
+        wxBell();
 }
 
 void HexWnd::CmdBackspace(wxCommandEvent &event) // called by user code, not event handler
@@ -864,7 +908,7 @@ void HexWnd::CmdBackspace(wxCommandEvent &event) // called by user code, not eve
 
     if (iSelStart == 0)
     {
-        MessageBeep((UINT)-1);
+        wxBell();
         return;
     }
 
@@ -944,7 +988,7 @@ bool HexWnd::CmdChar(char c)
             my_itoa((DWORD)oldval[0], oldbuf, s.iByteBase, m_iByteDigits);
             oldbuf[m_iCurDigit] = c;
             oldbuf[m_iByteDigits] = 0;
-            uint64 newval64 = _tcstoui64(oldbuf, NULL, s.iByteBase);
+            uint64 newval64 = wxStrtoull(oldbuf, NULL, s.iByteBase);
             if (newval64 > 255) // can happen in octal or decimal
                 return false; // value too large
             newval[0] = (uint8)newval64;
@@ -963,7 +1007,7 @@ bool HexWnd::CmdChar(char c)
     else
     {
         // if Unicode mode: have to replace two bytes and take a different data type
-        MessageBeep((DWORD)-1); //! can't edit Unicode or binary panes yet
+        wxBell(); //! can't edit Unicode or binary panes yet
         return false;
     }
 
@@ -1148,7 +1192,7 @@ void HexWnd::CmdReadPalette(wxCommandEvent &event)
 }
 
 // FAT MANIPULATION STUFF
-
+#ifdef TBDL
 void HexWnd::CmdGotoCluster(wxCommandEvent &event)
 {
     thRecentChoiceDialog dlg(this, _T("T.Hex"), _T("Go to cluster"), m_asGotoCluster);
@@ -1267,6 +1311,7 @@ void HexWnd::CmdFatAutoSave(wxCommandEvent &event)
         wxMessageBox(FormatDec(fileEnd - fileStart) + _T(" bytes saved."));
     }
 }
+#endif // TBDL
 
 //void HexWnd::CmdFocusHexWnd(wxCommandEvent &event)
 //{
@@ -1295,6 +1340,7 @@ void HexWnd::CmdToggleHexDec(wxCommandEvent &event)
     UpdateViews(DataView::DV_ALL);
 }
 
+#ifdef TBDL
 void HexWnd::CmdCopyFontCodePoints(wxCommandEvent &WXUNUSED(event))
 {
     HDC hdc = GetDC(NULL);
@@ -1333,6 +1379,7 @@ void HexWnd::CmdCopyFontCodePoints(wxCommandEvent &WXUNUSED(event))
 
     ReleaseDC(NULL, hdc);
 }
+#endif // TBDL
 
 inline uint32 memdiff(const uint8 *a, const uint8 *b, uint32 len)
 {
@@ -1373,7 +1420,7 @@ void HexWnd::CmdFindDiffRec(wxCommandEvent &(event))
                 }
             start += blocksize;
         }
-        MessageBeep(-1);
+        wxBell();
         if (frame->GetStatusBar())
             frame->SetStatusText(wxString::Format(_T("Reached end of file in %0.3f seconds"), timer.elapsed()));
         return;
@@ -1388,7 +1435,7 @@ void HexWnd::CmdFindDiffRec(wxCommandEvent &(event))
     {
         start += len;
         if (start + len >= end) {
-            MessageBeep(-1);
+            wxBell();
             if (frame->GetStatusBar())
                 frame->SetStatusText(wxString::Format(_T("Reached end of file in %0.3f seconds"), timer.elapsed()));
             break;
@@ -1438,7 +1485,7 @@ void HexWnd::CmdFindDiffRecBack(wxCommandEvent &(event))
                 }
             start -= blocksize;
         }
-        MessageBeep(-1);
+        wxBell();
         if (frame->GetStatusBar())
             frame->SetStatusText(wxString::Format(_T("Reached beginning of file in %0.3f seconds"), timer.elapsed()));
         return;
@@ -1451,7 +1498,7 @@ void HexWnd::CmdFindDiffRecBack(wxCommandEvent &(event))
     while (1)
     {
         if (start < len) {
-            MessageBeep(-1);
+            wxBell();
             if (frame->GetStatusBar())
                 frame->SetStatusText(wxString::Format(_T("Reached beginning of file in %0.3f seconds"), timer.elapsed()));
             break;

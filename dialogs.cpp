@@ -9,10 +9,13 @@
 #include "palette.h"
 #include "datasource.h"
 //#include "physicaldrive.h"
+#ifdef TBDL
 #include "blockdevs.h"
+#endif
 
 #define new New
 
+#ifdef TBDL
 BEGIN_EVENT_TABLE(ProcessDialog, wxDialog)
     EVT_BUTTON(wxID_OK, OnOK)
     EVT_LISTBOX_DCLICK(-1, OnOK)
@@ -121,7 +124,7 @@ int ProcessDialog::GetSelection()
 {
     return list->GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
 }
-
+#endif // TBDL
 
 //****************************************************************************
 //****************************************************************************
@@ -130,7 +133,7 @@ int ProcessDialog::GetSelection()
 //****************************************************************************
 
 BEGIN_EVENT_TABLE(MyMessageDialog, wxDialog)
-    EVT_COMMAND_RANGE(wxID_HIGHEST, wxID_HIGHEST + 1000, wxEVT_COMMAND_BUTTON_CLICKED, OnButton)
+    EVT_COMMAND_RANGE(wxID_HIGHEST, wxID_HIGHEST + 1000, wxEVT_COMMAND_BUTTON_CLICKED, MyMessageDialog::OnButton)
 END_EVENT_TABLE()
 
 MyMessageDialog::MyMessageDialog(
@@ -175,10 +178,10 @@ void MyMessageDialog::OnButton(wxCommandEvent &event)
 //****************************************************************************
 
 BEGIN_EVENT_TABLE(ExitSaveDialog, wxDialog)
-    EVT_BUTTON(ID_SAVE_NONE, OnNone)
-    EVT_BUTTON(ID_SAVE_ALL, OnAll)
-    EVT_BUTTON(wxID_CANCEL, OnReturn)
-    EVT_BUTTON(ID_SAVE_STATE, OnSaveState)
+    EVT_BUTTON(ID_SAVE_NONE, ExitSaveDialog::OnNone)
+    EVT_BUTTON(ID_SAVE_ALL, ExitSaveDialog::OnAll)
+    EVT_BUTTON(wxID_CANCEL, ExitSaveDialog::OnReturn)
+    EVT_BUTTON(ID_SAVE_STATE, ExitSaveDialog::OnSaveState)
 END_EVENT_TABLE()
 
 ExitSaveDialog::ExitSaveDialog(thFrame *frame)
@@ -370,12 +373,12 @@ GotoDlg2::GotoDlg2(wxWindow *parent, HexWnd *hw)
 //****************************************************************************
 
 BEGIN_EVENT_TABLE(FindDialog, wxDialog)
-    EVT_BUTTON(wxID_OK, OnFind)
-    EVT_BUTTON(IDC_FINDPREV, OnFind)
-    EVT_TEXT(IDC_TEXT, OnTextChange)
-    EVT_TEXT(IDC_HEX, OnHexChange)
-    EVT_CHECKBOX(IDC_UNICODE, OnUnicodeChange)
-    EVT_INIT_DIALOG(OnInit)
+    EVT_BUTTON(wxID_OK, FindDialog::OnFind)
+    EVT_BUTTON(IDC_FINDPREV, FindDialog::OnFind)
+    EVT_TEXT(IDC_TEXT, FindDialog::OnTextChange)
+    EVT_TEXT(IDC_HEX, FindDialog::OnHexChange)
+    EVT_CHECKBOX(IDC_UNICODE, FindDialog::OnUnicodeChange)
+    EVT_INIT_DIALOG(FindDialog::OnInit)
 END_EVENT_TABLE()
 
 FindDialog::FindDialog(wxWindow *parent, wxString initText /*= wxEmptyString*/, wxString initHex /*= wxEmptyString*/)
@@ -586,17 +589,17 @@ protected:
 //****************************************************************************
 
 BEGIN_EVENT_TABLE(SettingsDialog, wxDialog)
-    EVT_BUTTON(wxID_OK, OnOK)
-    EVT_COMMAND(-1, wxEVT_BAR_SELECTED, OnBarSelected)
-    EVT_CHECKBOX(IDC_ADJUST_LINE_BYTES, OnChkAdjustLineBytes)
-    EVT_LISTBOX(IDC_VALUE_COLOR_RANGES, OnRangeSelected)
-    EVT_TEXT(IDC_RANGE_TEXT, OnRangeText)
-    EVT_BUTTON(IDC_RANGE_ADD, OnRangeAdd)
-    //EVT_BUTTON(IDC_RANGE_EDIT, OnRangeEdit)
-    EVT_BUTTON(IDC_RANGE_DELETE, OnRangeDelete)
-    EVT_BUTTON(IDC_RANGE_MOVE_UP, OnRangeMoveUp)
-    EVT_BUTTON(IDC_RANGE_MOVE_DOWN, OnRangeMoveDown)
-    EVT_BUTTON(IDC_RANGE_SET_ALL, OnRangeSetAll)
+    EVT_BUTTON(wxID_OK, SettingsDialog::OnOK)
+    EVT_COMMAND(-1, wxEVT_BAR_SELECTED, SettingsDialog::OnBarSelected)
+    EVT_CHECKBOX(IDC_ADJUST_LINE_BYTES, SettingsDialog::OnChkAdjustLineBytes)
+    EVT_LISTBOX(IDC_VALUE_COLOR_RANGES, SettingsDialog::OnRangeSelected)
+    EVT_TEXT(IDC_RANGE_TEXT, SettingsDialog::OnRangeText)
+    EVT_BUTTON(IDC_RANGE_ADD, SettingsDialog::OnRangeAdd)
+    //EVT_BUTTON(IDC_RANGE_EDIT, SettingsDialog::OnRangeEdit)
+    EVT_BUTTON(IDC_RANGE_DELETE, SettingsDialog::OnRangeDelete)
+    EVT_BUTTON(IDC_RANGE_MOVE_UP, SettingsDialog::OnRangeMoveUp)
+    EVT_BUTTON(IDC_RANGE_MOVE_DOWN, SettingsDialog::OnRangeMoveDown)
+    EVT_BUTTON(IDC_RANGE_SET_ALL, SettingsDialog::OnRangeSetAll)
 END_EVENT_TABLE()
 
 SettingsDialog::SettingsDialog(thFrame *frame, HexWndSettings *s)
@@ -779,6 +782,7 @@ void SettingsDialog::InitControls()
 
     AddColorRanges(lstValueColorRanges, ramp->pal);
 
+    #ifdef TBDL
     switch (ps->iFontQuality)
     {
     case ANTIALIASED_QUALITY:
@@ -792,10 +796,12 @@ void SettingsDialog::InitControls()
     default:
         cmbFontStyle->SetSelection(0); break;
     }
+    #endif // TBDL
 }
 
 bool SettingsDialog::UpdateData()
 {
+    #ifdef TBDL
     wxString scp = cmbCodePage->GetValue();
     uint32 cp = 0;
     if (!scp.Len() ||
@@ -809,6 +815,7 @@ bool SettingsDialog::UpdateData()
         wxMessageBox(cmbCodePage->GetValue() + _T(" is not a valid code page."), _T("T.Hex"), wxICON_ERROR, this);
         return false;
     }
+    #endif // TBDL
 
     ps->bAdjustLineBytes = chkAdjustLineBytes->GetValue();
     ps->iLineBytes = spnLineBytes->GetValue();
@@ -822,6 +829,7 @@ bool SettingsDialog::UpdateData()
 
     ps->SetPalette(ramp->pal.GetPalette());
 
+    #ifdef TBDL
     switch (cmbFontStyle->GetSelection())
     {
     case 0:
@@ -834,6 +842,7 @@ bool SettingsDialog::UpdateData()
     case 3:
         ps->iFontQuality = CLEARTYPE_QUALITY; break;
     }
+    #endif // TBDL
 
     return true;
 }
@@ -1017,14 +1026,14 @@ public:
 
 
 BEGIN_EVENT_TABLE(StringCollectDialog, wxDialog)
-    EVT_BUTTON(wxID_OK, OnGo)
-    EVT_BUTTON(wxID_CANCEL, OnCancel)
-    EVT_LIST_ITEM_SELECTED(-1, OnSelect)
-    EVT_CONTEXT_MENU(OnContextMenu)
-    EVT_MENU(IDM_HEXOFFSET, OnHexOffset)
-    EVT_MENU(IDM_RELATIVEOFFSET, OnRelativeOffset)
-    EVT_BUTTON(IDC_FIND, OnFind)
-    EVT_BUTTON(IDC_SAVE, OnSave)
+    EVT_BUTTON(wxID_OK, StringCollectDialog::OnGo)
+    EVT_BUTTON(wxID_CANCEL, StringCollectDialog::OnCancel)
+    EVT_LIST_ITEM_SELECTED(-1, StringCollectDialog::OnSelect)
+    EVT_CONTEXT_MENU(StringCollectDialog::OnContextMenu)
+    EVT_MENU(IDM_HEXOFFSET, StringCollectDialog::OnHexOffset)
+    EVT_MENU(IDM_RELATIVEOFFSET, StringCollectDialog::OnRelativeOffset)
+    EVT_BUTTON(IDC_FIND, StringCollectDialog::OnFind)
+    EVT_BUTTON(IDC_SAVE, StringCollectDialog::OnSave)
 END_EVENT_TABLE()
 
 StringCollectDialog::StringCollectDialog(thFrame *frame, HexWnd *hw)
@@ -1544,12 +1553,14 @@ void StringCollectDialog::OnSave(wxCommandEvent &event)
         return;
 
     wxString filename = fileDlg.GetPath();
-    FILE *f = _tfopen(filename, _T("w"));
+    wxFFile f(filename, "w");
 
+    // Write a table of strings to a file.
+    //! Could use table formatting class here if you don't like wxString::Format("%*s")
     T_StringInfo &last = stringOffsets[m_StringCount-1];
     int nOffsetDigits = wxMax(5, FormatOffset(last.start).Len());
     int nSizeDigits = wxMax(4, CountDigits(last.GetChars(), 10));
-    _ftprintf(f, _T("%*s %*s String\n"), nOffsetDigits, _T("Start"), nSizeDigits, _T("Size"));
+    f.Write(wxString::Format(_T("%*s %*s String\n"), nOffsetDigits, _T("Start"), nSizeDigits, _T("Size")));
     wxString str;
     for (size_t n = 0; n < m_StringCount; n++)
     {
@@ -1558,9 +1569,9 @@ void StringCollectDialog::OnSave(wxCommandEvent &event)
             str = Escape(m_hw->doc->ReadStringW(info.start, wxMin(m_maxSize, info.GetChars())));
         else
             str = Escape(m_hw->doc->ReadString(info.start, wxMin(m_maxSize, info.GetChars())));
-        _ftprintf(f, _T("%*s %*u %s\n"), nOffsetDigits, FormatOffset(info.start).c_str(), nSizeDigits, info.GetChars(), str.c_str());
+        f.Write(wxString::Format(_T("%*s %*u %s\n"), nOffsetDigits, FormatOffset(info.start).c_str(),
+                                                     nSizeDigits, info.GetChars(), str.c_str()));
     }
-    fclose(f);
 }
 
 //****************************************************************************
@@ -1671,9 +1682,9 @@ CopyFormatPanel::CopyFormatPanel(wxWindow *parent)
 thCopyFormat CopyFormatPanel::GetFormat()
 {
     thCopyFormat fmt((thCopyFormat::_DataFormat)cmbFormat->GetSelection());
-    fmt.numberBase = _tstoi(cmbBase->GetValue());
-    fmt.wordSize = _tstoi(cmbWord->GetValue());
-    fmt.wordsPerLine = _tstoi(cmbWords->GetValue());
+    fmt.numberBase = wxAtoi(cmbBase->GetValue());
+    fmt.wordSize = wxAtoi(cmbWord->GetValue());
+    fmt.wordsPerLine = wxAtoi(cmbWords->GetValue());
 
     return fmt;
 }
@@ -1768,10 +1779,10 @@ PasteFormatDialog::PasteFormatDialog(wxWindow* parent)
 //****************************************************************************
 
 BEGIN_EVENT_TABLE(HistogramView, thBarViewCtrl)
-    EVT_CONTEXT_MENU(OnContextMenu)
-    EVT_MENU(IDM_LogScale, OnLogScale)
-    EVT_MENU(IDM_SnapToPeak, OnSnapToPeak)
-    //EVT_ERASE_BACKGROUND(OnErase)
+    EVT_CONTEXT_MENU(HistogramView::OnContextMenu)
+    EVT_MENU(IDM_LogScale, HistogramView::OnLogScale)
+    EVT_MENU(IDM_SnapToPeak, HistogramView::OnSnapToPeak)
+    //EVT_ERASE_BACKGROUND(HistogramView::OnErase)
 END_EVENT_TABLE()
 
 HistogramView::HistogramView(wxWindow *parent, HexWnd *hw, wxSize size /*= wxDefaultSize*/)
@@ -2022,10 +2033,10 @@ bool CHistogram::Calc(HexWnd *hw, HistogramView *pView /*= NULL*/)
 //pick number base
 
 BEGIN_EVENT_TABLE(HistogramDialog, wxDialog)
-    EVT_LIST_ITEM_SELECTED(-1, OnListItemSelected)
-    EVT_COMMAND(-1, wxEVT_BAR_SELECTED, OnBarSelected)
-    EVT_CONTEXT_MENU(OnContextMenu)
-    EVT_LIST_COL_CLICK(-1, OnColumnClick)
+    EVT_LIST_ITEM_SELECTED(-1, HistogramDialog::OnListItemSelected)
+    EVT_COMMAND(-1, wxEVT_BAR_SELECTED, HistogramDialog::OnBarSelected)
+    EVT_CONTEXT_MENU(HistogramDialog::OnContextMenu)
+    EVT_LIST_COL_CLICK(-1, HistogramDialog::OnColumnClick)
 END_EVENT_TABLE()
 
 HistogramDialog::HistogramDialog(HexWnd *hw)
@@ -2203,6 +2214,7 @@ void HistogramDialog::OnColumnClick(wxListEvent &event)
 }
 
 
+#ifdef TBDL
 //****************************************************************************
 //****************************************************************************
 // FontWidthChooserDialog
@@ -2210,8 +2222,8 @@ void HistogramDialog::OnColumnClick(wxListEvent &event)
 //****************************************************************************
 
 BEGIN_EVENT_TABLE(FontWidthChooserDialog, wxDialog)
-    EVT_BUTTON(wxID_OK, OnOK)
-    EVT_LISTBOX(-1, OnSelection)
+    EVT_BUTTON(wxID_OK, FontWidthChooserDialog::OnOK)
+    EVT_LISTBOX(-1, FontWidthChooserDialog::OnSelection)
 END_EVENT_TABLE()
 
 FontWidthChooserDialog::FontWidthChooserDialog(wxWindow *parent, LOGFONT &lf)
@@ -2292,6 +2304,7 @@ void FontWidthChooserDialog::TestFont(int sel)
     lf.lfHeight = sizes[sel] >> 16;
     sample->SetFont(wxCreateFontFromLogFont(&lf));
 }
+#endif // TBDL
 
 //****************************************************************************
 //****************************************************************************
@@ -2300,10 +2313,10 @@ void FontWidthChooserDialog::TestFont(int sel)
 //****************************************************************************
 
 BEGIN_EVENT_TABLE(thRecentChoice, wxComboBox)
-    EVT_TEXT(-1, OnTextChange)
+    EVT_TEXT(-1, thRecentChoice::OnTextChange)
     //EVT_CHAR(OnChar)
     //EVT_CHAR_HOOK(OnChar)
-    EVT_COMMAND_ENTER(-1, OnEnter)
+    EVT_COMMAND_ENTER(-1, thRecentChoice::OnEnter)
 END_EVENT_TABLE()
 
 thRecentChoice::thRecentChoice(wxWindow *parent,
@@ -2390,7 +2403,7 @@ void thRecentChoice::OnEnter(wxCommandEvent &event)
 //****************************************************************************
 
 BEGIN_EVENT_TABLE(thRecentChoiceDialog, wxDialog)
-    EVT_BUTTON(wxID_OK, OnOK)
+    EVT_BUTTON(wxID_OK, thRecentChoiceDialog::OnOK)
     //EVT_TEXT(-1, OnTextChange)
 END_EVENT_TABLE()
 
@@ -2426,6 +2439,7 @@ void thRecentChoiceDialog::OnOK(wxCommandEvent &event)
     EndModal(wxID_OK);
 }
 
+#ifdef TBDL
 //****************************************************************************
 //****************************************************************************
 // SlowReadDialog
@@ -2444,7 +2458,7 @@ VOID CALLBACK SlowReadCompletion(
 
 
 BEGIN_EVENT_TABLE(SlowReadDialog, wxDialog)
-    EVT_TIMER(-1, OnTimer)
+    EVT_TIMER(-1, SlowReadDialog::OnTimer)
 END_EVENT_TABLE()
 
 SlowReadDialog::SlowReadDialog(wxWindow *parent, HANDLE hFile)
@@ -2498,8 +2512,8 @@ void SlowReadDialog::OnComplete(
 //****************************************************************************
 
 BEGIN_EVENT_TABLE(thPipeOutDialog, wxDialog)
-//    EVT_BUTTON(wxID_OK, OnOK)
-    EVT_CHECKBOX(IDC_SHELL, OnChkShell)
+//    EVT_BUTTON(wxID_OK, thPipeOutDialog::OnOK)
+    EVT_CHECKBOX(IDC_SHELL, thPipeOutDialog::OnChkShell)
 END_EVENT_TABLE()
 
 thPipeOutDialog::thPipeOutDialog(wxWindow *parent)
@@ -2600,9 +2614,9 @@ void thPipeOutDialog::OnChkShell(wxCommandEvent &event)
 //****************************************************************************
 
 BEGIN_EVENT_TABLE(OpenDriveDialog, wxDialog)
-    EVT_LIST_ITEM_ACTIVATED(-1, OnActivate)
-    EVT_BUTTON(wxID_OK, OnOK)
-    EVT_CHECKBOX(IDC_ExactSize, OnExactSize)
+    EVT_LIST_ITEM_ACTIVATED(-1, OpenDriveDialog::OnActivate)
+    EVT_BUTTON(wxID_OK, OpenDriveDialog::OnOK)
+    EVT_CHECKBOX(IDC_ExactSize, OpenDriveDialog::OnExactSize)
 END_EVENT_TABLE()
 
 void OpenDriveDialog::OnOK(wxCommandEvent &event)
@@ -2836,6 +2850,7 @@ wxArrayInt OpenDriveDialog::MakeDriveImageList()
     FreeLibrary(shell32);
     return indexes;
 }
+#endif // TBDL
 
 AboutDialog::AboutDialog(wxWindow *parent)
 : wxDialog(parent, -1, _T("About T.Hex"), wxDefaultPosition)

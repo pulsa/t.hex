@@ -1,7 +1,7 @@
-#pragma once
-
 #ifndef _PRECOMP_H_
+#define _PRECOMP_H_
 
+#ifdef _MSC_VER
 #if _MSC_VER > 1000
 #pragma once
 #endif // _MSC_VER > 1000
@@ -24,7 +24,21 @@
 
 #include <tchar.h>
 
-#include <wx/wxprec.h>
+#endif  // _MSC_VER
+
+// For compilers that support precompilation, includes "wx/wx.h".
+#include "wx/wxprec.h"
+
+#ifdef __BORLANDC__
+    #pragma hdrstop
+#endif
+
+// for all others, include the necessary headers (this file is usually all you
+// need because it includes almost all "standard" wxWidgets headers)
+#ifndef WX_PRECOMP
+    #include "wx/wx.h"
+#endif
+
 #include <wx/caret.h>
 #include <wx/file.h>
 #include <wx/dir.h>
@@ -49,9 +63,6 @@
 #include <wx/wfstream.h> // same.
 #include <wx/zstream.h>  // zlib compressability test, 2008-09-29
 
-#define max wxMax
-#define min wxMin
-
 template <class T>
 inline T fnmax(const T& a, const T& b)
 {
@@ -59,6 +70,7 @@ inline T fnmax(const T& a, const T& b)
     return a;
 }
 
+#ifdef _MSC_VER
 #include <windows.h>
 #include <commctrl.h>
 #include <commdlg.h>
@@ -69,21 +81,23 @@ inline T fnmax(const T& a, const T& b)
 #include <Setupapi.h>
 #include <winioctl.h>
 //#include <cfgmgr32.h>
+#include <conio.h>
+#include <strsafe.h>
+#endif
 
 #include <stdio.h>
-#include <conio.h>
 #include <math.h>
 #include <stdlib.h>
+#include <errno.h>
 
 #include <map>
 #include <vector>
 #include <algorithm>
 #include <set>
 
-#include <strsafe.h>
-
 //#include "QString.h"
-#include "ATimer.h"
+#include "defs.h"
+#include "atimer.h"
 
 #ifdef INCLUDE_LIBDISASM
 extern "C" {

@@ -1931,10 +1931,6 @@ yyreturn:
 #line 243 "struct.y"
 
 
-int main()
-{
-return 0;
-}
 
 std::vector<VarInfo> typedefs;
 static int LookupTypedef(wxString type)

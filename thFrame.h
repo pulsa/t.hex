@@ -38,7 +38,7 @@ class thPipeOutDialog;
 class thFrame : public wxFrame
 {
 public:
-    thFrame(bool useIPC);
+    thFrame(wxString commandLine, bool useIPC);
     ~thFrame();
 
     virtual wxStatusBar* CreateStatusBar();
@@ -171,15 +171,18 @@ public:
     std::vector<DataView*> m_views;
     int m_queuedUpdateFlags;
 
+    #ifdef TBDL
     thClipboard clipboard;
+    #endif
+    #ifdef WIN32
     HWND hwndNextViewer; // next viewer in the clipboard chain
+    #endif
 
     wxString m_cfgName;
     wxString strWP;
-    WINDOWPLACEMENT m_wndPlacement;
     virtual bool Show(bool show = true);
 
-    void ProcessCommandLine(LPCTSTR cmdLine, wxString cwd = wxEmptyString);
+    void ProcessCommandLine(wxString cmdLine, wxString cwd = wxEmptyString);
 
     //! placeholder methods for ExitSaveDialog
     void SaveAll() {}
@@ -189,10 +192,17 @@ public:
     void CompareBuffers(); // temporary function to compare the first two documents and log to diffs.txt
     void PreloadFile(HexDoc *doc, wxString title);
 
+#ifndef WIN32
+    HWND GetHWND();
+    HWND GetHwnd() { return GetHWND(); }
+#endif
+
     wxAuiManager m_mgr;
     DECLARE_EVENT_TABLE()
 
+#ifdef _WINDOWS
     virtual WXLRESULT MSWWindowProc(WXUINT message, WXWPARAM wParam, WXLPARAM lParam);
+#endif
 
 private:
     HexWnd *m_hw;

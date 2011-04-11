@@ -6,6 +6,11 @@
 
 #define new New
 
+#ifndef WIN32
+#define _tprintf sprintf
+#endif
+
+#ifdef WIN32
 wxString GetLastErrorMsg(int code /*= 0*/)
 {
     if (!code)
@@ -45,7 +50,9 @@ void fatal(LPCTSTR msg)
     // Turn off leak reporting.  //! ?
     ExitProcess(0); // This prevents errors.
 }
+#endif // WIN32
 
+#ifdef WIN32
 #include <io.h>
 #include <fcntl.h>
 #include <stdio.h>
@@ -80,6 +87,7 @@ void CreateConsole(LPCTSTR title)
     SetConsoleTitle(title);
     SetWindowPos(hWnd, NULL, 0, 0, 0, 0, SWP_NOSIZE);
 }
+#endif
 
 const char hexdigits[] = "0123456789ABCDEF";
 /*void itoh(uint32 i, char *buffer, int digits)
@@ -169,7 +177,7 @@ int my_ftoa(float f, CHAR_T *buffer, int digits)
     }
 
     int dec, sign;
-    char *cvtbuf = _ecvt(f, digits, &dec, &sign);
+    char *cvtbuf = ecvt(f, digits, &dec, &sign);
     int chars = 3;
     if (sign)
         buffer[0] = '-';
@@ -225,7 +233,7 @@ int my_dtoa(const double &d, CHAR_T *buffer, int digits)
     }
 
     int dec, sign;
-    char *cvtbuf = _ecvt(d, digits, &dec, &sign);
+    char *cvtbuf = ecvt(d, digits, &dec, &sign);
     int chars = 3;
     if (sign)
         buffer[0] = '-';
@@ -249,6 +257,11 @@ int my_dtoa(const double &d, CHAR_T *buffer, int digits)
     }
     return chars + 3;
 }
+
+// template instantiation for GCC
+template void my_itoa(wxULongLong_t, wxChar*, int, int);
+template int my_ftoa(float, wxChar*, int);
+template int my_dtoa(const double &d, wxChar *buffer, int digits);
 
 const bool my_isprint[256] = {
     0,0,0,0,0,0,0,0, 0,1,1,0,0,1,0,0,
@@ -474,7 +487,7 @@ bool ReadUserNumber(wxString s, uint32 &n)
     TCHAR *endptr;
     wxString rest;
     int base = GetBase(s, rest);
-    n = _tcstoul(rest, &endptr, base);
+    n = wxStrtoul(rest, &endptr, base);
     return (*endptr) == 0;
 }
 
@@ -489,7 +502,7 @@ bool ReadUserNumber(wxString s, uint8 &n)
     wxString rest;
     int base = GetBase(s, rest);
 
-    uint32 n32 = _tcstoul(rest, &endptr, base);
+    uint32 n32 = wxStrtoul(rest, &endptr, base);
     if (n32 > 255)
         return false;
     n = (uint8)n32;
@@ -506,12 +519,15 @@ bool ReadUserNumber(wxString s, uint64 &n)
     TCHAR *endptr;
     wxString rest;
     int base = GetBase(s, rest);
-    n = _tcstoui64(rest, &endptr, base);
+    n = wxStrtoull(rest, &endptr, base);
     return (*endptr) == 0;
 }
 
+//#ifdef _MSC_VER
 //! moderately unsafe cast
+//! Shouldn't need this function.  size_t == uint32, right?
 bool ReadUserNumber(wxString s, size_t &n) { return ReadUserNumber(s, (uint32&)n); }
+//#endif
 
 bool ReadUserNumber(wxString s, int32 &n)
 {
@@ -526,7 +542,7 @@ bool ReadUserNumber(wxString s, int32 &n)
     TCHAR *endptr;
     wxString rest;
     int base = GetBase(s, rest);
-    n = _tcstoul(rest, &endptr, base) * sign;
+    n = wxStrtoul(rest, &endptr, base) * sign;
     return (*endptr) == 0;
 }
 
@@ -651,7 +667,7 @@ size_t FormatNumber(uint64 n, TCHAR *buffer, size_t bufferSize, int base, size_t
 
     if (len >= bufferSize)
         return 0;
-   
+
     for (int g = groups - 1; g >= 0; g--)
     {
         if (g == 0 && digits % group_digits)
@@ -707,9 +723,9 @@ int FormatDouble_(TCHAR *buf, int bufsize, double n, int significant /*= 3*/)
     wholeDigits = 1 + wxMax(wholeDigits, 0);
     if (wholeDigits + significant >= bufsize)
         return -1;
-        
+
     int decimalPlaces = wxMax(significant - wholeDigits, 0);
-    return _sntprintf(buf, bufsize, _T("%.*f"), decimalPlaces, n);
+    return wxSnprintf(buf, bufsize, _T("%.*f"), decimalPlaces, n);
 }
 
 const TCHAR *FormatBytes(uint64 n, uint64 no_prefix_cutoff /*= 0*/)
@@ -719,7 +735,7 @@ const TCHAR *FormatBytes(uint64 n, uint64 no_prefix_cutoff /*= 0*/)
     if (n == 1)
         return _T("1 byte");
     if (n < 1024) {
-        _tcscpy(s + FormatNumber(n, s, 90, 10), _T(" bytes"));
+        wxStrcpy(s + FormatNumber(n, s, 90, 10), _T(" bytes"));
         return s;
     }
     TCHAR prefixes[] = {'k', 'M', 'G', 'T', 'P', 'E'};
@@ -729,7 +745,7 @@ const TCHAR *FormatBytes(uint64 n, uint64 no_prefix_cutoff /*= 0*/)
         if ((n >> (10 * i + 10)) >= 1024)
             continue;
         label[1] = prefixes[i];
-        _tcscpy(s + FormatDouble_(s, 90, (n >> (10 * i)) / 1024.0, 3), label);
+        wxStrcpy(s + FormatDouble_(s, 90, (n >> (10 * i)) / 1024.0, 3), label);
         return s;
     }
     return _T("#Error"); // should never happen
@@ -740,7 +756,7 @@ wxString FormatDouble(double n, int decimalPlaces /*= 0*/)
     if (decimalPlaces)
         return wxString::Format(_T("%.*f"), decimalPlaces, n);
     TCHAR s[1000];
-    int len = _tprintf(s, _T("%f"), n);
+    int len = wxSnprintf(s, 1000, _T("%f"), n);
     while (s[len - 1] == '0')
         len--;
     if (s[len - 1] == '.')
@@ -941,10 +957,11 @@ int main()
 
 }
 
-#endif 
+#endif
 
+#ifdef WIN32
 // from majkinetor at http://forum.sysinternals.com/forum_posts.asp?TID=7974
-bool EnableDebugPriv( void ) 
+bool EnableDebugPriv( void )
 {
      HANDLE hToken;
      LUID sedebugnameValue;
@@ -971,7 +988,7 @@ bool EnableDebugPriv( void )
 
      if ( ! AdjustTokenPrivileges( hToken, FALSE, &tkp, sizeof tkp, NULL, NULL ) )
             return false; //_tprintf( _T("AdjustTokenPrivileges() failed, Error = %d SeDebugPrivilege is not available.\n"), GetLastError() );
-            
+
      CloseHandle( hToken );
      return true;
 }
@@ -983,7 +1000,7 @@ bool EnableDebugPriv( void )
     Thanks to Nish -- http://blog.voidnish.com/?p=72
     AEB - check out ZwQuerySymbolicLinkObject() at
         http://www.osronline.com/ddkx/kmarch/k111_2rle.htm
-    
+
     About QueryDosDevice():
       // Now if this is an AFS network drive mapping, {szMapping} will be:
       //
@@ -1056,36 +1073,6 @@ wxString GetRealFilePath(LPCTSTR path1, HANDLE hProcess, void *base)
     return path1;
 }
 
-// http://www-db.stanford.edu/~manku/bitcount/bitcount.html
-//int bitcount(unsigned int n)
-int bitcount(uint64 n)
-{  
-    int count = 0;
-    while (n)
-    {
-        count++;
-        n &= (n - 1);
-    }
-    return count;
-}
-
-//wxPoint MoveInside(const wxRect &rc, const wxPoint &pt, int tolX /*= 0*/, int tolY /*= 0*/)
-//{
-//    wxPoint pt2 = pt;
-//    wxRect rc2 = rc;
-//    rc2.Inflate(tolX, tolY);
-//    if (pt.x < rc.x && pt.x >= rc2.x)
-//        pt2.x = rc.x;
-//    else if (pt.x > rc.GetRight() && pt.x <= rc2.GetRight())
-//        pt2.x = rc.GetRight();
-//
-//    if (pt.y < rc.y && pt.y >= rc2.y)
-//        pt2.y = rc.y;
-//    else if (pt.y > rc.GetBottom() && pt.y <= rc2.GetBottom())
-//        pt2.y = rc.GetBottom();
-//
-//    return pt2;
-//}
 
 wxString GetFileDescription(LPCTSTR szExeFile)
 {
@@ -1276,6 +1263,39 @@ wxImageList* ProcList::MakeImageList()
     PRINTF(_T("\n"));
     return list;
 }
+#endif // WIN32
+
+// http://www-db.stanford.edu/~manku/bitcount/bitcount.html
+//int bitcount(unsigned int n)
+int bitcount(uint64 n)
+{
+    int count = 0;
+    while (n)
+    {
+        count++;
+        n &= (n - 1);
+    }
+    return count;
+}
+
+//wxPoint MoveInside(const wxRect &rc, const wxPoint &pt, int tolX /*= 0*/, int tolY /*= 0*/)
+//{
+//    wxPoint pt2 = pt;
+//    wxRect rc2 = rc;
+//    rc2.Inflate(tolX, tolY);
+//    if (pt.x < rc.x && pt.x >= rc2.x)
+//        pt2.x = rc.x;
+//    else if (pt.x > rc.GetRight() && pt.x <= rc2.GetRight())
+//        pt2.x = rc.GetRight();
+//
+//    if (pt.y < rc.y && pt.y >= rc2.y)
+//        pt2.y = rc.y;
+//    else if (pt.y > rc.GetBottom() && pt.y <= rc2.GetBottom())
+//        pt2.y = rc.GetBottom();
+//
+//    return pt2;
+//}
+
 
 //*****************************************************************************
 
@@ -1551,6 +1571,7 @@ thString thString::ToUnicode(const char *data, size_t chars /*= 0*/)
 #endif // _UNICODE
 
 
+#ifdef WIN32
 //*************************************************************************************************
 // GetFileNameFromHandle() -- handy function from MSDN documentation.
 
@@ -1570,38 +1591,38 @@ wxString GetFileNameFromHandle(HANDLE hFile)
      return _T("length=0");
 
   // Create a file mapping object.
-  hFileMap = CreateFileMapping(hFile, 
-                    NULL, 
+  hFileMap = CreateFileMapping(hFile,
+                    NULL,
                     PAGE_READONLY,
-                    0, 
+                    0,
                     MAX_PATH,
                     NULL);
 
-  if (hFileMap) 
+  if (hFileMap)
   {
     // Create a file mapping to get the file name.
     void* pMem = MapViewOfFile(hFileMap, FILE_MAP_READ, 0, 0, 1);
 
-    if (pMem) 
+    if (pMem)
     {
-      if (GetMappedFileName (GetCurrentProcess(), 
-                             pMem, 
+      if (GetMappedFileName (GetCurrentProcess(),
+                             pMem,
                              pszFilename,
-                             MAX_PATH)) 
+                             MAX_PATH))
       {
 
         // Translate path with device name to drive letters.
         TCHAR szTemp[BUFSIZE];
         szTemp[0] = '\0';
 
-        if (GetLogicalDriveStrings(BUFSIZE-1, szTemp)) 
+        if (GetLogicalDriveStrings(BUFSIZE-1, szTemp))
         {
           TCHAR szName[MAX_PATH];
           TCHAR szDrive[3] = TEXT(" :");
           BOOL bFound = FALSE;
           TCHAR* p = szTemp;
 
-          do 
+          do
           {
             // Copy the drive letter to the template string
             *szDrive = *p;
@@ -1611,12 +1632,12 @@ wxString GetFileNameFromHandle(HANDLE hFile)
             {
               UINT uNameLen = _tcslen(szName);
 
-              if (uNameLen < MAX_PATH) 
+              if (uNameLen < MAX_PATH)
               {
-                bFound = _tcsnicmp(pszFilename, szName, 
+                bFound = _tcsnicmp(pszFilename, szName,
                     uNameLen) == 0;
 
-                if (bFound) 
+                if (bFound)
                 {
                   // Reconstruct pszFilename using szTempFile
                   // Replace device path with DOS path
@@ -1638,12 +1659,13 @@ wxString GetFileNameFromHandle(HANDLE hFile)
       }
       bSuccess = TRUE;
       UnmapViewOfFile(pMem);
-    } 
+    }
 
     CloseHandle(hFileMap);
   }
   return pszFilename;
 }
+#endif // WIN32
 
 //*************************************************************************************************
 // thProgressDialog
@@ -1660,7 +1682,11 @@ thProgressDialog::thProgressDialog(THSIZE range, wxWindow *parent, wxString msg,
         wxPD_ELAPSED_TIME |
         wxPD_ESTIMATED_TIME |
         wxPD_REMAINING_TIME),
+#ifdef WIN32
 updateTimer(ATimer::TICKCOUNT)  // imprecise, but fast.
+#else
+updateTimer()  // no advantage to using GetTickCount() replacement on linux
+#endif
 {
     m_range = range;
     //m_lastStart = 0;
@@ -1709,3 +1735,12 @@ bool Confirm(wxString msg, wxString caption /*= _T("T. Hex")*/, wxWindow *parent
 {
     return (wxMessageBox(msg, caption, wxYES_NO, parent) == wxYES);
 }
+
+#ifndef WIN32
+DWORD GetTickCount()
+{
+    struct timespec tp;
+    clock_gettime(CLOCK_MONOTONIC, &tp);
+    return (DWORD)((wxLongLong_t)tp.tv_sec * 1000000 + tp.tv_nsec / 1000);
+}
+#endif

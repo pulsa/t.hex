@@ -41,7 +41,7 @@ public:
         if (item == _T("HWND"))
         {
             swnd = new char[20]; 
-            *size = sprintf(swnd, "%X", frame->GetHWND()) + 1;  // include null terminator
+            *size = sprintf(swnd, "%X", (UINT)frame->GetHWND()) + 1;  // include null terminator
             return (wxChar*)swnd;
         }
         return NULL;

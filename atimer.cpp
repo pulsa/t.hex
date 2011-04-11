@@ -39,6 +39,7 @@ bool ATimer::Init(timer_type method, bool bAdjustInterval /*= true*/)
 
    this->method = method;
 
+#ifdef WIN32
    switch(method)
    {
    case HPC:
@@ -88,6 +89,9 @@ bool ATimer::Init(timer_type method, bool bAdjustInterval /*= true*/)
    default:
       return false;
    }
+#else // WIN32
+    ticks_per_sec = 1000000000;  // struct timespec measures in nanoseconds
+#endif
    this->bAdjustInterval = bAdjustInterval;
    if(bAdjustInterval)
       minInterval = GetMinInterval();
@@ -97,6 +101,7 @@ bool ATimer::Init(timer_type method, bool bAdjustInterval /*= true*/)
 
 void ATimer::GetCount(UINT64 *count)
 {
+#ifdef WIN32
 #if defined(ATIMER_USE_RDTSC) || defined(ATIMER_USE_WINMM) || defined(ATIMER_USE_TICKCOUNT)
    switch(method)
    {
@@ -130,6 +135,11 @@ void ATimer::GetCount(UINT64 *count)
 #else
    // This is always available.
    QueryPerformanceCounter((LARGE_INTEGER*)count);
+#endif
+#else // WIN32
+    struct timespec ts;
+    clock_gettime(CLOCK_MONOTONIC, &ts);
+    *count = ts.tv_sec * 1000000000 + ts.tv_nsec;
 #endif
 }
 
@@ -165,6 +175,7 @@ ULONG ATimer::GetMinInterval()
 
 void ATimer::Delay(ULONG uSec)
 {
+#ifdef WIN32
    UINT64 now, stop_time;
    UINT64 delay = uSec * ticks_per_sec / 1000000;
    const UINT64 minSleep = ticks_per_sec >> 4; // 1/16 second, or 62.5 ms
@@ -180,6 +191,9 @@ void ATimer::Delay(ULONG uSec)
 
    while(now < stop_time)
       GetCount(&now);
+#else  // WIN32
+    usleep(uSec);
+#endif
 }
 
 void ATimer::Pause()

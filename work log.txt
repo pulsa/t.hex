@@ -875,3 +875,18 @@ Patched FatInfo to allow root directory in FAT16 as valid cluster.
 Monday, 2009-09-07
 Put together a Debug Unicode Static build and uploaded it to http://t-hex.com/hex, as I posted at
 http://lifehacker.com/5352885/check-out-early-in-this-weeks-open-thread#c15200258
+
+Saturday, 2011-01-18
+Checked the source in at github.
+
+Friday, 2011-03-18
+Set up Linux build environment.
+
+Saturday, 2011-03-19
+Installed Bakefile.  Started trying to compile.  What a pain.
+
+Saturday, 2011-04-09
+Successfully compiled project, minus some arcane features.  Now to get it to run.
+
+Sunday, 2011-04-10
+Set up Code::Blocks project.  A good debugger is the only way I'm going to get this to work.

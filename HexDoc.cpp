@@ -603,7 +603,7 @@ bool HexDoc::DoRead(THSIZE nOffset, size_t nSize, uint8* target)
     {
         if (ts == NULL)
             return false; //! Help!
-        copySize = min(remaining, ts->size - srcOffset);
+        copySize = wxMin(remaining, ts->size - srcOffset);
         if (!ts->Read(srcOffset, copySize, target + dstOffset))
             return false;
         dstOffset += copySize;
@@ -713,10 +713,10 @@ wxString HexDoc::ReadStringW(THSIZE nIndex, size_t nSize, bool replaceNull /*= t
 //*****************************************************************************
 //*****************************************************************************
 
-bool HexDoc::SaveRange(LPCTSTR filename, uint64 begin, uint64 length)
+bool HexDoc::SaveRange(wxString filename, THSIZE begin, THSIZE length)
 {
-    HANDLE hFile = CreateFile(filename, GENERIC_WRITE, 0, 0, CREATE_ALWAYS, 0, 0);
-    if (hFile == INVALID_HANDLE_VALUE)
+    wxFile f(filename, wxFile::write);
+    if (!f.IsOpened())
     {
         wxMessageBox(_T("Couldn't open file for output."));
         return false;
@@ -724,12 +724,12 @@ bool HexDoc::SaveRange(LPCTSTR filename, uint64 begin, uint64 length)
 
     wxString msg = _T("Saving ") + FormatDec(length) + _T(" bytes to \n") + filename;
 
-    bool rc = WriteRange(hFile, begin, length, msg);
-    CloseHandle(hFile);
+    bool rc = WriteRange(f, begin, length, msg);
+    f.Close();
     return rc;
 }
 
-bool HexDoc::WriteRange(HANDLE hOutput, THSIZE begin, THSIZE length, wxString msg)
+bool HexDoc::WriteRange(wxFile &f, THSIZE begin, THSIZE length, wxString msg)
 {
     // bad name.  Maybe SaveRange is wrong too?  (okay with Segments and Regions)
     //! should be in new thread.
@@ -757,7 +757,7 @@ bool HexDoc::WriteRange(HANDLE hOutput, THSIZE begin, THSIZE length, wxString ms
         if (length - offset < blockSize)
             blockSize = length - offset;
         Read(begin + offset, blockSize, buf);
-        WriteFile(hOutput, buf, blockSize, &cBytes, NULL);
+        cBytes = f.Write(buf, blockSize);
         if (!progress.Update(offset) && Confirm(_T("Are you sure you want to abort?")))
             break;
     }
@@ -771,6 +771,7 @@ bool HexDoc::Save()
     bool rc = true;
     //uint8 *buf = new uint8[MEGA]; //! To do: use cache buffer?
     //uint8 *buf = m_pCacheBuffer;  //! testing
+    Segment *ts = 0;
 
     //! need a temp file here.
     //! also should be in separate thread.
@@ -814,7 +815,7 @@ bool HexDoc::Save()
                 }
                 if (!m_pDS->Write(base + offset + display_address, blocksize, buf))
                 {
-                    PRINTF(_T("Save() Error code %d from Write()\n"), GetLastError());
+                    PRINTF(_T("Save() Error code %d from Write()\n"), errno);
                     rc = false;
                     goto done;
                 }
@@ -865,7 +866,6 @@ bool HexDoc::Save()
         goto done;  // skip rebuilding the buffer
     }
 
-    Segment *ts = 0;
     if (size)
         ts = new Segment(size, display_address, m_pDS); // calls m_pDS->AddRef
     DeleteSegments();
@@ -1137,7 +1137,7 @@ int HexDoc::GetSerializedLength(THSIZE nOffset, THSIZE nSize)
                 sSize += ts->pDS->GetSerializedLength();
             }
         }
-        THSIZE copySize = min(nSize, ts->size - segOffset);
+        THSIZE copySize = wxMin(nSize, ts->size - segOffset);
         sSize += ts->GetSerializedLength(segOffset, copySize);
         segStart += ts->size;
         segOffset = 0;
@@ -1175,7 +1175,7 @@ void HexDoc::Serialize(THSIZE nOffset, THSIZE nSize, uint8 *target)
                 hdr.nSources++;
             }
         }
-        THSIZE copySize = min(nOffset + nSize, segStart + ts->size) - (segStart + segOffset);
+        THSIZE copySize = wxMin(nOffset + nSize, segStart + ts->size) - (segStart + segOffset);
         int sSize = ts->GetSerializedLength(segOffset, copySize);
         ts->Serialize(segOffset, copySize, nSource, target + sOffset);
         sOffset += sSize;

@@ -380,7 +380,7 @@ wxString thPaletteData::Import(wxString filename)
     if (lines[1] != _T("0100")) // version
         return _T("Second line should be \"0100\".");
 
-    number_of_colors = _tstoi(lines[2]);
+    number_of_colors = wxAtol(lines[2]);
     wxStringTokenizer st;
 
     for (i = 0; i < number_of_colors; i++)
@@ -395,7 +395,7 @@ wxString thPaletteData::Import(wxString filename)
 
         for (j = 0; j < 3; j++)
         {
-           color_ints[j] = _tstoi(st.GetNextToken());
+           color_ints[j] = wxAtol(st.GetNextToken());
            if (color_ints[j] < 0 || color_ints[j] > 255)
                return _T("Corrupted palette file.");
         }

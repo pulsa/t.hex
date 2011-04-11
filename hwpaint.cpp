@@ -1,3 +1,8 @@
+#include "precomp.h"
+#include "hexwnd.h"
+#include "hexdoc.h"
+
+
 //OnPaint()
 //    creates wxMemoryDC
 //    paints the unused area  (should use wxDC::Clear)
@@ -39,9 +44,10 @@ void HexWnd::OnPaint(wxPaintEvent &event)
     wxRect rcBound = updateRegion.GetBox();
 
     wxMemoryDC dc;
-    HDC hdc = (HDC)dc.GetHDC();
+    //HDC hdc = (HDC)dc.GetHDC();
     wxSize clientSize = GetClientSize();
-    dc.SelectObject(wxBitmap(clientSize.x, clientSize.y));
+    wxBitmap bmp(clientSize.x, clientSize.y);
+    dc.SelectObject(bmp);
     dc.SetFont(m_font);
 
     dc.SetPen(*wxTRANSPARENT_PEN);
@@ -158,7 +164,7 @@ void HexWnd::OnPaint(wxPaintEvent &event)
     while (!updateRegion.IsEmpty())
     {
         wxRegionIterator upd(updateRegion);
-        updateRegion.Subtract(PaintRect(hdc, dc, upd.GetRect()));
+        updateRegion.Subtract(PaintRect(dc, upd.GetRect()));
     }
 
     // paint address pane
@@ -180,7 +186,7 @@ void HexWnd::OnPaint(wxPaintEvent &event)
     paintDC.Blit(rcBound.x, rcBound.y, rcBound.width, rcBound.height, &dc, rcBound.x, rcBound.y);
 }
 
-wxRect HexWnd::PaintRect(HDC hdc, wxDC &memDC, const wxRect &rcPaint)
+wxRect HexWnd::PaintRect(wxDC &memDC, const wxRect &rcPaint)
 {
     wxRect paintRect = rcPaint;
 
@@ -325,7 +331,6 @@ void HexWnd::PaintLine(uint64 line, wxDC &dc, int start_x, int width, int top)
 void HexWnd::PaintRuler(wxDC &dc, const wxRect &rcPaint)
 {
     TCHAR buf[65];
-    HDC hdc = (HDC)dc.GetHDC();
 
     // draw background rectangle
     dc.SetPen(*wxTRANSPARENT_PEN);
@@ -340,10 +345,9 @@ void HexWnd::PaintRuler(wxDC &dc, const wxRect &rcPaint)
     dc.DrawLine(left, m_iRulerHeight - 1, m_iLineWidth - 1, m_iRulerHeight - 1); // bottom
     dc.DrawLine(m_iLineWidth - 1,      0, m_iLineWidth - 1, m_iRulerHeight);     // right
 
-    SetTextColor(hdc, s.clrAdr);
-    SetBkMode(hdc, TRANSPARENT);
-
-    SelectObject(hdc, m_font.GetHFONT());
+    dc.SetTextForeground(s.clrAdr);
+    dc.SetBackgroundMode(wxTRANSPARENT);
+    dc.SetFont(m_font);
 
     for (int nPane = 1; nPane < 10; nPane++) // skip the address pane
     {
@@ -369,12 +373,12 @@ void HexWnd::PaintRuler(wxDC &dc, const wxRect &rcPaint)
                 int digits = CountDigits(s.iLineBytes - 1, s.iAddressBase);
                 my_itoa((uint32)col, buf, s.iAddressBase, digits);
                 for (int i = 0; i < digits; i++)
-                    TextOut(hdc, left + (width - width_hex) / 2, i * m_tm.tmHeight, buf+i, 1);
+                    dc.DrawText(wxString(buf[i]), left + (width - width_hex) / 2, i * m_tm.tmHeight);
             }
             else
             {
                 my_itoa((uint32)col % s.iLineBytes, buf, s.iAddressBase, 1);
-                TextOut(hdc, left + (width - width_hex) / 2, m_iRulerHeight - m_tm.tmHeight, buf, 1);
+                dc.DrawText(wxString(buf[0]), left + (width - width_hex) / 2, m_iRulerHeight - m_tm.tmHeight);
             }
             col += pane.m_iColBytes;
         }
@@ -394,7 +398,6 @@ void HexWnd::PaintPaneLine(wxDC &dc, uint64 line, int nPane, size_t offset,
 {
     uint64 iSelStart, iSelEnd;
     GetSelection(iSelStart, iSelEnd);
-    HDC hdc = (HDC)dc.GetHDC();
     int x, y = s.iExtraLineSpace / 2;
     wxRect rc;
     const uint8 *pData = m_lineBuffer + offset;
@@ -424,8 +427,8 @@ void HexWnd::PaintPaneLine(wxDC &dc, uint64 line, int nPane, size_t offset,
 
     if (pane.id == DisplayPane::ADDRESS)
     {
-        SetTextColor(hdc, s.clrAdr);
-        SetBkMode(hdc, TRANSPARENT);  //! called too often
+        dc.SetTextForeground(s.clrAdr);
+        dc.SetBackgroundMode(wxTRANSPARENT);  //! called too often
 
         int x = s.bStickyAddr ? 0 : -m_iScrollX;
 
@@ -442,10 +445,11 @@ void HexWnd::PaintPaneLine(wxDC &dc, uint64 line, int nPane, size_t offset,
             dc.SetLogicalFunction(wxCOPY);
         }
 
+        wxString text(buf, FormatAddress(address, buf, 100));
         if (s.bFakeMonoSpace)
-            CenterTextOut(hdc, x + s.iPanePad, top + y, 0, NULL, buf, FormatAddress(address, buf, 100), width_hex);
+            CenterTextOut(dc, x + s.iPanePad, top + y, text, width_hex);
         else
-            TextOut(hdc, x + s.iPanePad, top + y, buf, FormatAddress(address, buf, 100));
+            dc.DrawText(text, x + s.iPanePad, top + y);
         
         return;
     }
@@ -613,6 +617,7 @@ void HexWnd::PaintPaneLine(wxDC &dc, uint64 line, int nPane, size_t offset,
             //lead = 0;
             lead = iLeftLead[(uint8)buf[0]];
         }
+        #ifdef LC1VECMEM
         else if (pane.id == DisplayPane::VECMEM)
         {
             *(T_VecMemDec*)buf = DecodeVecMem(pData - ((((int)address % 80) >> 4) << 4), (int)address % 80);
@@ -620,33 +625,34 @@ void HexWnd::PaintPaneLine(wxDC &dc, uint64 line, int nPane, size_t offset,
             charCount = 4;
             lead = iLeftLead[(uint8)buf[0]];
         }
+        #endif
 
         if (col >= selStartCol && col < selEndCol)
         {
-            SetTextColor(hdc, palSelText->GetColor(val));
-            SetBkMode(hdc, TRANSPARENT);  //! called too often
+            dc.SetTextForeground(palSelText->GetColor(val));
+            dc.SetBackgroundMode(wxTRANSPARENT);  //! called too often
         }
         else if (s.bHighlightModified && m_pModified && pMod[col * pane.m_iColBytes])
         {
             //SetTextColor(hdc, s.clrModText[val]);
-            SetTextColor(hdc, palModText->GetColor(val));
-            SetBkColor(hdc, s.clrModBack);
-            SetBkMode(hdc, OPAQUE);  //! called too often
+            dc.SetTextForeground(palModText->GetColor(val));
+            dc.SetTextBackground(s.clrModBack);
+            dc.SetBackgroundMode(wxSOLID);  //! called too often
             etoFlags |= ETO_OPAQUE;
         }
         else
         {
             if (s.bEvenOddColors)
             {
-                SetTextColor(hdc, s.clrEOText[address & 1]);
-                SetBkColor(hdc, s.clrEOBack[address & 1]);
-                SetBkMode(hdc, OPAQUE);  //! called too often
+                dc.SetTextForeground(s.clrEOText[address & 1]);
+                dc.SetTextBackground(s.clrEOBack[address & 1]);
+                dc.SetBackgroundMode(wxSOLID);  //! called too often
                 etoFlags |= ETO_OPAQUE;
             }
             else
             {
-                SetTextColor(hdc, palText->GetColor(val));
-                SetBkMode(hdc, TRANSPARENT);  //! called too often
+                dc.SetTextForeground(palText->GetColor(val));
+                dc.SetBackgroundMode(wxTRANSPARENT);  //! called too often
             }
         }
 
@@ -657,13 +663,19 @@ void HexWnd::PaintPaneLine(wxDC &dc, uint64 line, int nPane, size_t offset,
         // ExtTextOutW() is one of the few Unicode functions supported natively on Win95.
         if (pane.id == DisplayPane::ID_UNICODE || pane.id == DisplayPane::ANSI)
         {
+            #ifdef WIN32
             if (m_tm.tmCharSet == OEM_CHARSET && pane.id == DisplayPane::ANSI)
                 etoFlags |= ETO_GLYPH_INDEX;
+            #endif
             if (m_bFixedWidthFont)
                 lead += pane.m_extra;
             else if (s.bFakeMonoSpace && iCharWidths[*(uint16*)buf])
                 lead += (width - iCharWidths[*(uint16*)buf]) / 2;
+            #ifdef WIN32
             ExtTextOutW(hdc, x + lead, top + y, etoFlags, &rcText, (LPCWSTR)buf, 1, NULL);
+            #else
+            dc.DrawText(wxString(buf[0]), x + lead, top + y);
+            #endif
         }
         else
         {
@@ -672,9 +684,9 @@ void HexWnd::PaintPaneLine(wxDC &dc, uint64 line, int nPane, size_t offset,
             if (buf[0] == '0' && buf[1] == 'A')
                lead = lead; //! breakpoint
             if (!m_bFixedWidthFont && s.bFakeMonoSpace)
-                CenterTextOut(hdc, x + lead, top + y, etoFlags, &rcText, buf, charCount, pane.m_iCharWidth);
+                CenterTextOut(dc, x + lead, top + y, wxString(buf, charCount), pane.m_iCharWidth);
             else
-                ExtTextOut(hdc, x + lead + pane.m_extra, top + y, etoFlags, &rcText, buf, charCount, NULL);
+                dc.DrawText(wxString(buf, charCount), x + lead + pane.m_extra, top + y);
         }
     }
 

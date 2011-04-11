@@ -9,7 +9,7 @@
 
 class HexWndSettings;
 //class FatInfo;
-#include "fatinfo.h"
+//#include "FatInfo.h"
 
 #include "undo.h"
 #include "utils.h"
@@ -53,7 +53,11 @@ public:
     int GetX(int col);
     int GetRect(int col, int count, int &width, uint32 flags); // returns the X-coordinate
     int HitTest(int x, int &digit, int &half);
+    #ifdef _WINDOWS
     virtual void SetFont(wxFont &newFont, wxDC &dc, TEXTMETRIC &tm);
+    #else
+    //! not yet implemented.
+    #endif
 
     inline int GetRight() { return m_left + m_width2; }
 
@@ -75,7 +79,8 @@ class UnicodePane : public DisplayPane
 {
 public:
     UnicodePane();
-    virtual void SetFont(wxFont &newFont, wxDC &dc, TEXTMETRIC &tm);
+    //virtual void SetFont(wxFont &newFont, wxDC &dc, TEXTMETRIC &tm);
+    //! not yet implemented
 };
 
 class FileMap;
@@ -103,7 +108,7 @@ public:
     HexDoc *doc;
     bool SetDoc(HexDoc *pDoc);
     bool SetDataSource(DataSource *pDS);
-    FatInfo fatInfo;
+    //FatInfo fatInfo;  //! not yet implemented
 
     //sequence *doc;
     std::vector<DOC_INFO> docinfo;
@@ -114,7 +119,7 @@ public:
 
     void thScrollWindowRaw(int dx, int dy, bool bUpdate = false);
     void thScrollWindow(int dx, THSIZE oldLine, bool bUpdate = false);
-    LRESULT OnSmoothScroll(int dx, int dy);
+    int OnSmoothScroll(int dx, int dy);
     void FinishSmoothScroll();
     int m_iYOffset, m_iLastYScroll; // used for sub-line scrolling
 
@@ -147,7 +152,9 @@ public:
     wxString error() { return m_error; }
 
     void SetFont(wxFont &newFont); // Use this if you have a wxFont already.
+    #ifdef _WINDOWS
     void SetFont(LOGFONT *plf);    // Use this if you don't.
+    #endif
 
     TEXTMETRIC GetTextMetric() { return m_tm; }
 
@@ -229,6 +236,7 @@ public:
     void OnDataChange(THSIZE nAddress, THSIZE nOldSize, THSIZE nNewSize); // called by HexDoc
     bool SetModified(bool modified);
     void SetSelection(uint64 iSelStart, uint64 iSelEnd, int region = 0, int digit = 0);
+    void SetSelection(THSIZE iCursorPos) { SetSelection(iCursorPos, iCursorPos); }
     int FormatAddress(THSIZE address, TCHAR *buf, int bufsize);
 
     // wxFrameManager calls p.window->Refresh(true), which used to make our background get redrawn.
@@ -257,7 +265,9 @@ protected:
     uint64 m_iTotalLines;
     uint64 m_iMaxScroll;
     uint32 m_iVisibleLines;
-    int m_iScrollX;
+    
+    int m_iScrollX, m_iScrollMaxX, m_iScrollPageX;
+    
     uint64 m_iMouseOverByte, m_iMouseOverLine;
     int m_iMouseOverRegion, m_iMouseOverCount;
     bool m_bMousePosValid;
@@ -279,8 +289,13 @@ protected:
     int m_iLineBufferSize;
     int m_iSpaceCount, *m_pCharSpaces; // used by CenterTextOut
 
+    // used to make variable width font look more like monospace
+    #ifdef _WINDOWS
     void CenterTextOut(HDC hdc, int x, int y, int flags, RECT *pRC,
                        LPCTSTR text, int charCount, int cellWidth);
+    #endif
+    //! I hate to slow down painting so much, but it's either that or the project.
+    void CenterTextOut(wxDC &dc, int x, int y, wxString text, int cellWidth);
 
     bool m_ok;
     wxString m_error;
@@ -288,7 +303,9 @@ protected:
     wxBrush m_hbrWndBack, m_hbrAdrBack;
     wxPen m_penGrid;
     TEXTMETRIC m_tm;
+    #ifdef _WINDOWS
     LOGFONT m_lf;  // Yeah.  It's a perfectly good name.
+    #endif
     int m_iCodePage, m_iDefaultChar;
     bool m_bFontCharsOnly; // mostly a shadow of s.bFontCharsOnly
     bool m_bFixedWidthFont;
@@ -327,7 +344,7 @@ protected:
     void OnSelectionMouseMove(uint64 mouseLine, int col, int half);
     void OnFileChange();
 
-    wxRect PaintRect(HDC hdc, wxDC &memDC, const wxRect &rcPaint);
+    wxRect PaintRect(wxDC &memDC, const wxRect &rcPaint);
     void PaintPane(wxDC &dc, int nPane, const THSIZE &firstLine, const THSIZE &lastLine, const wxRect &rcPaint);
     void PaintLine(uint64 line, wxDC &dc, int start_x, int width, int top = 0);
     void PaintPaneLine(wxDC &dc, uint64 line, int nPane, size_t offset, int byteCount, int byteStart, THSIZE address, int top = 0);
@@ -336,6 +353,8 @@ protected:
     DWORD panesPainted;  // bitmask of panes updated; used by PaintRuler().
     void PaintSelection(wxDC &dc);
     void PaintPaneSelection(wxDC &dc, DisplayPane &pane, THSIZE firstLine, THSIZE lastLine, int firstByte, int lastByte);
+    void MyTextOut(const wxDC &dc, int x, int y, int etoFlags, RECT *rcText,
+                   TCHAR *buf, int charCount, DisplayPane &pane, bool center);
 
     void RepaintBytes(uint64 start_byte, uint64 end_byte, bool bUpdateNow = true);
     void RepaintLines(uint64 start_line, uint64 end_line, bool bUpdateNow = true);
@@ -370,7 +389,7 @@ protected:
     void AdjustForNewDataSize();
     void ResizeScrollBars();
     bool GetLineInfo(uint64 line, uint64 &address, int &count, int& start);
-    void ScrollPartialLine(int delta);
+    void ScrollPartialLine(int delta, int wheelDelta);
     int GetByteDigits(int mouseRegion = -1);
     //int GetCursorRegion() { return m_bHexCursor ? 4 : 6; }
     bool DigitGranularity();
@@ -378,10 +397,13 @@ protected:
     int m_iLineWidth, m_iLineHeight, m_iCharWidth, m_iDigitWidth;
     int m_iRulerHeight, m_iPaintWidth, m_iFirstLineTop;
     int m_iHexStart, m_iASCIIStart;
-    int GetTextWidth(int chars) { return m_tm.tmMaxCharWidth * chars + m_tm.tmOverhang; }
-    UINT GetCharWidths(HDC hdc, UINT first, UINT last, bool bUseDrawText = false);
+    //int GetTextWidth(int chars) { return m_tm.tmMaxCharWidth * chars + m_tm.tmOverhang; }
+    
     uint16 iLeftLead[65536], iCharWidths[65536], width_hex, width_all;
     uint16 charMap256[256]; // code point for each 8-bit character
+    #ifdef _WINDOWS
+    // used by SetFont()
+    UINT GetCharWidths(HDC hdc, UINT first, UINT last, bool bUseDrawText = false);
 
     wxString m_sFileName;
     HANDLE m_hChange;
@@ -391,6 +413,7 @@ protected:
     {
         ((HexWnd*)dwUser)->OnFileChange();
     }
+    #endif
 
     THSIZE NextBytePos(int dir, THSIZE current, int *pDigit = NULL);  // dir -1 = left, +1 = right
 
@@ -491,6 +514,11 @@ public:
 };
 
 //! Accelerators using the Shift key leave bit 0 set.  Damn annoying.
+#ifdef _WINDOWS
 inline bool ShiftDown() { return !!(GetKeyState(VK_SHIFT) >> 15); }
+#else
+//! TBDL (To Be Done in Linux)
+inline bool ShiftDown() { return false; }
+#endif
 
 #endif // _HEXWND_H_

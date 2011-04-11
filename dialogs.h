@@ -25,6 +25,7 @@ class thRecentChoice;
 #define NEW_HIDDEN_CANCEL_BUTTON(parent) new wxButton( \
     parent, wxID_CANCEL, wxEmptyString, wxPoint(0, 0), wxSize(0, 0))
 
+#ifdef TBDL
 class ProcessDialog : public wxDialog
 {
 public:
@@ -102,6 +103,7 @@ private:
     wxString m_sTarget;
     bool m_bReadOnly, m_bExactSize;
 };
+#endif // TBDL
 
 class GotoDlg : public wxDialog
 {
@@ -113,7 +115,7 @@ public:
     void OnCancel(wxCommandEvent &event);
     void OnGetCursor(wxCommandEvent &event);
     void OnAddressChange(wxCommandEvent &event);
-    __int64 GetTarget(int &source);
+    wxLongLong_t GetTarget(int &source);
 
     // Goto dialog items
     enum {IDC_ADDR_LBL = 100,
@@ -563,6 +565,7 @@ public:
     void OnColumnClick(wxListEvent &event);
 };
 
+#ifdef TBDL
 class FontWidthChooserDialog : public wxDialog
 {
 public:
@@ -589,6 +592,7 @@ public:
     void OnSelection(wxCommandEvent &event) { TestFont(event.GetSelection()); }
     DECLARE_EVENT_TABLE()
 };
+#endif //TBDL
 
 class thRecentChoice : public wxComboBox
 {
@@ -643,6 +647,7 @@ public:
 };
 
 class ModifyBuffer;
+#ifdef TBDL
 class SlowReadDialog : public wxDialog
 {
 public:
@@ -701,6 +706,7 @@ public:
 
     wxString m_sShell, m_sArgPrefix;
 };
+#endif // TBDL
 
 class AboutDialog : public wxDialog
 {

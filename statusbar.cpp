@@ -14,13 +14,13 @@
 //*****************************************************************************
 
 BEGIN_EVENT_TABLE(thStatusBar, wxStatusBar)
-    EVT_LEFT_DCLICK(OnDoubleClick)
-    EVT_CONTEXT_MENU(OnContextMenu)
-    EVT_MENU(IDM_EXACT_SIZE, ToggleExactSize)
-    EVT_MENU(IDM_BASE_DEC, OnBase)
-    EVT_MENU(IDM_BASE_HEX, OnBase)
-    EVT_MENU(IDM_BASE_BOTH, OnBase)
-    EVT_MENU(IDM_BASE_ALL, OnBase)
+    EVT_LEFT_DCLICK(thStatusBar::OnDoubleClick)
+    EVT_CONTEXT_MENU(thStatusBar::OnContextMenu)
+    EVT_MENU(IDM_EXACT_SIZE, thStatusBar::ToggleExactSize)
+    EVT_MENU(IDM_BASE_DEC, thStatusBar::OnBase)
+    EVT_MENU(IDM_BASE_HEX, thStatusBar::OnBase)
+    EVT_MENU(IDM_BASE_BOTH, thStatusBar::OnBase)
+    EVT_MENU(IDM_BASE_ALL, thStatusBar::OnBase)
 END_EVENT_TABLE()
 
 thStatusBar::thStatusBar(wxFrame *parent, HexWnd *hw)

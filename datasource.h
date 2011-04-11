@@ -77,30 +77,27 @@ protected:
 class FileDataSource : public DataSource
 {
 public:
-    FileDataSource(LPCTSTR filename, bool bReadOnly);
+    FileDataSource(wxString filename, bool bReadOnly);
     ~FileDataSource();
 
     virtual void Flush();
     virtual bool Read(uint64 nIndex, uint32 nSize, uint8 *pData);
     virtual bool Write(uint64 nIndex, uint32 nSize, const uint8 *pData);
-    virtual void ShowProperties(HexWnd *hw);
+    //virtual void ShowProperties(HexWnd *hw);
     virtual bool SetEOF(THSIZE nIndex);
     virtual bool IsFile() const { return true; }
 
-    virtual const uint8* GetBasePointer(THSIZE nIndex, THSIZE nSize);
+    //virtual const uint8* GetBasePointer(THSIZE nIndex, THSIZE nSize);
     virtual wxString GetFullPath() { return m_fullpath; }
 protected:
     FileDataSource();  // for classes that derive from this
 
     wxString m_fullpath;
-    bool MemoryMap(THSIZE nIndex, THSIZE nSize);
-    HANDLE hFile, hMapping;
-    uint8 *m_pData;
-    THSIZE m_mapStart, m_mapSize;
-    bool tryMapping; // set to false on first error
-    LARGE_INTEGER fileSize;
+    int fd;
+    THSIZE fileSize;
 };
 
+#ifdef _WINDOWS
 class DiskDataSource : public DataSource
 {
 public:
@@ -137,6 +134,9 @@ public:
     bool IsThisProc;
     HANDLE hProcess;
 };
+#endif // _WINDOWS
+
+//******************************************************************************
 
 class UnsavedDataSource : public DataSource
 {
@@ -247,7 +247,7 @@ private:
 };
 
 //*****************************************************************************
-
+#if 0  //! Why did I want to do this again?
 class CachedFile : public DataSource  // Reads an entire file into RAM.
 {
 public:
@@ -307,6 +307,7 @@ private:
     uint8 *m_pData;
     THSIZE m_nSize;
 };
+#endif // 0
 
 //*****************************************************************************
 

@@ -130,7 +130,7 @@ public:
     wxString GetData()
     {
         if (strData.IsEmpty())
-            strData = wxString((const TCHAR*)data, len);
+            strData = wxString((const wxChar*)data, len);
         return strData;
     }
 

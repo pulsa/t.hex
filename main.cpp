@@ -15,8 +15,9 @@
 
 bool thApp::OnInit()
 {
-    HANDLE hFlag = CreateEventA(NULL, 0, 0, "T_Hex.event");
     bool useIPC = true;
+    #ifdef TBDL
+    HANDLE hFlag = CreateEventA(NULL, 0, 0, "T_Hex.event");
     if (GetLastError() == ERROR_ALREADY_EXISTS)
     {
         wxClient *cli = new wxClient();
@@ -47,12 +48,27 @@ bool thApp::OnInit()
             useIPC = false;
         }
     }
+    #endif
 
-#ifdef _DEBUG
+#if defined(_MSC_VER) && defined(_DEBUG)
     //_CrtSetBreakAlloc(9558);
     CreateConsole(_T("TH Console"));
 #endif
-    wxFrame* frame = new thFrame(useIPC);
+
+    wxString commandLine;
+    #ifdef WIN32
+    commandLine = GetCommandLine();
+    #else
+    for (int i = 1; i < argc; i++)
+    {
+        if (i > 1)
+            commandLine += ' ';
+        commandLine += argv[i];
+    }
+    #endif
+
+    wxFrame* frame = new thFrame(commandLine, useIPC);
+
     SetTopWindow(frame);
     frame->Show();
     //::PostMessage((HWND)frame->GetHWND(), WM_CLOSE, 0, 0); // close immediately for profiling

@@ -46,12 +46,12 @@ template<class CHAR_T> void my_itoa(int64 i, CHAR_T *buffer, int base, int digit
 template<class CHAR_T> int my_ftoa(float f, CHAR_T *buffer, int digits);
 template<class CHAR_T> int my_dtoa(const double &d, CHAR_T *buffer, int digits);
 
-template void my_itoa(uint32 i, char    *buffer, int base, int digits);
-template void my_itoa(uint32 i, wchar_t *buffer, int base, int digits);
-template void my_itoa(uint64 i, char    *buffer, int base, int digits);
-template void my_itoa(uint64 i, wchar_t *buffer, int base, int digits);
-template int my_ftoa(float f, TCHAR *buffer, int digits);
-template int my_dtoa(const double &d, TCHAR *buffer, int digits);
+//template void my_itoa(uint32 i, char    *buffer, int base, int digits);
+//template void my_itoa(uint32 i, wchar_t *buffer, int base, int digits);
+//template void my_itoa(uint64 i, char    *buffer, int base, int digits);
+//template void my_itoa(uint64 i, wchar_t *buffer, int base, int digits);
+//template int my_ftoa(float f, wxChar *buffer, int digits);
+//template int my_dtoa(const double &d, wxChar *buffer, int digits);
 
 extern const bool my_isprint[256];
 
@@ -70,7 +70,7 @@ public:
             HexTable['A' + i] = HexTable['a' + i] = 0x0A + i;
     }
 
-    static inline uint8 NibbleVal(TCHAR c)
+    static inline uint8 NibbleVal(wxChar c)
     {
         return HexTable[(uint8)c];
     }
@@ -130,15 +130,15 @@ wxString FormatDouble(double n, int decimalPlaces = 0);
 //wxString FormatHumanReadable(uint64 n, TCHAR &prefix, int decDigits = 2);
 //wxString FormatBytes(uint64 n, uint64 no_prefix_cutoff = 0, int decDigits = 2);
 wxString FormatWithBase(THSIZE n, int base);
-const TCHAR *FormatBytes(uint64 n, uint64 no_prefix_cutoff = 0);
+const wxChar *FormatBytes(uint64 n, uint64 no_prefix_cutoff = 0);
 
 //size_t FormatHex(uint64 n, char *buffer, size_t bufferSize, size_t digits = 0);
 //size_t FormatDec(uint64 n, char *buffer, size_t bufferSize, size_t digits = 0);
 //size_t FormatBin(uint64 n, char *buffer, size_t bufferSize, size_t digits = 0);
-size_t FormatNumber(uint64 n, TCHAR *buffer, size_t bufferSize, int base, size_t digits = 0);
+size_t FormatNumber(uint64 n, wxChar *buffer, size_t bufferSize, int base, size_t digits = 0);
 inline wxString FormatNumber(uint64 n, int base, size_t digits = 0)
 {
-   TCHAR s[99]; return wxString(s, FormatNumber(n, s, 99, base, digits));
+   wxChar s[99]; return wxString(s, FormatNumber(n, s, 99, base, digits));
 }
 
 inline wxString FormatHex(uint64 n) { return FormatNumber(n, 16); }
@@ -160,7 +160,7 @@ void ibm2ieee(void *to, const void *from, int len);
 void ieee2ibm(void *to, const void *from, int len);
 
 bool EnableDebugPriv( void );
-TCHAR GetDriveLetter(LPCTSTR lpDevicePath, LPCTSTR *rest);
+wxChar GetDriveLetter(LPCTSTR lpDevicePath, LPCTSTR *rest);
 wxString GetRealFilePath(LPCTSTR path1, HANDLE hProcess, void *address);
 wxString Unescape(wxString src);
 wxString Escape(wxString src);
@@ -169,7 +169,7 @@ wxString Escape(wxString src);
 int bitcount(uint64 n);
 
 //wxPoint MoveInside(const wxRect &rc, const wxPoint &pt, int tolX = 0, int tolY = 0);
-
+#ifdef _WINDOWS_
 class ProcList
 {
 public:
@@ -209,6 +209,7 @@ private:
     static BOOL CALLBACK EnumWindowsProc(HWND hWnd, LPARAM lParam);
     void EnumWindowsProc(HWND hWnd);
 };
+#endif // _WINDOWS
 
 class DblBufWindow
 {
@@ -293,6 +294,7 @@ wxString PyString_DecodeEscape(const char *s,
                                Py_ssize_t unicode,
                                const char *recode_encoding);
 
+#ifdef _WINDOWS_
 class thMutexLocker
 {
 public:
@@ -307,6 +309,7 @@ public:
 private:
    HANDLE m_mtx;
 };
+#endif
 
 wxString Plural(THSIZE n, LPCTSTR s1 = NULL, LPCTSTR s2 = NULL);
 
@@ -443,7 +446,7 @@ protected:
 // thString
 // Yet another string class.  It's really an array of bytes with wxString's memory management.
 // At this point, in fact, it's a wrapper around wxString.
-// wxString::Len() depends on the size of TCHAR, and there is no way to represent
+// wxString::Len() depends on the size of wxChar, and there is no way to represent
 // odd number of bytes in Unicode mode with wxString.  Hence, this class.
 //*************************************************************************************************
 
@@ -477,7 +480,7 @@ public:
         if (bytes)
             m_len = bytes;
         else
-            m_len = src.Len() * sizeof(TCHAR);
+            m_len = src.Len() * sizeof(wxChar);
         //m_data = (uint8*)m_str.data();
     }
 };

@@ -40,7 +40,7 @@
 // This macro enables measurement using the timeGetTime() function.
 //#define ATIMER_USE_WINMM
 
-
+#ifdef _WINDOWS
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 
@@ -64,6 +64,10 @@
    #else
       #define ATIMER_EXPORT //__declspec(dllimport)
    #endif
+#endif
+
+#else  // not Windows
+   #define ATIMER_EXPORT
 #endif
 
 class ATIMER_EXPORT ATimer {
@@ -152,7 +156,7 @@ inline void ATimer::SetInterval(UINT64 interval)
 
 inline double ATimer::GetSeconds() const
 {
-   return (double)(__int64)interval / (double)(__int64)ticks_per_sec;
+   return (double)(INT64)interval / (double)(INT64)ticks_per_sec;
 }
 
 

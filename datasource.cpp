@@ -9,10 +9,12 @@
 #include "hexwnd.h"
 #include "utils.h"
 
+#ifdef _WINDOWS
 extern "C" {
 #include "akrip32.h"
 #include "scsipt.h"
 }
+#endif
 
 #define new New
 
@@ -53,36 +55,17 @@ void DataSource::ShowProperties(HexWnd *hw)
 FileDataSource::FileDataSource()
 {
     m_bOpen = FALSE;
-    hMapping = NULL;
-    m_pData = NULL;
-    m_bMemoryMapped = false;
     m_bCanChangeSize = m_bWriteable = false;
-    hFile = INVALID_HANDLE_VALUE;
-    tryMapping = false;
+    fd = -1;
 }
 
-FileDataSource::FileDataSource(LPCTSTR filename, bool bReadOnly)
+FileDataSource::FileDataSource(wxString filename, bool bReadOnly)
 {
     //! todo: if file opened read-only, option to allow writes and update immediately
 
-    if (g_granularity_mask == 0)
-    {
-        SYSTEM_INFO sysinfo;
-        GetSystemInfo(&sysinfo);
-        if (bitcount(sysinfo.dwAllocationGranularity) != 1)
-            wxMessageBox(wxString::Format(_T("Huh? Allocation granularity is 0x%X."), sysinfo.dwAllocationGranularity));
-        g_granularity_mask = sysinfo.dwAllocationGranularity - 1;
-    }
-
-    //m_pRootRegion = NULL;
     m_bOpen = FALSE;
     m_bWriteable = !bReadOnly;
-    hFile = INVALID_HANDLE_VALUE;
-    hMapping = NULL;
-    m_pData = NULL;
-    m_bMemoryMapped = false; //true;
-    tryMapping = true;
-	tryMapping = false;  //! speed testing, 2009-05-02
+    fd = -1;
 
     wxFileName fn(filename);
     m_title = fn.GetFullName();  // strip off any "\\.\" stuff
@@ -90,22 +73,18 @@ FileDataSource::FileDataSource(LPCTSTR filename, bool bReadOnly)
 
     if (m_bWriteable)
     {
-        hFile = CreateFile(filename, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, NULL);
-        if (hFile == INVALID_HANDLE_VALUE)
+        fd = open(filename, O_RDWR);
+        if (fd < 0)
             m_bWriteable = false; // try opening read-only
     }
 
     if (!m_bWriteable)
     {
-        DWORD dwShare = FILE_SHARE_READ;
-        if (appSettings.bFileShareWrite)
-            dwShare |= FILE_SHARE_WRITE;
-        hFile = CreateFile(filename, GENERIC_READ,
-           dwShare, NULL, OPEN_EXISTING, 0, NULL);
-        if (hFile == INVALID_HANDLE_VALUE)
+        fd = open(filename, O_RDONLY);
+        if (fd < 0)
         {
             wxString tmp;
-            tmp.Printf(_T("Couldn't open \"%s\".\nCode %d."), filename, GetLastError());
+            tmp.Printf(_T("Couldn't open \"%s\".\nCode %d."), filename, errno);
             wxMessageBox(tmp);
             return;
         }
@@ -113,18 +92,17 @@ FileDataSource::FileDataSource(LPCTSTR filename, bool bReadOnly)
 
     m_bCanChangeSize = m_bWriteable;
 
-    fileSize.LowPart = GetFileSize(hFile, (DWORD*)&fileSize.HighPart);
-    if (fileSize.LowPart == 0xFFFFFFFF && GetLastError() != 0)
-    { // 0xFFFFFFFF is error code and valid file size.  Must check GetLastError too.
+    fileSize = lseek(fd, 0, SEEK_END);
+    if (fileSize == (THSIZE)-1)
+    {
         wxString msg;
-        msg.Printf(_T("GetFileSize() failed.  Code %d"), GetLastError());
+        msg.Printf(_T("lseek() failed.  Code %d"), errno);
         wxMessageBox(msg);
         return;
     }
+    lseek(fd, 0, SEEK_SET);
 
-    MemoryMap(0, wxMin(fileSize.QuadPart, 0x100000));
-
-    HexDoc* doc = AddRegion(0, 0, fileSize.QuadPart, wxString(_T("File: ")) + filename);
+    HexDoc* doc = AddRegion(0, 0, fileSize, wxString(_T("File: ")) + filename);
     doc->dwFlags = PAGE_READWRITE; //! this isn't quite right for files
 
     m_bOpen = true;
@@ -133,134 +111,40 @@ FileDataSource::FileDataSource(LPCTSTR filename, bool bReadOnly)
 
 FileDataSource::~FileDataSource()
 {
-    if (m_pData != NULL)
-        UnmapViewOfFile(m_pData);
-    if (hMapping != NULL)
-        CloseHandle(hMapping);
-    if (hFile != INVALID_HANDLE_VALUE)
-        CloseHandle(hFile);
+    if (fd >= 0)
+        close(fd);
 }
 
 void FileDataSource::Flush()
 {
-    FlushFileBuffers(hFile);
+    //! Nothing to do in Linux?
 }
 
 bool FileDataSource::Read(uint64 nIndex, uint32 nSize, uint8 *pData)
 {
-    //! todo: use memory-mapped file here?  Beware, it's tricky...
-
-    LARGE_INTEGER offset;
-    offset.QuadPart = nIndex;
-    SetFilePointer(hFile, offset.LowPart, &offset.HighPart, FILE_BEGIN);
-    //! check return from SetFilePointer()
-    //! todo: enforce 4GB limit on Win98?  or can we even try to open that file?
-    return !!ReadFile(hFile, pData, nSize, &nSize, NULL);
+    lseek(fd, nIndex, SEEK_SET);
+    return nSize == read(fd, pData, nSize);
 }
 
 bool FileDataSource::Write(uint64 nIndex, uint32 nSize, const uint8 *pData)
 {
-    if (nIndex >= m_mapStart && nIndex + nSize <= m_mapStart + m_mapSize)
-    {
-        memcpy(m_pData + nIndex - m_mapStart, pData, nSize);
-        return true;
-    }
-
-    LARGE_INTEGER offset;
-    offset.QuadPart = nIndex;
-    SetFilePointer(hFile, offset.LowPart, &offset.HighPart, FILE_BEGIN);
-    //! check return from SetFilePointer()
-    //! todo: enforce 4GB limit on Win98?  or can we even try to open that file?
-    return !!WriteFile(hFile, pData, nSize, &nSize, NULL);
-}
-
-bool FileDataSource::MemoryMap(THSIZE nIndex, THSIZE nSize)
-{
-    m_mapSize = 0; // clear this first
-    if (!tryMapping)
-        return false;
-
-    if (nIndex + nSize > (THSIZE)fileSize.QuadPart)
-        return false;
-
-    // Round nIndex downward to system-dependent boundary to avoid ERROR_MAPPED_ALIGNMENT.
-    // nSize doesn't matter so much; the caller can ask for more if they want it.
-    //! We could maybe improve performance just a hair by increasing nSize a few kB... Test this.
-    nSize += nIndex & g_granularity_mask;
-    nIndex &= ~(THSIZE)g_granularity_mask;
-
-    if (hMapping == NULL)
-        hMapping = CreateFileMapping(hFile, NULL, m_bWriteable ? PAGE_READWRITE : PAGE_READONLY, 0, 0, NULL);
-    if (hMapping == NULL)
-    {
-        tryMapping = false;
-        m_pData = NULL;
-        wxString tmp;
-        tmp.Printf(_T("CreateFileMapping() failed.\nCode %d."), GetLastError());
-        wxMessageBox(tmp);
-        return false;
-    }
-
-    if (m_pData)
-        UnmapViewOfFile(m_pData);
-    m_pData = (uint8*)MapViewOfFile(hMapping,
-        m_bWriteable ? FILE_MAP_WRITE : FILE_MAP_READ,
-        DWORD(nIndex >> 32), DWORD(nIndex), nSize);
-    if (m_pData == NULL)
-    {
-        tryMapping = false;
-        wxString tmp;
-        tmp.Printf(_T("MapViewOfFile() failed.\nCode %d."), GetLastError());
-        wxMessageBox(tmp);
-        return false;
-    }
-    // if m_pData is NULL, we will use ReadFile() instead.
-    m_mapStart = nIndex;
-    m_mapSize = nSize;
-    return true;
-}
-
-const uint8* FileDataSource::GetBasePointer(THSIZE nIndex, THSIZE nSize)
-{
-    if (nIndex >= m_mapStart && nIndex + nSize <= m_mapStart + m_mapSize)
-        return m_pData + nIndex - m_mapStart;
-    if (!MemoryMap(nIndex, nSize))
-        return NULL;
-    return m_pData + nIndex - m_mapStart;
-}
-
-void FileDataSource::ShowProperties(HexWnd *hw)
-{
-    SHELLEXECUTEINFO sei = { sizeof(sei) };
-    sei.lpFile = m_fullpath;
-    sei.lpVerb = _T("properties");
-    sei.fMask  = SEE_MASK_INVOKEIDLIST;
-    sei.hwnd = (HWND)hw->GetHWND();
-    ShellExecuteEx(&sei);
+    lseek(fd, nIndex, SEEK_SET);
+    return nSize == write(fd, pData, nSize);
 }
 
 bool FileDataSource::SetEOF(THSIZE nIndex)
 {
-    if (nIndex == (THSIZE)fileSize.QuadPart)
+    if (nIndex == fileSize)
         return true;
 
-    // Unmap views and delete mapping objects before changing file size.
-    m_mapSize = 0;
-    if (m_pData)
-        UnmapViewOfFile(m_pData);
-    m_pData = NULL;
-    if (hMapping != NULL)
-        CloseHandle(hMapping);
-    hMapping = NULL;
-
-    LARGE_INTEGER pos;
-    pos.QuadPart = nIndex;
-    if (!SetFilePointerEx(hFile, pos, NULL, FILE_BEGIN))
-        return false;
-    return !!SetEndOfFile(hFile);
+    ftruncate(fd, nIndex);
+    lseek(fd, nIndex, SEEK_SET);
+    return true;  //! should check errors
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+
+#ifdef _WINDOWS
 
 DWORD MSB2DWORD(const BYTE* b)
 {
@@ -1053,6 +937,7 @@ void ProcMemDataSource::ShowProperties(HexWnd *hw)
         docs.size(), nModules, nHeaps, nMappedFiles);
     PRINTF(_T("Total size of all regions: %s\n"), FormatBytes(totalSize));
 }
+#endif // _WINDOWS
 
 //*************************************************************************************************
 
@@ -1395,6 +1280,7 @@ bool VecMemDataSource::ToggleReadOnly()
 }
 #endif // LC1VECMEM
 
+#ifdef _WINDOWS
 ProcessFileDataSource::ProcessFileDataSource(DWORD procID, DWORD hForeignFile)
 : FileDataSource()
 {
@@ -1441,3 +1327,4 @@ bool ProcessFileDataSource::Read(uint64 nIndex, uint32 nSize, uint8 *pData)
     SetFilePointerEx(hFile, filepos, NULL, FILE_BEGIN);
     return result;
 }
+#endif // _WINDOWS

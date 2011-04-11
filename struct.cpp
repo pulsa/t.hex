@@ -1,7 +1,7 @@
 #include "precomp.h"
 #include "thex.h"
 #include "struct.h"
-#include "bigint.h"
+//#include "bigint.h"
 #include "hexwnd.h"
 #include "utils.h"
 

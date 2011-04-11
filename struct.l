@@ -1,5 +1,7 @@
 %{
 
+#include "precomp.h"  //! Where's the right place for this?
+
 #include <stdlib.h>
 #include <string.h>
 #include "struct_par.hpp"
@@ -58,7 +60,7 @@ other           .
  */
 
 static const struct
-{ char *name;
+{ const char *name;
   int yylex;
 } keywords[] = {
 	{ "ABS_POINTER", 	ABS_POINTER },
@@ -100,7 +102,7 @@ static int keywordSearch(FlexLexer *flex)
    while (lo <= hi)
    {
       mid = (lo + hi) >> 1;
-      if ((cc = _strcmpi(flex->YYText(), keywords[mid].name)) == 0)
+      if ((cc = wxStricmp(flex->YYText(), keywords[mid].name)) == 0)
          return keywords[mid].yylex;
       if (cc < 0)
          hi = mid - 1;
