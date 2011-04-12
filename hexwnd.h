@@ -127,7 +127,6 @@ public:
     bool OpenDrive(LPCTSTR path, bool bReadOnly);
     bool OpenProcess(DWORD pid, wxString procName, bool bReadOnly);
     bool OpenBlank();
-    bool OpenLC1VectorMemory(wxString addr);
     bool OpenTestFile(LPCTSTR filename);
     bool OpenDataSource(DataSource *pDS);
 
@@ -265,9 +264,9 @@ protected:
     uint64 m_iTotalLines;
     uint64 m_iMaxScroll;
     uint32 m_iVisibleLines;
-    
+
     int m_iScrollX, m_iScrollMaxX, m_iScrollPageX;
-    
+
     uint64 m_iMouseOverByte, m_iMouseOverLine;
     int m_iMouseOverRegion, m_iMouseOverCount;
     bool m_bMousePosValid;
@@ -398,7 +397,7 @@ protected:
     int m_iRulerHeight, m_iPaintWidth, m_iFirstLineTop;
     int m_iHexStart, m_iASCIIStart;
     //int GetTextWidth(int chars) { return m_tm.tmMaxCharWidth * chars + m_tm.tmOverhang; }
-    
+
     uint16 iLeftLead[65536], iCharWidths[65536], width_hex, width_all;
     uint16 charMap256[256]; // code point for each 8-bit character
     #ifdef _WINDOWS

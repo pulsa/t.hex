@@ -309,58 +309,6 @@ private:
 };
 #endif // 0
 
-//*****************************************************************************
-
-#ifdef LC1VECMEM
-
-enum {
-   MCC_TARGET_REGISTER = 0x00,
-   MCC_TARGET_MEMORY   = 0x10,
-   MCC_ACCESS_READ     = 0x00,
-   MCC_ACCESS_WRITE    = 0x01,
-};
-
-#pragma pack(push, 1)
-
-typedef struct {
-   UCHAR seq;    // sequence number; used by the board to handle duplicates
-   UCHAR cntl;   // control bits defined above
-   USHORT len;   // count of register or memory transactions in this packet
-   ULONG ul[1];  // each packet sent has at least one 32-bit word
-   uint8* mem(size_t n = 0) { return (uint8*)&ul[2] + n; }
-} MCC_NET_PACKET;
-
-#pragma pack(pop)
-
-// MCC_PACKET_LEN() returns the size of a packet that contains the given number of ULONGs,
-// which must include at least one 4-byte register address.  Examples:
-//   MCC_PACKET_LEN(4)  // This packet will write two registers.
-//   MCC_PACKET_LEN(82) // 80 DWORDs to vector memory
-#define MCC_PACKET_LEN(words) (sizeof(MCC_NET_PACKET) + ((words) - 1) * sizeof(ULONG))
-#define MCC_PACKET_ALLOC(words) ((MCC_NET_PACKET*)malloc(MCC_PACKET_LEN(words)))
-#define MCC_PACKET_FREE(p)    free(p)
-
-class VecMemDataSource : public DataSource
-{
-public:
-    VecMemDataSource(wxIPV4address addr, bool bReadOnly);
-    ~VecMemDataSource();
-    virtual bool Read(uint64 nIndex, uint32 nSize, uint8 *pData);
-    virtual bool Write(uint64 nIndex, uint32 nSize, const uint8 *pData);
-    virtual bool ToggleReadOnly();
-
-protected:
-    HANDLE hBusMutex;
-    sockaddr_in RemoteSA;
-    SOCKET sockfd;
-    MCC_NET_PACKET *inbuf, *outbuf;
-    bool GetRows(ULONG Sadr, int length);
-    bool SetRows(ULONG Sadr, int length);
-    bool SendAndReceive(const MCC_NET_PACKET *cmd, size_t cmdLen,
-                        MCC_NET_PACKET *response, size_t rspLen, int timeout_ms = 1000);
-};
-
-#endif // LC1VECMEM
 
 //*****************************************************************************
 // Very dangerous!  Will probably crash a process or lead to less obvious problems.

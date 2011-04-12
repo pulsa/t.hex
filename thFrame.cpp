@@ -49,9 +49,6 @@ BEGIN_EVENT_TABLE(thFrame, wxFrame)
     #ifdef TBDL
     EVT_MENU(IDM_OpenDrive,         thFrame::CmdOpenDrive)
     EVT_MENU(IDM_OpenProcess,       thFrame::CmdOpenProcess)
-    #ifdef LC1VECMEM
-    EVT_MENU(IDM_OpenLC1,           thFrame::CmdOpenLC1)
-    #endif
     #endif // TBDL
     EVT_MENU(IDM_FileNew,           thFrame::CmdNewFile)
     EVT_MENU(IDM_Save,              thFrame::CmdSave)
@@ -180,7 +177,6 @@ thFrame::thFrame(bool useIPC)
     menu->Append(IDM_OpenFile, _T("&Open file\tCtrl+O"));
     menu->Append(IDM_OpenDrive, _T("Open &drive\tCtrl+D"));
     menu->Append(IDM_OpenProcess, _T("Open process\tCtrl+Shift+O"));
-    menu->Append(IDM_OpenLC1, _T("Open LC-1 vector &memory\tCtrl+M"));
     menu->Append(IDM_OpenSpecial, _T("Open special\tCtrl+L"));
     menu->Append(IDM_WriteSpecial, _T("Write special\tCtrl+Shift+S"));
     menu->Append(IDM_ToggleReadOnly, _T("Toggle read-only"));
@@ -348,19 +344,13 @@ thFrame::thFrame(bool useIPC)
 
     ProcessCommandLine();
 
-    //if (m_hw == NULL) // nothing to open from the command line?
-    if (pendingWindows.size() == 0)
+    if (pendingWindows.size() == 0)  // nothing to open from the command line?
     {
         HexWnd *hw = new HexWnd(this);
         hw->OpenBlank();
         AddHexWnd(hw);
     }
 
-    //if (!m_hw->Ok())
-    //{
-    //    wxMessageBox(_T("Couldn't create hex window.\n") + m_hw->error(), _T("Error"), wxOK);
-    //}
-    //!m_hw->SetFocus();
 
     if (pendingWindows.size() > 1)
     {
@@ -514,13 +504,13 @@ void thFrame::ProcessCommandLine(wxString cmdLine, wxString cwd /*= wxEmptyStrin
 
 static const wxCmdLineEntryDesc cmdLineDesc[] =
 {  //!WX29 WTF... wxCmdLineParser only takes char* now?
-	{ wxCMD_LINE_SWITCH, ("h"), ("help"), ("show this help message"),
-	    wxCMD_LINE_VAL_NONE, wxCMD_LINE_OPTION_HELP },
-	{ wxCMD_LINE_OPTION, ("p"), ("pid"),  ("Process ID"), wxCMD_LINE_VAL_NUMBER },
-	{ wxCMD_LINE_OPTION, ("e"), ("exe"),  ("Process name") },
-	{ wxCMD_LINE_PARAM,  NULL,    NULL,       ("File"), wxCMD_LINE_VAL_STRING,
-	    wxCMD_LINE_PARAM_OPTIONAL | wxCMD_LINE_PARAM_MULTIPLE },
-	{ wxCMD_LINE_NONE }
+    { wxCMD_LINE_SWITCH, ("h"), ("help"), ("show this help message"),
+        wxCMD_LINE_VAL_NONE, wxCMD_LINE_OPTION_HELP },
+    { wxCMD_LINE_OPTION, ("p"), ("pid"),  ("Process ID"), wxCMD_LINE_VAL_NUMBER },
+    { wxCMD_LINE_OPTION, ("e"), ("exe"),  ("Process name") },
+    { wxCMD_LINE_PARAM,  NULL,    NULL,       ("File"), wxCMD_LINE_VAL_STRING,
+        wxCMD_LINE_PARAM_OPTIONAL | wxCMD_LINE_PARAM_MULTIPLE },
+    { wxCMD_LINE_NONE }
 };
 
     wxCmdLineParser parser(cmdLineDesc);
@@ -893,17 +883,6 @@ void thFrame::CmdOpenProcess(wxCommandEvent &event)
     }
 }
 #endif // TBDL
-
-#ifdef LC1VECMEM
-void thFrame::CmdOpenLC1(wxCommandEvent &event)
-{
-    HexWnd *hw = new HexWnd(this);
-    //hw->OpenLC1VectorMemory(_T("127.0.0.1"));
-    //hw->OpenLC1VectorMemory(_T("192.168.10.1"));
-    hw->OpenLC1VectorMemory(_T("10.2.2.1"));
-    AddHexWnd(hw);
-}
-#endif
 
 void thFrame::CmdNewFile(wxCommandEvent &event)
 {
@@ -1429,7 +1408,7 @@ void thFrame::AddHexWnd(HexWnd *hw)
 
     if (bWindowShown)
     {
-        tabs->Freeze();
+        //tabs->Freeze();  // Plz fix this for GTK if you can.
         if (!tabs->IsShown())
         {
             wxAuiPaneInfo &pane = m_mgr.GetPane(_T("HexWnd"));
@@ -1454,7 +1433,7 @@ void thFrame::AddHexWnd(HexWnd *hw)
             tabs->SetSelection(tabs->GetPageCount() - 1);
         }
         SetHexWnd(hw);
-        tabs->Thaw();
+        //tabs->Thaw();
     }
     else
         pendingWindows.push_back(hw);
@@ -1686,14 +1665,14 @@ void thFrame::OnPageClosed(NotebookEventType& WXUNUSED(event))
     if (tabs->GetPageCount() == 1) // removed second-to-last page, only one left
     {
         HexWnd *otherWnd = (HexWnd*)tabs->GetPage(0);
-        otherWnd->Freeze();
+        otherWnd->Hide();  // Freeze() didn't work on GTK for some reason.
         tabs->RemovePage(0);
         tabs->Hide();
         otherWnd->Reparent(this);
         wxAuiPaneInfo &pane = m_mgr.GetPane(tabs);
         pane.Window(otherWnd);
-        otherWnd->Thaw();
-        m_mgr.Update(); //! do we need this?
+        otherWnd->Show();
+        m_mgr.Update();
     }
 }
 
@@ -1706,6 +1685,8 @@ void thFrame::CmdCloseTab(wxCommandEvent &WXUNUSED(event))
         wxAuiNotebookEvent e;
         OnPageClosed(e); // wxAuiNotebook doesn't do this.
 #endif
+        if (tabs->GetPageCount() == 0)
+            SetHexWnd(NULL);  // Only needed if we were showing notebook for single tab
         UpdateUI();
     }
     else if (m_hw)

@@ -617,15 +617,6 @@ void HexWnd::PaintPaneLine(wxDC &dc, uint64 line, int nPane, size_t offset,
             //lead = 0;
             lead = iLeftLead[(uint8)buf[0]];
         }
-        #ifdef LC1VECMEM
-        else if (pane.id == DisplayPane::VECMEM)
-        {
-            *(T_VecMemDec*)buf = DecodeVecMem(pData - ((((int)address % 80) >> 4) << 4), (int)address % 80);
-            val = 128; // color everything medium
-            charCount = 4;
-            lead = iLeftLead[(uint8)buf[0]];
-        }
-        #endif
 
         if (col >= selStartCol && col < selEndCol)
         {

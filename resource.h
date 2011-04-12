@@ -86,7 +86,6 @@
 #define IDM_OpenDrive                   186
 #define IDM_ReadPalette                 187
 #define IDM_ToggleReadOnly              188
-#define IDM_OpenLC1                     189
 
 #define IDM_GotoCluster                 190
 #define IDM_PrevBlock                   191

@@ -34,6 +34,7 @@ protected:
     HexWnd *hw;
     int m_lastField;
     THBASE *pBase;
+    int m_fieldPadWidth;
 
     DWORD dynamicResizeTime[SB_FIELD_COUNT];
 

@@ -34,6 +34,11 @@ thStatusBar::thStatusBar(wxFrame *parent, HexWnd *hw)
     widths[SBF_CHARSET] = 60;
     widths[SBF_FILESIZE] = 100;
     widths[SBF_EDITMODE] = 60;
+    #ifdef WIN32
+    m_fieldPadWidth = 5;
+    #else
+    m_fieldPadWidth = 10;
+    #endif
     memcpy(minWidth, widths, sizeof(minWidth));
     SetFieldsCount(SB_FIELD_COUNT, widths);
     this->hw = NULL;
@@ -211,7 +216,7 @@ void thStatusBar::FitPane(int pane)
     if (pane == SB_FIELD_COUNT - 1)
         widths[pane] = x + GetSize().y;
     else
-        widths[pane] = x + 5; //unusableWidth[pane];
+        widths[pane] = x + m_fieldPadWidth; //unusableWidth[pane];
     SetStatusWidths(SB_FIELD_COUNT, widths);
     //if (unusableWidth[pane] == 0)
     //{
@@ -258,7 +263,7 @@ bool thStatusBar::SetDynamicPane(const wxString &str, int pane, bool bForceUpdat
         int diff = (now - dynamicResizeTime[pane]) / 200;
         diff = wxMin(diff, 50);                 // limit to this many
         diff = wxMin(diff, widths[pane] - x);   // don't chop off text
-        
+
         widths[pane] -= diff;
         dynamicResizeTime[pane] = now;
         changed = true;

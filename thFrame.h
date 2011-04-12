@@ -116,7 +116,6 @@ public:
     void CmdOpenFile(wxCommandEvent &event);
     void CmdOpenDrive(wxCommandEvent &event);
     void CmdOpenProcess(wxCommandEvent &event);
-    void CmdOpenLC1(wxCommandEvent &event);
     void CmdNewFile(wxCommandEvent &event);
     void CmdCopyAsDlg(wxCommandEvent &event);
     void CmdPasteDlg(wxCommandEvent &event);

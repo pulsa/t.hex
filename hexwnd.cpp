@@ -1745,27 +1745,6 @@ bool HexWnd::OpenProcess(DWORD pid, wxString procName, bool bReadOnly)
     return true;
 }
 
-bool HexWnd::OpenLC1VectorMemory(wxString addr)
-{
-#ifdef LC1VECMEM
-    wxIPV4address ipv4;
-    ipv4.Hostname(addr);
-    ipv4.Service(0x721F);
-
-    DataSource *pDS = new VecMemDataSource(ipv4, true);
-    if (!pDS->IsOpen())
-    {
-       delete pDS;
-       return false;
-    }
-    SetDataSource(pDS);
-    return true;
-#else
-    wxMessageBox(_T("LC-1 vector memory support disabled in this build."), _T("T. Hex"));
-    return false;
-#endif // LC1VECMEM
-}
-
 bool HexWnd::OpenTestFile(LPCTSTR filename)
 {
     DataSource *pDS = new CachedFile(filename);
@@ -3180,82 +3159,4 @@ void HexWnd::UpdateSettings(HexWndSettings &ns)
     AdjustForNewDataSize();  // And this should pretty much take care of the rest.
 }
 
-#ifdef LC1VECMEM
-static const char ABES_V_Formats[17] = "XQLH01NP89ABCDEF";
 
-static const char * opcode_table[] =
-{
-   "ADV", "MSSA", "DINT", "EINT", "RINT", "0x05", "SCAN", "0x07", "CRF0",  "SF0", "CRF1",  "SF1", "CRF2",  "SF2", "CRF3",  "SF3",  //0
-  "HALT", "0x11", "0x12", "0x13", "0x14", "0x15", "0x16", "0x17", "RETI", "0x19", "0x1a", "0x1b",  "RPT", "0x1d", "0x1e", "0x1f",  //1
-   "LI0", "0x21",  "LI1", "0x23",  "LI2", "0x25",  "LI3", "0x27", "0x28", "0x29", "0x2a", "0x2b", "0x2c", "0x2d", "0x2e", "0x2f",  //2
-  "0x30", "0x31", "0x32", "0x33", "0x34", "0x35", "0x36", "0x37", "0x38", "0x39", "0x3a", "0x3b", "0x3c", "0x3d", "0x3e", "0x3f",  //3
-  "JNX0",  "JX0", "JNX1",  "JX1", "JNX2",  "JX2", "JNX3",  "JX3",  "JF0", "JNF0",  "JF1", "JNF1",  "JF2", "JNF2",  "JF3", "JNF3",  //4
-  "JNME",  "JME", "JUMP", "0x53", "0x54", "0x55", "0x56", "0x57", "JNI0",  "JI0", "JNI1",  "JI1", "JNI2",  "JI2", "JNI3",  "JI3",  //5
-  "CNX0",  "CX0", "CNX1",  "CX1", "CNX2",  "CX2", "CNX3",  "CX3",  "CF0", "CNF0",  "CF1", "CNF1",  "CF2", "CNF2",  "CF3", "CNF3",  //6
-  "CNME",  "CME", "CALL", "0x73", "0x74", "0x75", "0x76", "0x77", "CNI0",  "CI0", "CNI1",  "CI1", "CNI2",  "CI2", "CNI3",  "CI3",  //7
-   "RX0", "RNX0",  "RX1", "RNX1",  "RX2", "RNX2",  "RX3", "RNX3", "RNF0",  "RF0", "RNF1",  "RF1", "RNF2",  "RF2", "RNF3",  "RF3",  //8
-   "RME", "RNME", "0x92",  "RET", "0x94", "0x95", "0x96", "RSCN",  "RI0", "RNI0",  "RI1", "RNI1",  "RI2", "RNI2",  "RI3", "RNI3",  //9
-  "0xa0", "0xa1", "0xa2", "0xa3", "0xa4", "0xa5", "0xa6", "0xa7", "0xa8", "0xa9", "0xaa", "0xab", "0xac", "0xad", "0xae", "0xaf",  //A
-  "0xb0", "0xb1", "0xb2", "0xb3", "0xb4", "0xb5", "0xb6", "0xb7", "0xb8", "0xb9", "0xba", "0xbb", "0xbc", "0xbd", "0xbe", "0xbf",  //B
-  "0xc0", "0xc1", "0xc2", "0xc3", "0xc4", "0xc5", "0xc6", "0xc7", "0xc8", "0xc9", "0xca", "0xcb", "0xcc", "0xcd", "0xce", "0xcf",  //C
-  "0xd0", "0xd1", "0xd2", "0xd3", "0xd4", "0xd5", "0xd6", "0xd7", "0xd8", "0xd9", "0xda", "0xdb", "0xdc", "0xdd", "0xde", "0xdf",  //D
-  "0xe0", "0xe1", "0xe2", "0xe3", "0xe4", "0xe5", "0xe6", "0xe7", "0xe8", "0xe9", "0xea", "0xeb", "0xec", "0xed", "0xee", "0xef",  //E
-  "0xf0", "0xf1", "0xf2", "0xf3", "0xf4", "0xf5", "0xf6", "0xf7", "0xf8", "0xf9", "0xfa", "0xfb", "0xfc", "0xfd", "0xfe", "0xff"   //F
-};
-
-T_VecMemDec DecodeVecMem(const uint8 *pRow, int offset)
-{
-    T_VecMemDec ret;
-    TCHAR *buf = ret.c;
-    buf[0] = buf[1] = buf[2] = buf[3] = ' ';
-
-    if (offset >= 80)
-        return ret;
-    if (offset >= 16)
-    {
-        buf[1] = ABES_V_Formats[pRow[offset] >> 4];
-        buf[2] = ABES_V_Formats[pRow[offset] & 15];
-        return ret;
-    }
-    switch (offset)
-    {
-    case 0: { // opcode
-        //return *(T_VecMemDec*)opcode_table[pRow[0]];
-            const char *op = opcode_table[pRow[0]];
-            buf[0] = op[0];
-            buf[1] = op[1];
-            buf[2] = op[2];
-            buf[3] = op[3];
-        }
-        break;
-    case 1: case 2: case 3: case 4: // operand bytes
-    case 11: // Sync + CS
-        my_itoa((uint32)pRow[offset], buf + 1, 16, 2);
-        break;
-    case 5: // MISR
-        my_itoa((uint32)pRow[5] >> 6, buf + 1, 2, 2);
-        break;
-    case 6: // flags, timing goes in byte 7
-        my_itoa((uint32)pRow[6] >> 4, buf, 2, 4);
-        break;
-    case 7: // timing set from byte 6
-        buf[1] = (pRow[6] & 7) + '0';
-        break;
-    case 8: // FG resync
-        buf[1] = (pRow[8] & 1) + '0';
-        break;
-    case 9: // FCS toggle bits from byte 10
-        if (pRow[10] & 0x80) buf[0] = 'D';
-        if (pRow[10] & 0x40) buf[1] = 'C';
-        if (pRow[10] & 0x20) buf[2] = 'B';
-        if (pRow[10] & 0x10) buf[3] = 'A';
-        break;
-    case 10: // FCS flags
-        buf[1] = ((pRow[10] >> 2) & 3) + 'A';
-        buf[2] = (pRow[10] & 3) + 'A';
-        break;
-    }
-    return ret;
-}
-
-#endif // LC1VECMEM
