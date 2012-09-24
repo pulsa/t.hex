@@ -3,14 +3,18 @@
 #include "resource.h"
 #include "thex.h"
 #include "thFrame.h"
-#include "wx/msw/private.h"
+//#include "wx/msw/private.h"
 //#include "manager.h"
 #include "toolwnds.h"
 #include "dialogs.h"
 #include "settings.h"
+#ifdef WIN32
 #include "links.h"
+#endif
 #include "utils.h"
+#ifdef TBDL
 #include "spawn.h"
+#endif
 #include <wx/cmdline.h>
 #include <wx/regex.h>
 #include "datasource.h"
@@ -23,74 +27,77 @@
 //HexWndSettings s;
 thAppSettings appSettings;
 
-static bool testflag = false;  //! for debugging window messages
 
 BEGIN_EVENT_TABLE(thFrame, wxFrame)
-    EVT_CLOSE(OnClose)
-    //EVT_ACTIVATE(OnActivate)
-    EVT_AUI_PANE_CLOSE(OnPaneClose)
-    EVT_MENU_OPEN(OnMenuOpen)
-    EVT_SET_FOCUS(OnSetFocus)
-    EVT_LEFT_DCLICK(OnDoubleClick)
-    //EVT_HELP(-1, OnHelp)
+    EVT_CLOSE(thFrame::OnClose)
+    //EVT_ACTIVATE(thFrame::OnActivate)
+    EVT_AUI_PANE_CLOSE(thFrame::OnPaneClose)
+    EVT_MENU_OPEN(thFrame::OnMenuOpen)
+    EVT_SET_FOCUS(thFrame::OnSetFocus)
+    EVT_LEFT_DCLICK(thFrame::OnDoubleClick)
+    //EVT_HELP(-1, thFrame::OnHelp)
 
-    EVT_MENU(wxID_EXIT,             CmdExit)
-    EVT_MENU(IDM_FontDlg,           CmdFontDlg)
-    EVT_MENU(IDM_GotoDlg,           CmdGotoDlg)
-    EVT_MENU(IDM_FullScreen,        CmdFullScreen)
-    EVT_MENU(IDM_ViewFileMap,       CmdFileMap)
-    EVT_MENU(IDM_ToggleInsert,      CmdToggleInsert)
-    EVT_MENU(IDM_OpenFile,          CmdOpenFile)
-    EVT_MENU(IDM_OpenDrive,         CmdOpenDrive)
-    EVT_MENU(IDM_OpenProcess,       CmdOpenProcess)
-    EVT_MENU(IDM_OpenLC1,           CmdOpenLC1)
-    EVT_MENU(IDM_FileNew,           CmdNewFile)
-    EVT_MENU(IDM_Save,              CmdSave)
-    EVT_MENU(IDM_SaveAs,            CmdSaveAs)
-    EVT_MENU(IDM_Settings,          CmdSettings)
-    EVT_MENU(IDM_Find,              CmdFindDlg)
-    EVT_MENU(IDM_FindNext,          CmdFindAgain)
-    EVT_MENU(IDM_FindPrevious,      CmdFindAgain)
-    EVT_MENU(IDM_CycleClipboard,    CmdCycleClipboard)
-    EVT_MENU(IDM_Histogram,         CmdHistogram)
-    EVT_MENU(IDM_CollectStrings,    CmdCollectStrings)
-    EVT_MENU(IDM_ViewStatusBar,     CmdViewStatusBar)
-    EVT_MENU(IDM_ViewToolBar,       CmdViewToolBar)
-    EVT_MENU(IDM_ViewDocList,       CmdViewDocList)
-    EVT_MENU(IDM_ViewNumberView,    CmdNumberView)
-    EVT_MENU(IDM_ViewStringView,    CmdStringView)
-    EVT_MENU(IDM_ViewStructureView, CmdStructureView)
-    EVT_MENU(IDM_ViewDisasmView,    CmdDisasmView)
-    EVT_MENU(IDM_ViewFatView,       CmdFatView)
-    EVT_MENU(IDM_ViewExportView,    CmdExportView)
-    EVT_MENU(IDM_OpenSpecial,       CmdOpenSpecial)
-    EVT_MENU(IDM_WriteSpecial,      CmdWriteSpecial)
-    EVT_MENU(IDM_FileProperties,    OnFileProperties)
-    EVT_MENU(IDM_WindowCloseTab,    CmdCloseTab)
-    EVT_MENU(IDM_CopyAsDlg,         CmdCopyAsDlg)
-    EVT_MENU(IDM_ToggleReadOnly,    CmdToggleReadOnly)
-    EVT_MENU(IDM_About,             CmdAbout)
-    EVT_MENU(IDM_OpenTestFile,      CmdOpenTestFile)
-    EVT_MENU(IDM_OpenProcessFile,   CmdOpenProcessFile)
-    EVT_MENU(IDM_NextBinChar,       CmdNextBinChar)
-    EVT_MENU(IDM_PrevBinChar,       CmdPrevBinChar)
-    EVT_MENU(IDM_ZipRecover,        CmdZipRecover)
-    EVT_MENU(IDM_Compressability,   CmdCompressability)
-    EVT_MENU(IDM_SwapOrder2,        CmdSwapOrder2)
-    EVT_MENU(IDM_SwapOrder4,        CmdSwapOrder4)
-    EVT_MENU(IDM_UnZlib,            CmdUnZlib)
+    EVT_MENU(wxID_EXIT,             thFrame::CmdExit)
+    #ifdef TBDL
+    EVT_MENU(IDM_FontDlg,           thFrame::CmdFontDlg)
+    #endif
+    EVT_MENU(IDM_GotoDlg,           thFrame::CmdGotoDlg)
+    EVT_MENU(IDM_FullScreen,        thFrame::CmdFullScreen)
+    EVT_MENU(IDM_ViewFileMap,       thFrame::CmdFileMap)
+    EVT_MENU(IDM_ToggleInsert,      thFrame::CmdToggleInsert)
+    EVT_MENU(IDM_OpenFile,          thFrame::CmdOpenFile)
+    #ifdef TBDL
+    EVT_MENU(IDM_OpenDrive,         thFrame::CmdOpenDrive)
+    EVT_MENU(IDM_OpenProcess,       thFrame::CmdOpenProcess)
+    #endif // TBDL
+    EVT_MENU(IDM_FileNew,           thFrame::CmdNewFile)
+    EVT_MENU(IDM_Save,              thFrame::CmdSave)
+    EVT_MENU(IDM_SaveAs,            thFrame::CmdSaveAs)
+    EVT_MENU(IDM_Settings,          thFrame::CmdSettings)
+    EVT_MENU(IDM_Find,              thFrame::CmdFindDlg)
+    EVT_MENU(IDM_FindNext,          thFrame::CmdFindAgain)
+    EVT_MENU(IDM_FindPrevious,      thFrame::CmdFindAgain)
+    EVT_MENU(IDM_CycleClipboard,    thFrame::CmdCycleClipboard)
+    EVT_MENU(IDM_Histogram,         thFrame::CmdHistogram)
+    EVT_MENU(IDM_CollectStrings,    thFrame::CmdCollectStrings)
+    EVT_MENU(IDM_ViewStatusBar,     thFrame::CmdViewStatusBar)
+    EVT_MENU(IDM_ViewToolBar,       thFrame::CmdViewToolBar)
+    EVT_MENU(IDM_ViewDocList,       thFrame::CmdViewDocList)
+    EVT_MENU(IDM_ViewNumberView,    thFrame::CmdNumberView)
+    EVT_MENU(IDM_ViewStringView,    thFrame::CmdStringView)
+    EVT_MENU(IDM_ViewStructureView, thFrame::CmdStructureView)
+    #ifdef TBDL
+    EVT_MENU(IDM_ViewExportView,    thFrame::CmdExportView)
+    EVT_MENU(IDM_ViewDisasmView,    thFrame::CmdDisasmView)
+    EVT_MENU(IDM_OpenSpecial,       thFrame::CmdOpenSpecial)
+    EVT_MENU(IDM_WriteSpecial,      thFrame::CmdWriteSpecial)
+    EVT_MENU(IDM_OpenTestFile,      thFrame::CmdOpenTestFile)
+    EVT_MENU(IDM_OpenProcessFile,   thFrame::CmdOpenProcessFile)
+    #endif // TBDL
+    EVT_MENU(IDM_FileProperties,    thFrame::OnFileProperties)
+    EVT_MENU(IDM_WindowCloseTab,    thFrame::CmdCloseTab)
+    EVT_MENU(IDM_CopyAsDlg,         thFrame::CmdCopyAsDlg)
+    EVT_MENU(IDM_ToggleReadOnly,    thFrame::CmdToggleReadOnly)
+    EVT_MENU(IDM_About,             thFrame::CmdAbout)
+    EVT_MENU(IDM_NextBinChar,       thFrame::CmdNextBinChar)
+    EVT_MENU(IDM_PrevBinChar,       thFrame::CmdPrevBinChar)
+    EVT_MENU(IDM_ZipRecover,        thFrame::CmdZipRecover)
+    EVT_MENU(IDM_Compressability,   thFrame::CmdCompressability)
+    EVT_MENU(IDM_SwapOrder2,        thFrame::CmdSwapOrder2)
+    EVT_MENU(IDM_SwapOrder4,        thFrame::CmdSwapOrder4)
+    EVT_MENU(IDM_UnZlib,            thFrame::CmdUnZlib)
 
     // Forward other commands to current HexWnd.
-    EVT_COMMAND_RANGE(0, IDM_Max, wxEVT_COMMAND_MENU_SELECTED, OnMenuOther)
+    EVT_COMMAND_RANGE(0, IDM_Max, wxEVT_COMMAND_MENU_SELECTED, thFrame::OnMenuOther)
 
 #ifdef WXFLATNOTEBOOK
-EVT_FLATNOTEBOOK_PAGE_CHANGED(-1, OnPageChanged)
-EVT_FLATNOTEBOOK_PAGE_CLOSED(-1, OnPageClosed)
-EVT_FLATNOTEBOOK_CONTEXT_MENU(-1, OnPageContextMenu)
+EVT_FLATNOTEBOOK_PAGE_CHANGED(-1, thFrame::OnPageChanged)
+EVT_FLATNOTEBOOK_PAGE_CLOSED(-1, thFrame::OnPageClosed)
+EVT_FLATNOTEBOOK_CONTEXT_MENU(-1, thFrame::OnPageContextMenu)
 #else
-    EVT_AUINOTEBOOK_PAGE_CLOSED(-1, OnPageClosed)
-    EVT_AUINOTEBOOK_PAGE_CHANGED(-1, OnPageChanged)
-    EVT_AUINOTEBOOK_BUTTON(-1, OnPageContextMenu)
+    EVT_AUINOTEBOOK_PAGE_CLOSED(-1, thFrame::OnPageClosed)
+    EVT_AUINOTEBOOK_PAGE_CHANGED(-1, thFrame::OnPageChanged)
+    EVT_AUINOTEBOOK_BUTTON(-1, thFrame::OnPageContextMenu)
 #endif
 
 END_EVENT_TABLE()
@@ -111,7 +118,6 @@ thFrame::thFrame(bool useIPC)
     findDlg = NULL;
     m_pSpawnHandler = NULL;
     m_dlgGoto = NULL;
-    ipcsvr = NULL;
     m_dlgPipeOut = NULL;
 
     SetDropTarget(new thDropTarget(this));
@@ -125,12 +131,18 @@ thFrame::thFrame(bool useIPC)
 #ifdef INCLUDE_LIBDISASM
     disasmView = NULL;
 #endif
-    fatView = NULL;
     exportView = NULL;
 
+#ifdef WIN32
     CoInitialize(NULL);
+#endif
 
+    #ifdef WIN32
     SetIcon(wxICON(IDI_THEX));
+    #else
+    #include "res/thex.xpm"
+    SetIcon(wxIcon(T_Hex));
+    #endif
 
     // Get name of configuration file.
     wxFileName fn(wxGetApp().argv[0]);
@@ -162,7 +174,6 @@ thFrame::thFrame(bool useIPC)
     menu->Append(IDM_OpenFile, _T("&Open file\tCtrl+O"));
     menu->Append(IDM_OpenDrive, _T("Open &drive\tCtrl+D"));
     menu->Append(IDM_OpenProcess, _T("Open process\tCtrl+Shift+O"));
-    menu->Append(IDM_OpenLC1, _T("Open LC-1 vector &memory\tCtrl+M"));
     menu->Append(IDM_OpenSpecial, _T("Open special\tCtrl+L"));
     menu->Append(IDM_WriteSpecial, _T("Write special\tCtrl+Shift+S"));
     menu->Append(IDM_ToggleReadOnly, _T("Toggle read-only"));
@@ -223,7 +234,6 @@ thFrame::thFrame(bool useIPC)
     sub->AppendCheckItem(IDM_ViewStringView, _T("&String View"));
     sub->AppendCheckItem(IDM_ViewStructureView, _T("S&tructure View"));
     sub->AppendCheckItem(IDM_ViewDisasmView, _T("&Disassembly View"));
-    sub->AppendCheckItem(IDM_ViewFatView, _T("&FAT32 View"));
     sub->AppendCheckItem(IDM_ViewExportView, _T("&Export View"));
 
     // view menu
@@ -272,16 +282,6 @@ thFrame::thFrame(bool useIPC)
     menu->Append(-1, _T("&Operations"), sub);
     menuBar->Append(menu, _T("&Tools"));
 
-    // FAT menu
-    menu = new wxMenu();
-    menu->Append(IDM_GotoPath, _T("Go to &path\tF4"));
-    menu->Append(IDM_GotoCluster, _T("&Go to cluster\tAlt+G"));
-    menu->Append(IDM_JumpToFromFat, _T("Go to corresponding FAT cluster\tAlt+J"));
-    menu->Append(IDM_FirstCluster, _T("&First cluster of file\tAlt+Home"));
-    menu->Append(IDM_LastCluster, _T("&Last cluster of file\tAlt+End"));
-    menu->Append(IDM_FatAutoSave, _T("FAT Auto-save\tCtrl+F1"));  // formerly F1 for Marty
-    menuBar->Append(menu, _T("F&AT"));
-
     // window menu
     menu = new wxMenu();
     menu->Append(IDM_WindowCloseTab, _T("&Close tab\tCtrl+F4"));
@@ -326,21 +326,15 @@ thFrame::thFrame(bool useIPC)
 
     tabs->Hide();
 
-    ProcessCommandLine(GetCommandLine());
+    ProcessCommandLine();
 
-    //if (m_hw == NULL) // nothing to open from the command line?
-    if (pendingWindows.size() == 0)
-    {
-        HexWnd *hw = new HexWnd(this);
-        hw->OpenBlank();
-        AddHexWnd(hw);
-    }
-
-    //if (!m_hw->Ok())
+    //if (pendingWindows.size() == 0)  // nothing to open from the command line?
     //{
-    //    wxMessageBox(_T("Couldn't create hex window.\n") + m_hw->error(), _T("Error"), wxOK);
+    //    HexWnd *hw = new HexWnd(this);
+    //    hw->OpenBlank();
+    //    AddHexWnd(hw);
     //}
-    //!m_hw->SetFocus();
+
 
     if (pendingWindows.size() > 1)
     {
@@ -353,7 +347,7 @@ thFrame::thFrame(bool useIPC)
         m_mgr.AddPane(tabs, wxAuiPaneInfo().Name(_T("HexWnd")).CenterPane().PaneBorder(false));
         m_hw->SetFocus();  // needed for multiple docs on the command line
     }
-    else
+    else if (pendingWindows.size() > 0)
     {
         tabs->Hide();
         SetHexWnd(pendingWindows[0]);
@@ -413,17 +407,13 @@ thFrame::thFrame(bool useIPC)
         AddView(undoView);
     }
 
-    if (appSettings.bFatView)
-    {
-        fatView = new FatView(this);
-        AddView(fatView);
-    }
-
+#ifdef TBDL
     if (appSettings.bExportView)
     {
         exportView = new ExportView(this);
         AddView(exportView);
     }
+#endif // TBDL
 
     //HACCEL hAccel = LoadMyAccelerators();
     //HACCEL hAccel = LoadAccelerators(hInstance, _T("AhedAccel"));
@@ -474,67 +464,52 @@ thFrame::~thFrame()
     //! todo: delete DataViews?
 
     delete findDlg;
-    delete m_pSpawnHandler;
     delete m_dlgGoto;
+    #ifdef TBDL
+    delete m_pSpawnHandler;
     delete m_dlgPipeOut;
+    #endif
 
+#ifdef WIN32
     CoUninitialize();
+#endif
 }
 
-void thFrame::ProcessCommandLine(LPCTSTR cmdLine, wxString cwd /*= wxEmptyString*/)
+void thFrame::ProcessCommandLine(wxString cmdLine, wxString cwd /*= wxEmptyString*/)
 {
-    wxApp &app = wxGetApp();
-    HexWnd *hw = NULL;
-
     if (cwd != wxEmptyString)
         ::wxSetWorkingDirectory(cwd);
 
-    // First try to open entire argument list as a single file.
-    int i = 0;
-    if (cmdLine[0] == '"') // if first character is '"', look for its partner
-    {
-        for (i = 1; cmdLine[i]; i++)
-        {
-            if (cmdLine[i] == '"')
-            {
-                i++;
-                break;
-            }
-        }
-    }
+static const wxCmdLineEntryDesc cmdLineDesc[] =
+{  //!WX29 WTF... wxCmdLineParser only takes char* now?
+    { wxCMD_LINE_SWITCH, ("h"), ("help"), ("show this help message"),
+        wxCMD_LINE_VAL_NONE, wxCMD_LINE_OPTION_HELP },
+    { wxCMD_LINE_OPTION, ("p"), ("pid"),  ("Process ID"), wxCMD_LINE_VAL_NUMBER },
+    { wxCMD_LINE_OPTION, ("e"), ("exe"),  ("Process name") },
+    { wxCMD_LINE_PARAM,  NULL,    NULL,       ("File"), wxCMD_LINE_VAL_STRING,
+        wxCMD_LINE_PARAM_OPTIONAL | wxCMD_LINE_PARAM_MULTIPLE },
+    { wxCMD_LINE_NONE }
+};
+
+    wxCmdLineParser parser(cmdLineDesc);
+    if (cmdLine.Len())
+        parser.SetCmdLine(cmdLine);
     else
-        for (i = 0; cmdLine[i] && cmdLine[i] != ' '; i++)
-            ;
-    while (cmdLine[i] == ' ')
-        i++;
-    if (cmdLine[i] && cmdLine[i] != '"' && (wxFile::Exists(cmdLine + i) || !_tcsncmp(cmdLine + i, _T("\\\\.\\"), 4)))
     {
-        OpenFile(cmdLine + i, appSettings.bDefaultReadOnly);
-        return; // skip normal arg processing loop
+        wxApp &app = wxGetApp();
+        parser.SetCmdLine(app.argc, app.argv);
     }
-
-    static const wxCmdLineEntryDesc cmdLineDesc[] =
-    {  //!WX29 WTF... wxCmdLineParser only takes char* now?
-        { wxCMD_LINE_SWITCH, ("h"), ("help"), ("show this help message"),
-            wxCMD_LINE_VAL_NONE, wxCMD_LINE_OPTION_HELP },
-        { wxCMD_LINE_OPTION, ("p"), ("pid"),  ("Process ID"), wxCMD_LINE_VAL_NUMBER },
-        { wxCMD_LINE_OPTION, ("e"), ("exe"),  ("Process name") },
-        { wxCMD_LINE_PARAM,  NULL,    NULL,       ("File"), wxCMD_LINE_VAL_STRING,
-            wxCMD_LINE_PARAM_OPTIONAL | wxCMD_LINE_PARAM_MULTIPLE },
-        { wxCMD_LINE_NONE }
-    };
-
-    wxCmdLineParser parser(cmdLineDesc, cmdLine + i);
     if (parser.Parse())
        return;
 
+    #ifdef TBDL
     long pid;
     if (parser.Found(("p"), &pid))
     {
         ProcList procList;
         if (pid <= 0)
             pid = GetCurrentProcessId();
-        hw = new HexWnd(this);
+        HexWnd *hw = new HexWnd(this);
         hw->OpenProcess(pid, procList.NameFromPID(pid), true);
         AddHexWnd(hw);
     }
@@ -553,10 +528,11 @@ void thFrame::ProcessCommandLine(LPCTSTR cmdLine, wxString cwd /*= wxEmptyString
          else
              wxMessageBox(_T("Couldn't get PID for '") + procName + _T("'"));
     }
+    #endif
 
-    for (i = 0; i < (int)parser.GetParamCount(); i++)
+    for (size_t j = 0; j < parser.GetParamCount(); j++)
     {
-        OpenFile(parser.GetParam(i), appSettings.bDefaultReadOnly);
+        OpenFile(parser.GetParam(j), appSettings.bDefaultReadOnly);
     }
 }
 
@@ -574,13 +550,16 @@ void thFrame::OnClose(wxCloseEvent &event)
 
     wxFileConfig cfg(_T("T Hex"), _T("Adam Bailey"), m_cfgName);
 
+#ifdef _WINDOWS
+    WINDOWPLACEMENT wp;
     if (!appSettings.bFullScreen)
-        GetWindowPlacement(GetHwnd(), &m_wndPlacement);
-    RECT &rc = m_wndPlacement.rcNormalPosition;
+        GetWindowPlacement(GetHwnd(), &wp);
+    RECT &rc = wp.rcNormalPosition;
     cfg.Write(_T("WindowPlacement"), wxString::Format(_T("%d %d %d %d %d"),
         rc.left, rc.top,
         rc.right - rc.left, rc.bottom - rc.top,
-        m_wndPlacement.showCmd == SW_MAXIMIZE));
+        wp.showCmd == SW_MAXIMIZE));
+#endif  // _WINDOWS
 
     //s.Save(cfg);
     //for (int tab = 0; tab < tabs->GetPageCount(); tab++)
@@ -591,12 +570,14 @@ void thFrame::OnClose(wxCloseEvent &event)
     //    m_hw->s.Save(cfg); //! should maybe save in ~HexWnd()
 
     // clean up dialogs here that use thRecentChoice
+    #ifdef TBDL
     delete m_dlgPipeOut;
     m_dlgPipeOut = NULL;
+    #endif
 
     ghw_settings.Save(cfg);
     appSettings.Save(cfg);
-    
+
     //cfg.Write(_T("Layout/FileMap"), m_mgr.SavePaneInfo(m_mgr.GetPane(map)));
     //cfg.Write(_T("Layout/Profiler"), m_mgr.SavePaneInfo(m_mgr.GetPane(profView)));
     //cfg.Write(_T("Layout/DocList"), m_mgr.SavePaneInfo(m_mgr.GetPane(docList)));
@@ -615,13 +596,14 @@ void thFrame::OnClose(wxCloseEvent &event)
 
 void thFrame::CmdExit(wxCommandEvent &event)
 {
-    OnClose(wxCloseEvent());
+    wxCloseEvent dummy;
+    OnClose(dummy);
 }
 
 void thFrame::CmdGotoDlg(wxCommandEvent &event)
 {
     if (!m_hw) {
-        MessageBeep((DWORD)-1);
+        wxBell();
         return;
     }
 
@@ -637,7 +619,7 @@ void thFrame::CmdGotoDlg(wxCommandEvent &event)
 void thFrame::CmdFindDlg(wxCommandEvent &event)
 {
     if (!m_hw) {
-        MessageBeep((DWORD)-1);
+        wxBell();
         return;
     }
     //if (!findDlg)
@@ -657,7 +639,7 @@ void thFrame::CmdFindDlg(wxCommandEvent &event)
 void thFrame::CmdFindAgain(wxCommandEvent &event)
 {
     if (!m_hw) {
-        MessageBeep((DWORD)-1);
+        wxBell();
         return;
     }
 
@@ -734,6 +716,7 @@ begin:
     {
         wxString filename = filenames[i];
 
+        #ifdef WIN32
         CLnkFile lnk(filename);
         if (lnk.isValidLink)
         {
@@ -769,6 +752,7 @@ begin:
                 }
             }
         }
+        #endif // WIN32
 
         //hw->SetDataSource(new FileDataSource(filename, false));
         HexWnd *hw = new HexWnd(this);
@@ -782,6 +766,7 @@ begin:
     }
 }
 
+#ifdef TBDL
 void thFrame::CmdOpenDrive(wxCommandEvent &event)
 {
     //wxArrayString volumes;
@@ -875,20 +860,22 @@ void thFrame::CmdOpenProcess(wxCommandEvent &event)
         AddHexWnd(hw);
     }
 }
-
-void thFrame::CmdOpenLC1(wxCommandEvent &event)
-{
-    HexWnd *hw = new HexWnd(this);
-    //hw->OpenLC1VectorMemory(_T("127.0.0.1"));
-    //hw->OpenLC1VectorMemory(_T("192.168.10.1"));
-    hw->OpenLC1VectorMemory(_T("10.2.2.1"));
-    AddHexWnd(hw);
-}
+#endif // TBDL
 
 void thFrame::CmdNewFile(wxCommandEvent &event)
 {
-    if (appSettings.bReuseWindow)
-        m_hw->OpenBlank(); //! check for modified file first
+    if (m_hw && appSettings.bReuseWindow)
+    {
+        // check for modified file first
+        if (m_hw->doc->IsModified() &&
+            wxMessageBox(_T("Save changes to ") + m_hw->doc->info + "?", "T. Hex", wxYES_NO | wxCANCEL) == wxYES &&
+            !m_hw->doc->Save())
+        {
+            wxMessageBox(_T("Problem."));
+            return;
+        }
+        m_hw->OpenBlank(); 
+    }
     else
     {
         HexWnd *hw = new HexWnd(this);
@@ -899,26 +886,25 @@ void thFrame::CmdNewFile(wxCommandEvent &event)
 
 void thFrame::CmdSettings(wxCommandEvent &event)
 {
-    HexWndSettings s = ghw_settings; // make a copy (why was this again?)
-    if (m_hw)
-        s = m_hw->s;
+    HexWndSettings s = ghw_settings; // make a copy, to see what changed
     SettingsDialog dlg(this, &s);
-    dlg.ShowModal();
+    if (dlg.ShowModal() == wxID_CANCEL)
+        return;
+
     //m_hw->s = s; // this should avoid reading 200 bytes into a 16-byte buffer that happened in OnPaint()
     //m_hw->OnDataChange(0, -1, m_hw->DocSize()); //! hack
     //m_hw->SetFont(m_hw->GetFont()); //! WRONG, but it works (except for bytes-per-line changes)
-    if (m_hw) {
-        m_hw->UpdateSettings(s);
 
-        if (dlg.FontChanged(&ghw_settings)) {
-            //LOGFONT lf;
-            //GetObject((HFONT)m_hw->GetFont().GetHFONT(), sizeof(lf), &lf);
-            //m_hw->SetFont(&lf);  // This uses new font quality setting.
-            m_hw->SetFont(m_hw->GetFont()); //! only uses new quality setting.  Needs work.
-        }
+    // FOR NOW, give all windows the same HexWndSettings.
+    // This may change when I figure out how to make it work.  2012-08-05
+    for (size_t tab = 0; tab < tabs->GetPageCount(); tab++)
+    {
+        HexWnd *hw = (HexWnd*)tabs->GetPage(tab);
+        hw->UpdateSettings(s);
     }
 
-    UpdateViews(m_hw, DataView::DV_ALL); //! also a bit of a hack
+    if (m_hw)
+        UpdateViews(m_hw, DataView::DV_ALL); //! also a bit of a hack
     //! What else could change?
 
     // Save settings for later.
@@ -941,6 +927,7 @@ void thFrame::CmdSelectDlg(wxCommandEvent &event)
 {
 }
 
+#ifdef TBDL
 UINT_PTR CALLBACK FontDlgHook(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
     const int idStrikeout = 0x410, idFixedWidth = 0x1337;
@@ -1004,6 +991,12 @@ UINT_PTR CALLBACK FontDlgHook(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam
 
 void thFrame::CmdFontDlg(wxCommandEvent &event)
 {
+    if (!m_hw)
+    {
+        wxMessageBox("FIXME: No HexWnd object available for initial font.");
+        return;
+    }
+
     //! wxFontDialog doesn't allow restriction to fixed-pitch fonts.
     LOGFONT lf;
     GetObject((HFONT)m_hw->GetFont().GetHFONT(), sizeof(lf), &lf);
@@ -1054,120 +1047,18 @@ bool MarkFullScreenWindow(HWND hWnd, bool fullscreen)
     }
     return ok;
 }
+#endif // TBDL
 
 void thFrame::CmdFullScreen(wxCommandEvent &event)
 {
-    //static bool bFullScreen = false;
     appSettings.bFullScreen = !appSettings.bFullScreen;
 
-    static DWORD orig_style = WS_VISIBLE;
-
-    // wow.  Now I feel silly.
     ShowFullScreen(appSettings.bFullScreen,
        wxFULLSCREEN_NOCAPTION |
        wxFULLSCREEN_NOBORDER |
        wxFULLSCREEN_NOMENUBAR |
        wxFULLSCREEN_NOSTATUSBAR );
     return;
-
-#if 0
-    HWND hWnd = GetHwnd();
-
-    if (appSettings.bFullScreen)
-    {
-        GetWindowPlacement(GetHwnd(), &m_wndPlacement);
-
-        //HWND hTray = ::FindWindow(_T("Shell_TrayWnd"), NULL);
-        //ShowWindow(hTray, SW_HIDE);
-
-        //! Make the taskbar appear automatically.
-        //! This doesn't work without DoEvents(), and makes all other apps resize.
-        //! That's pretty ugly.  IE6 apparently does its own mouse tracking and
-        //  shows or hides the taskbar as appropriate. (No SetCapture(), though.)
-        //APPBARDATA ab = { sizeof(ab) };
-        //ab.lParam = ABS_AUTOHIDE;
-        //SHAppBarMessage(ABM_SETSTATE, &ab);
-        //wxGetApp().DoEvents();
-
-        //! todo: track mouse.  if it gets close to the edge of the screen with the
-        // taskbar, show the taskbar.  If the mouse moves away again, hide the taskbar.
-        // We only have to do anything if ABS_ALWAYSONTOP bit is set,
-        // because if it's not, then the user probably isn't expecting a start menu.
-        // But IE always pops it up when you get close.  Maybe that's okay too.
-        // Can we do this all with SHAppBarMessage, or do we need an HWND?
-
-        //DWORD style = GetWindowLong(hWnd, GWL_STYLE);
-        //SetWindowLong(hWnd, GWL_STYLE, style & ~WS_CAPTION);
-        orig_style = (DWORD)GetWindowLong(hWnd, GWL_STYLE);
-        SetWindowLong(GetHwnd(), GWL_STYLE, WS_VISIBLE); // remove title bar
-        //SetWindowPos(hWnd, 0, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_FRAMECHANGED);
-
-        //SetWindowPos(GetHwnd(), HWND_TOPMOST,
-        //    0,
-        //    0,
-        //    GetSystemMetrics(SM_CXSCREEN),
-        //    GetSystemMetrics(SM_CYSCREEN),
-        //    SWP_SHOWWINDOW | SWP_FRAMECHANGED);
-
-        //! testing:
-        //MarkFullScreenWindow(hWnd, true);
-
-        HMONITOR hMonitor = MonitorFromWindow(hWnd, MONITOR_DEFAULTTOPRIMARY);
-        MONITORINFO mi = { sizeof(mi) };
-        GetMonitorInfo(hMonitor, &mi);
-        //SetWindowPos(GetHwnd(), HWND_TOPMOST,
-        SetWindowPos(GetHwnd(), HWND_TOP,
-            mi.rcMonitor.left,
-            mi.rcMonitor.top,
-            mi.rcMonitor.right - mi.rcMonitor.left,
-            mi.rcMonitor.bottom - mi.rcMonitor.top,
-            SWP_FRAMECHANGED | SWP_NOSENDCHANGING);
-
-        //InvalidateRect(GetHwnd(), NULL, 0);
-
-        // Hide status bar when going full-screen.  Removed 2007-09-05.
-        // This conflicts with CmdViewStatusBar and leaves the main window in a weird state.
-        //if (m_status)
-        //{
-        //    //m_status->SetWindowStyle(0);
-        //    SetStatusBar(NULL);
-        //    m_status->Hide();
-        //    Layout();
-        //}
-    }
-    else
-    {
-        //APPBARDATA ab = { sizeof(ab) };
-        //ab.lParam = ABS_ALWAYSONTOP;
-        //SHAppBarMessage(ABM_SETSTATE, &ab);
-
-        //HWND hTray = ::FindWindow(_T("Shell_TrayWnd"), NULL);
-        //ShowWindow(hTray, SW_SHOW);
-
-        //MarkFullScreenWindow(hWnd, false);
-
-        //SetWindowLong(GetHwnd(), GWL_STYLE, WS_OVERLAPPEDWINDOW); // restore title bar
-        //DWORD style = GetWindowLong(hWnd, GWL_STYLE);
-        //SetWindowLong(hWnd, GWL_STYLE, style | WS_CAPTION);
-        SetWindowLong(hWnd, GWL_STYLE, orig_style);
-        SetWindowPos(hWnd, 0, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_FRAMECHANGED);
-        SetWindowPlacement(GetHwnd(), &m_wndPlacement);
-        //SetWindowPos(GetHwnd(), HWND_NOTOPMOST, 0, 0, 0, 0,
-        //    SWP_NOMOVE | SWP_NOSIZE | SWP_FRAMECHANGED);
-
-        //InvalidateRect(NULL, NULL, 0);
-
-        // Hide status bar when going full-screen.  Removed 2007-09-05
-        //if (m_status)
-        //{
-        //    //m_status->SetWindowStyle(wxST_SIZEGRIP);
-        //    m_status->Show();
-        //    SetStatusBar(m_status);
-        //    Layout();
-        //}
-    }
-    InvalidateRect(NULL, NULL, 0);
-#endif // 0
 }
 
 void thFrame::CmdToggleInsert(wxCommandEvent &event)
@@ -1271,13 +1162,9 @@ void thFrame::UpdateViews(HexWnd *hw, int flags)
     }
 }
 
+#ifdef WIN32
 WXLRESULT thFrame::MSWWindowProc(WXUINT message, WXWPARAM wParam, WXLPARAM lParam)
 {
-    if (testflag && (message == WM_WINDOWPOSCHANGING))
-    {
-        message = message; //! breakpoint
-    }
-
     if (message == WM_RENDERALLFORMATS)
     {
          //! todo: ask user whether to leave on clipboard?
@@ -1289,25 +1176,28 @@ WXLRESULT thFrame::MSWWindowProc(WXUINT message, WXWPARAM wParam, WXLPARAM lPara
     }
     //else if (message == WM_CHANGECBCHAIN)
     //{
-    //    // If the next window is closing, repair the chain. 
-    //    if ((HWND) wParam == hwndNextViewer) 
-    //        hwndNextViewer = (HWND) lParam; 
+    //    // If the next window is closing, repair the chain.
+    //    if ((HWND) wParam == hwndNextViewer)
+    //        hwndNextViewer = (HWND) lParam;
 
-    //    // Otherwise, pass the message to the next link. 
-    //    else if (hwndNextViewer != NULL) 
+    //    // Otherwise, pass the message to the next link.
+    //    else if (hwndNextViewer != NULL)
     //    {
-    //        SendMessage(hwndNextViewer, message, wParam, lParam); 
+    //        SendMessage(hwndNextViewer, message, wParam, lParam);
     //    }
     //    return 0;
     //}
 
     return wxFrame::MSWWindowProc(message, wParam, lParam);
 }
+#endif
 
 void thFrame::CmdCycleClipboard(wxCommandEvent &event)
 {
+    #ifdef TBDL
     clipboard.Cycle();
     m_hw->CmdPaste(event); //! Do something intelligent here
+    #endif
 }
 
 void thFrame::CmdHistogram(wxCommandEvent &event)
@@ -1364,6 +1254,7 @@ wxStatusBar* thFrame::CreateStatusBar()
 
 bool thFrame::Show(bool show /*= true*/)
 {
+    #ifdef TBDL
     if (show)
     {
         WINDOWPLACEMENT wp;
@@ -1378,7 +1269,8 @@ bool thFrame::Show(bool show /*= true*/)
         //SetWindowPos(GetHwnd(), NULL, 0, 0, 0, 0,
         //    SWP_NOMOVE | SWP_NOSIZE | SWP_FRAMECHANGED);
     }
-    
+    #endif // TBDL
+
     return wxFrame::Show(show);
 }
 
@@ -1455,26 +1347,23 @@ void thFrame::CmdStructureView(wxCommandEvent &event)
     ToggleView(viewStruct, appSettings.bStructureView);
 }
 
+#ifdef INCLUDE_LIBDISASM
 void thFrame::CmdDisasmView(wxCommandEvent &event)
 {
     if (!disasmView)
         disasmView = new DisasmView(this);
     ToggleView(disasmView, appSettings.bDisasmView);
 }
+#endif
 
-void thFrame::CmdFatView(wxCommandEvent &event)
-{
-    if (!fatView)
-        fatView = new FatView(this);
-    ToggleView(fatView, appSettings.bFatView);
-}
-
+#ifdef TBDL
 void thFrame::CmdExportView(wxCommandEvent &event)
 {
     if (!exportView)
         exportView = new ExportView(this);
     ToggleView(exportView, appSettings.bExportView);
 }
+#endif // TBDL
 
 void thFrame::SetHexWnd(HexWnd *hw)
 {
@@ -1484,7 +1373,7 @@ void thFrame::SetHexWnd(HexWnd *hw)
     if (hw)
     {
         SetTitle(hw->GetTitle() + _T(" - Tyrannosaurus Hex"));
-        DisplayPane::s_pSettings = &hw->s; //!
+        DisplayPane::s_pSettings = &hw->GetSettings(); //!
         //hw->Raise(); // need this to get focus from wxAuiNotebook
         hw->SetFocus(); // Testing 2007-08-28.  Automatic focus quit working a while ago.
         // now fixed with SetFocus() in thFrame() after adding initial windows
@@ -1504,24 +1393,24 @@ void thFrame::AddHexWnd(HexWnd *hw)
 
     if (bWindowShown)
     {
-        tabs->Freeze();
-        if (!tabs->IsShown())
+        //tabs->Freeze();  // broken in wx 2.9?
+        if (!tabs->IsShown())  // adding first or second HexWnd
         {
-            wxAuiPaneInfo &pane = m_mgr.GetPane(_T("HexWnd"));
-            wxWindow *old_panel = NULL;
+            wxWindow *newWindow;
             if (m_hw)
             {
                 tabs->AddPage(m_hw, m_hw->GetTitle());
                 tabs->Show();
-                pane.Window(tabs);
+                newWindow = tabs;
             }
             else
-            {
-                old_panel = pane.window;
-                pane.Window(hw);
-            }
+                newWindow = hw;
+            wxAuiPaneInfo &pane = m_mgr.GetPane(_T("HexWnd"));
+            if (pane.IsOk())
+                pane.Window(newWindow);
+            else
+                m_mgr.AddPane(newWindow, wxAuiPaneInfo().Name(_T("HexWnd")).CenterPane().PaneBorder(false));
             m_mgr.Update();
-            delete old_panel;
         }
         if (m_hw) // at least one HexWnd already shown?
         {
@@ -1529,7 +1418,7 @@ void thFrame::AddHexWnd(HexWnd *hw)
             tabs->SetSelection(tabs->GetPageCount() - 1);
         }
         SetHexWnd(hw);
-        tabs->Thaw();
+        //tabs->Thaw();
     }
     else
         pendingWindows.push_back(hw);
@@ -1563,6 +1452,7 @@ void thFrame::CmdOpenSpecial(wxCommandEvent &event)
         OpenFile(appSettings.asOpenSpecial[0], true);
 }
 
+#ifdef TBDL
 void thFrame::CmdWriteSpecial(wxCommandEvent &event)
 {
     thPipeOutDialog dlg(this);
@@ -1601,16 +1491,18 @@ void thFrame::OnPipeComplete()
 {
     if (m_pSpawnHandler->bComplete)
         PRINTF(_T("The child process exited with code %d (0x%X)\n"),
-            m_pSpawnHandler->exitCode, 
+            m_pSpawnHandler->exitCode,
             m_pSpawnHandler->exitCode);
     else
         PRINTF(_T("The child process is still active.\n"));
 
     // SpawnHandler could delete itself after it calls this method...
 }
+#endif // TBDL
 
 void thFrame::OpenFile(wxString filename, bool bReadOnly) //! need a better read/write argument
 {
+    #ifdef TBDL
     wxFileName fn(filename);
     bool isDrive = false;
     if (fn.HasVolume() && !fn.HasName() &&  // filename is drive root
@@ -1673,7 +1565,7 @@ void thFrame::OpenFile(wxString filename, bool bReadOnly) //! need a better read
     {
         //CreateReaderThread(hFile);
         //FastWriteBuf buf(1024);
-        //ReadFileEx(hFile, buf, 1024, 
+        //ReadFileEx(hFile, buf, 1024,
     }
     //if (type == FILE_TYPE_DISK) // Oops.  This applies to real files on a disk.
     //{
@@ -1694,6 +1586,7 @@ void thFrame::OpenFile(wxString filename, bool bReadOnly) //! need a better read
         wxMessageBox(msg);
     }
     else
+    #endif // TBDL
     {
         HexWnd *hw = new HexWnd(this);
         if (hw->OpenFile(filename, bReadOnly))
@@ -1716,18 +1609,18 @@ void thFrame::OnPaneClose(wxAuiManagerEvent &event)
         appSettings.bNumberView = false;
     if (win == docList)
         appSettings.bDocList = false;
-    if (win == profView)
-    {
-        //! can't get it back.  UI doesn't know about it.
-    }
+    //if (win == profView)
+    //{
+    //    //! can't get it back.  UI doesn't know about it.
+    //}
 #ifdef INCLUDE_LIBDISASM
     if (win == disasmView)
         appSettings.bDisasmView = false;
 #endif
-    if (win == fatView)
-        appSettings.bFatView = false;
+    #ifdef TBDL
     if (win == exportView)
         appSettings.bExportView = false;
+    #endif
     UpdateUI();
 }
 
@@ -1755,14 +1648,14 @@ void thFrame::OnPageClosed(NotebookEventType& WXUNUSED(event))
     if (tabs->GetPageCount() == 1) // removed second-to-last page, only one left
     {
         HexWnd *otherWnd = (HexWnd*)tabs->GetPage(0);
-        otherWnd->Freeze();
+        otherWnd->Hide();  // Freeze() didn't work on GTK for some reason.
         tabs->RemovePage(0);
         tabs->Hide();
         otherWnd->Reparent(this);
         wxAuiPaneInfo &pane = m_mgr.GetPane(tabs);
         pane.Window(otherWnd);
-        otherWnd->Thaw();
-        m_mgr.Update(); //! do we need this?
+        otherWnd->Show();
+        m_mgr.Update();
     }
 }
 
@@ -1771,6 +1664,8 @@ void thFrame::CmdCloseTab(wxCommandEvent &WXUNUSED(event))
     if (tabs->IsShown())
     {
         tabs->DeletePage(tabs->GetSelection());
+        if (tabs->GetPageCount() == 0)  // Do this before OnPageClosed().  2012-08-03
+            SetHexWnd(NULL);  // Only needed if we were showing notebook for single tab
 #ifndef WXFLATNOTEBOOK
         wxAuiNotebookEvent e;
         OnPageClosed(e); // wxAuiNotebook doesn't do this.
@@ -1814,7 +1709,6 @@ void thFrame::UpdateUI()
     menuBar->Check(IDM_ViewStringView, appSettings.bStringView);
     menuBar->Check(IDM_ViewStructureView, appSettings.bStructureView);
     menuBar->Check(IDM_ViewDisasmView, appSettings.bDisasmView);
-    menuBar->Check(IDM_ViewFatView, appSettings.bFatView);
     menuBar->Check(IDM_ViewExportView, appSettings.bExportView);
 
     menuBar->Check(IDM_ViewStatusBar, appSettings.bStatusBar);
@@ -1823,9 +1717,10 @@ void thFrame::UpdateUI()
 
     if (m_hw)
     {
-        menuBar->Check(IDM_ViewRuler, m_hw->m_settings.bShowRuler);
-        menuBar->Check(IDM_ViewStickyAddr, m_hw->m_settings.bStickyAddr);
-        menuBar->Check(IDM_ViewAdjustColumns, m_hw->m_settings.bAdjustLineBytes);
+        HexWndSettings s = m_hw->GetSettings();
+        menuBar->Check(IDM_ViewRuler, s.bShowRuler);
+        menuBar->Check(IDM_ViewStickyAddr, s.bStickyAddr);
+        menuBar->Check(IDM_ViewAdjustColumns, s.bAdjustLineBytes);
         menuBar->SetLabel(IDM_ToggleReadOnly, m_hw->IsReadOnly() ? _T("Re-open writeable") : _T("Re-open read-only"));
     }
 }
@@ -1892,6 +1787,7 @@ void thFrame::OnHelp(wxHelpEvent &event)
     about.ShowModal();
 }
 
+#ifdef TBDL
 void thFrame::CmdOpenTestFile(wxCommandEvent &event)
 {
     HexWnd *hw = new HexWnd(this);
@@ -1925,27 +1821,28 @@ void thFrame::CmdOpenProcessFile(wxCommandEvent &event)
     pDS->Release();
     m_mgr.Update();
 }
+#endif // TBDL
 
 void thFrame::CmdNextBinChar(wxCommandEvent &event)
 {
     if (!m_hw) return;
     HexDoc *doc = m_hw->doc;
-    const bool isUnicode = m_hw->m_pane[m_hw->GetSelection().iRegion].id == DisplayPane::ID_UNICODE;
+    const bool isUnicode = m_hw->GetCurrentPane().id == DisplayPane::ID_UNICODE;
 
-    THSIZE start = m_hw->GetSelection().nStart;
-    if (!isUnicode && start < doc->size)
+    THSIZE start = m_hw->GetSelection().nStart, docSize = doc->GetSize();
+    if (!isUnicode && start < docSize)
         start++;
 
-    for (; start < doc->size; start += MEGA)
+    for (; start < docSize; start += MEGA)
     {
-        int blocksize = (int)wxMin(doc->size - start, MEGA);
+        int blocksize = (int)wxMin(docSize - start, MEGA);
         const uint8 *buf = doc->Load(start, blocksize);
         if (!buf)
             break;
         if (isUnicode)
         {
             blocksize--;
-            if (m_hw->s.iEndianMode == NATIVE_ENDIAN_MODE)
+            if (m_hw->GetSettings().iEndianMode == NATIVE_ENDIAN_MODE)
             {
                 for (int x = 0; x < blocksize; x += 2)
                 {
@@ -1982,7 +1879,7 @@ void thFrame::CmdNextBinChar(wxCommandEvent &event)
         }
     }
     SetStatusText(_T("EOF"));
-    MessageBeep((UINT)-1);
+    wxBell();
 }
 
 void thFrame::CmdPrevBinChar(wxCommandEvent &event)
@@ -2005,7 +1902,7 @@ void thFrame::CmdPrevBinChar(wxCommandEvent &event)
             }
     }
     SetStatusText(_T("EOF"));
-    MessageBeep((UINT)-1);
+    wxBell();
 }
 
 bool thFrame::GetDocsFromUser(int n, int *pnDoc)
@@ -2081,7 +1978,6 @@ void thFrame::CompareBuffers()
     HexWnd *hw2 = (HexWnd*)tabs->GetPage(nDoc[1]);
     HexDoc *doc1 = hw1->doc;
     HexDoc *doc2 = hw2->doc;
-    const uint8 *buf1, *buf2;
 
     Selection sel1 = hw1->GetSelection();
     Selection sel2 = hw2->GetSelection();
@@ -2092,12 +1988,7 @@ void thFrame::CompareBuffers()
     if (sel2.GetSize() > 0)
         base2 = sel2.GetFirst(), size2 = sel2.GetSize();
     THSIZE compareSize = wxMin(size1, size2);
-    THSIZE diffCount = 0, diffBytes = 0;
-    int blockSize = HEXDOC_BUFFER_SIZE;
-
-    //! Speed test, 2009-05-02.
-    //PreloadFile(hw1->doc, hw1->GetTitle());
-    //PreloadFile(hw2->doc, hw2->GetTitle());
+    int blockSize = wxMin(HEXDOC_BUFFER_SIZE * 32, compareSize);
 
     // New procedure, 2009-05-02.
     // Comparing goes much faster off this 750GB NTFS WDC7500AACS if we read both files separately first.
@@ -2106,142 +1997,44 @@ void thFrame::CompareBuffers()
     // If this matches, compute a hash for both files.
     // Inform the user of the results and ask if they want to do a full comparison.
 
-    if (compareSize > appSettings.nSmartCompareSize &&
-        appSettings.nSmartCompareSize > 0)
-    {
-        if (0 == (buf1 = doc1->Load(base1, blockSize)))
-        {
-            PRINTF(_T("Couldn't read from doc 1 at 0x%I64X\n"), base1);
-            return;
-        }
-        if (0 == (buf2 = doc2->Load(base2, blockSize)))
-        {
-            PRINTF(_T("Couldn't read from doc 2 at 0x%I64X\n"), base2);
-            return;
-        }
+    // Tweaking this procedure for speed, complexity.  2011-06-02
+    // Comparison is fastest if we read one whole file, then the other.
+    // But that makes the user wait for longest possible delay.
+    // Let's compromise with a 32MB block size.
 
-        wxString sizemsg, hashmsg;
-        int iconStyle = wxICON_HAND;
-        if (size1 > size2)
-            sizemsg = hw1->GetTitle() + _T("\n (left side) is longer by ") + FormatBytes(size1 - size2, MEGA) + _T(".");
-        else if (size2 > size1)
-            sizemsg = hw2->GetTitle() + _T("\n (right side) is longer by ") + FormatBytes(size2 - size1, MEGA) + _T(".");
-        //else
-        //    sizemsg = _T("Both files are the same size.");
-
-        if (memcmp(buf1, buf2, blockSize) == 0)
-        {
-            ULONG hash1, hash2;
-            if (doc1->ComputeAdler32(base1, compareSize, hash1) &&
-                doc2->ComputeAdler32(base2, compareSize, hash2) &&
-                hash1 == hash2)
-            {
-                hashmsg = _T("Checksums match.\n");
-                iconStyle = wxICON_INFORMATION;  //! todo: better icon
-            }
-            else
-                hashmsg = _T("Files are different.\n");
-        }
-        else
-            hashmsg = _T("Differences found in first megabyte.\n");
-
-        if (wxMessageBox(hashmsg + sizemsg + _T("\nDo full byte-by-byte comparison?"),
-            _T("T.Hex Buffer Comparison"), wxYES_NO | iconStyle) == wxNO)
-            return;
-    }
+    CompareData d(doc1, doc2);
 
     wxString msg = hw1->GetTitle() + _T("\n") + hw2->GetTitle();
     thProgressDialog progress(compareSize, this, msg, _T("T.Hex Buffer Comparison"));
+    progress.SetSpeedScale(2);
 
-    FILE *df = _tfopen(_T("diffs.txt"), _T("a"));
-    fprintf(df, "%S\n%S\n", hw1->GetTitle().c_str(), hw2->GetTitle().c_str());
-    TCHAR diffbuf[21];
-    int ad = CountDigits(max(hw1->GetLastDisplayAddress(), hw2->GetLastDisplayAddress()), 16);
-    int cd = 2;
+    d.df.Write(hw1->GetTitle() + '\n');
+    d.df.Write(hw2->GetTitle() + '\n');
+    d.ad = CountDigits(wxMax(hw1->GetLastDisplayAddress(), hw2->GetLastDisplayAddress()), 16);
+    d.cd = 2;
 
-    THSIZE offset, firstDiff, lastDiff = 0;
-    bool firstSet = false;
+    THSIZE offset;
     for (offset = 0; offset < compareSize; offset += blockSize)
     {
-        if (!progress.Update(offset, true, wxString::Format(_T(", %I64d difference"), diffCount) + Plural(diffCount)))
+        if (!progress.Update(offset, true, wxString::Format(_T(", %I64d difference"), d.diffCount) + Plural(d.diffCount)))
             break;
 
-        if (compareSize - offset < blockSize)
-            blockSize = compareSize - offset;
+        blockSize = wxMin(blockSize, compareSize - offset);
 
-        if (0 == (buf1 = doc1->Load(offset + base1, blockSize)))
-        {
-            PRINTF(_T("Couldn't read from doc 1 at 0x%I64X\n"), offset + base1);
+        THSIZE diffOffset = CompareBuffersChecksum(d, base1 + offset, base2 + offset, blockSize);
+        if (d.cancel)
             break;
-        }
-        if (0 == (buf2 = doc2->Load(offset + base2, blockSize)))
+        if (diffOffset < blockSize)
         {
-            PRINTF(_T("Couldn't read from doc 2 at 0x%I64X\n"), offset + base2);
-            break;
-        }
-
-        if (memcmp(buf1, buf2, blockSize))
-        {
-            for (int i = 0; i < blockSize; i++)
+            for (THSIZE o2 = offset + diffOffset; o2 < offset + blockSize; o2 += HEXDOC_BUFFER_SIZE)
             {
-                if (buf1[i] != buf2[i]) {
-                    if (!firstSet) {
-                        firstDiff = offset + i;
-                        firstSet = true;
-                    }
-                    lastDiff = offset + i;
-
-                    // Update 2008-09-24.  Now treat this case as one difference.
-                    //    File 1: 11002200330044005500660077008800
-                    //    File 2: 11002200330044000000000000008800
-
-                    const uint8 save1 = buf1[i], save2 = buf2[i];
-                    int changed1 = 0, changed2 = 0;
-
-                    THSIZE bytes = 1, lastDiffBytes = 1;
-                    int start = i;
-                    i++;
-                    while (i < blockSize && (buf1[i] != buf2[i] || !changed1 || !changed2))
-                    {
-                        bytes++;
-                        if (buf1[i] != buf2[i])
-                            lastDiffBytes = bytes;
-                        changed1 |= buf1[i] ^ save1;
-                        changed2 |= buf2[i] ^ save2;
-                        i++;
-                    }
-
-                    bytes = lastDiffBytes;
-
-                    if (diffCount < 1000) {
-                        // Give a quick summary of how the bytes changed.
-                        TCHAR *s = diffbuf;
-                        for (int j = 0; j < min(bytes, 4); j++, s += 2)
-                            my_itoa((uint32)buf1[start + j], s, 16, 2);
-                        _tcscpy(s, _T(" => "));
-                        s += 4;
-                        for (int j = 0; j < min(bytes, 4); j++, s += 2)
-                            my_itoa((uint32)buf2[start + j], s, 16, 2);
-                        *s = 0;  // Terminate string.
-
-                        if (bytes == 1) {
-                            PRINTF(  _T("0x%0*I64X,  %*d byte  %s\n"), ad, offset + start, cd, 1, diffbuf);
-                            fprintf(df, "0x%0*I64X,  %*d byte  %S\n" , ad, offset + start, cd, 1, diffbuf);
-                        } else {
-                            PRINTF(  _T("0x%0*I64X, %*I64d bytes  %s\n"), ad, offset + start, cd, bytes, diffbuf);
-                            fprintf(df, "0x%0*I64X, %*I64d bytes  %S\n" , ad, offset + start, cd, bytes, diffbuf);
-                        }
-                        cd = fnmax(cd, CountDigits(bytes, 10));
-                    }
-                    else if (diffCount == 1000)
-                        PRINTF( _T("Too many differences.\n"));
-                    diffBytes += bytes;
-                    diffCount++;
-                }
+                int bufSize = wxMin(compareSize - o2, HEXDOC_BUFFER_SIZE);
+                if (!CompareBuffersDetail(d, base1 + o2, base2 + o2, bufSize))
+                    goto done;
             }
-            fflush(df);
         }
     }
+done:
 
     progress.Update(compareSize - 1); // does stupid things if you pass the max value
     //progress.Hide();
@@ -2249,14 +2042,14 @@ void thFrame::CompareBuffers()
     if (offset >= compareSize) // not canceled?
     {
         msg = wxString(FormatBytes(compareSize, MEGA)) + _T(" compared.\n");
-        if (diffCount)
+        if (d.diffCount)
         {
-            msg += FormatDec(diffCount) + _T(" different block") + Plural(diffCount) +
-                _T(" found in ") + FormatBytes(diffBytes, MEGA);
-            msg += _T(".\nFirst difference is at 0x") + FormatHex(firstDiff);
-            msg += _T(".\nLast difference is at 0x") + FormatHex(lastDiff);
-            hw1->ScrollToRange(base1 + firstDiff, base1 + firstDiff, J_AUTO);
-            hw2->ScrollToRange(base2 + firstDiff, base2 + firstDiff, J_AUTO);
+            msg += FormatDec(d.diffCount) + _T(" different block") + Plural(d.diffCount) +
+                _T(" found in ") + FormatBytes(d.diffBytes, MEGA);
+            msg += _T(".\nFirst difference is at ") + FormatOffset(d.firstDiff);
+            msg += _T(".\nLast difference is at ") + FormatOffset(d.lastDiff);
+            hw1->ScrollToRange(base1 + d.firstDiff, base1 + d.firstDiff, J_AUTO);
+            hw2->ScrollToRange(base2 + d.firstDiff, base2 + d.firstDiff, J_AUTO);
         }
         else
             msg += _T("No differences found");
@@ -2264,13 +2057,135 @@ void thFrame::CompareBuffers()
             msg += _T(".\n") + hw1->GetTitle() + _T("\n (left side) is longer by ") + FormatBytes(size1 - size2, MEGA);
         if (size2 > size1)
             msg += _T(".\n") + hw2->GetTitle() + _T("\n (right side) is longer by ") + FormatBytes(size2 - size1, MEGA);
-        PRINTF(_T("%s.\n"), msg.c_str());
-        fprintf(df, "%s.\n\n", msg.mb_str());
+        PRINTF(_T("%s.\n"), msg.mb_str());
+        d.df.Write(msg + ".\n\n");
         wxMessageBox(msg + (wxChar)'.');
     }
-
-    fclose(df);
 }
+
+
+bool thFrame::CompareBuffersDetail(CompareData &d, THSIZE base1, THSIZE base2, THSIZE compareSize)
+{
+    const uint8 *buf1, *buf2;
+    if (0 == (buf1 = d.doc1->Load(base1, compareSize)))
+    {
+        PRINTF(_T("Couldn't read from doc 1 at 0x%I64X\n"), base1);
+        return false;
+    }
+    if (0 == (buf2 = d.doc2->Load(base2, compareSize)))
+    {
+        PRINTF(_T("Couldn't read from doc 2 at 0x%I64X\n"), base2);
+        return false;
+    }
+
+    if (memcmp(buf1, buf2, compareSize))
+    {
+        for (int i = 0; i < compareSize; i++)
+        {
+            if (buf1[i] != buf2[i]) {
+                if (!d.firstSet) {
+                    d.firstDiff = base1 + i;
+                    d.firstSet = true;
+                }
+                d.lastDiff = base1 + i;
+
+                // Update 2008-09-24.  Now treat this case as one difference.
+                //    File 1: 11002200330044005500660077008800
+                //    File 2: 11002200330044000000000000008800
+
+                const uint8 save1 = buf1[i], save2 = buf2[i];
+                int changed1 = 0, changed2 = 0;
+
+                THSIZE bytes = 1, lastDiffBytes = 1;
+                int start = i;
+                i++;
+                while (i < compareSize && (buf1[i] != buf2[i] || !changed1 || !changed2))
+                {
+                    bytes++;
+                    if (buf1[i] != buf2[i])
+                        lastDiffBytes = bytes;
+                    changed1 |= buf1[i] ^ save1;
+                    changed2 |= buf2[i] ^ save2;
+                    i++;
+                }
+
+                bytes = lastDiffBytes;
+
+                if (d.diffCount < 1000) {
+                    // Give a quick summary of how the bytes changed.
+                    TCHAR diffbuf[21], *s = diffbuf;
+                    for (int j = 0; j < wxMin(bytes, 4); j++, s += 2)
+                        my_itoa((uint32)buf1[start + j], s, 16, 2);
+                    wxStrcpy(s, _T(" => "));
+                    s += 4;
+                    for (int j = 0; j < wxMin(bytes, 4); j++, s += 2)
+                        my_itoa((uint32)buf2[start + j], s, 16, 2);
+                    *s = 0;  // Terminate string.
+
+                    if (bytes == 1) {
+                        PRINTF(  _T("0x%0*I64X,  %*d byte  %s\n"), d.ad, base1 + start, d.cd, 1, diffbuf);
+                        d.df.Write(wxString::Format("0x%0*I64X,  %*d byte  %s\n" , d.ad, base1 + start, d.cd, 1, diffbuf));
+                    } else {
+                        PRINTF(  _T("0x%0*I64X, %*I64d bytes  %s\n"), d.ad, base1 + start, d.cd, bytes, diffbuf);
+                        d.df.Write(wxString::Format("0x%0*I64X, %*I64d bytes  %s\n" , d.ad, base1 + start, d.cd, bytes, diffbuf));
+                    }
+                    d.cd = fnmax(d.cd, CountDigits(bytes, 10));
+                }
+                else if (d.diffCount == 1000)
+                    PRINTF( _T("Too many differences.\n"));
+                d.diffBytes += bytes;
+                d.diffCount++;
+            }
+        }
+        d.df.Flush();
+    }
+
+    return true;
+}
+
+// Compare buffers assuming there are no differences.
+// Return location of first difference, or compareSize.
+THSIZE thFrame::CompareBuffersChecksum(CompareData &d, THSIZE base1, THSIZE base2, THSIZE compareSize)
+{
+    int blocks = DivideRoundUp(compareSize, HEXDOC_BUFFER_SIZE);
+    ULONG hash2, *hash1 = new ULONG[blocks];
+    THSIZE diffOffset;
+
+    // Read N x 1MB blocks for doc1, storing intermediate checksums.
+    for (int i = 0; i < blocks; i++)
+    {
+        THSIZE offset = i * HEXDOC_BUFFER_SIZE;
+        THSIZE blockSize = wxMin(compareSize - offset, HEXDOC_BUFFER_SIZE);
+        if (!d.doc1->ComputeAdler32(base1 + offset, blockSize, hash1[i]))
+        {
+            d.cancel = true;
+            goto done;
+        }
+    }
+
+    // Read N x 1MB blocks for doc2, comparing with doc1 checksums.
+    for (int i = 0; i < blocks; i++)
+    {
+        THSIZE offset = i * HEXDOC_BUFFER_SIZE;
+        THSIZE blockSize = wxMin(compareSize - offset, HEXDOC_BUFFER_SIZE);
+        if (!d.doc2->ComputeAdler32(base2 + offset, blockSize, hash2))
+        {
+            d.cancel = true;
+            goto done;
+        }
+        if (hash2 != hash1[i])
+        {
+            diffOffset = offset;
+            goto done;
+        }
+    }
+    diffOffset = compareSize;
+
+done:
+    delete [] hash1;
+    return diffOffset;
+}
+
 
 void thFrame::OnDoubleClick(wxMouseEvent &event)
 {
@@ -2330,12 +2245,12 @@ void thFrame::CmdZipRecover(wxCommandEvent &event)
         if (wxFile::Exists(newname))
         {
             int result = wxMessageBox(name + _T(" exists.  Overwrite?"), _T("ZIP recovery"), wxYES_NO | wxCANCEL);
-            if (result == wxYES)
-                if (wxFile::Exists(newname) && !wxRemoveFile(newname))  // user may delete it himself.
-                {
-                    wxMessageBox(_T("Couldn't delete ") + name);
-                    write = false;
-                }
+            if (result == wxYES &&
+                wxFile::Exists(newname) && !wxRemoveFile(newname))  // user may delete it himself.
+            {
+                wxMessageBox(_T("Couldn't delete ") + name);
+                write = false;
+            }
             else if (result == wxNO)
                 write = false;
             else if (result == wxCANCEL)
@@ -2374,7 +2289,11 @@ void thFrame::CmdCompressability(wxCommandEvent &event)
 {
     if (!m_hw || !m_hw->doc)
         return;
-    Selection sel = m_hw->GetSelectionOrAll();
+    Selection sel;
+    if (m_hw->HasSelection())
+        sel = m_hw->GetSelection();
+    else
+        sel.nStart = 0, sel.nEnd = m_hw->DocSize();
     if (sel.GetSize() == 0)
         return;
 
@@ -2407,7 +2326,7 @@ void thFrame::CmdCompressability(wxCommandEvent &event)
     int savingsPct = 0;
     if (outsize < (wxFileOffset)offset)
         savingsPct = (offset - outsize) * 100 / offset;
-    TCHAR *explanation;
+    LPCTSTR explanation;
     switch (savingsPct / 10)
     {
     case 0: explanation = _T("Abysmal"); break;
@@ -2501,6 +2420,14 @@ void thFrame::CmdUnZlib(wxCommandEvent &event)
         in.Read(out);
     }
 
+    #ifdef TBDL
     clipboard.SetData(uncomp, DisplayPane::NUMERIC, thCopyFormat::RAW);
+    #endif
 }
 
+#ifndef WIN32
+DWORD thFrame::GetHWND()
+{
+    return 0;  //! TBDL
+}
+#endif

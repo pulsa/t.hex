@@ -35,6 +35,31 @@ class thStatusBar;
 class ipcServer;
 class thPipeOutDialog;
 
+
+class CompareData {
+public:
+    CompareData(HexDoc *doc1, HexDoc *doc2)
+        : df("diffs.txt", "a")
+    {
+        this->doc1 = doc1;
+        this->doc2 = doc2;
+        firstSet = false;
+        firstDiff = lastDiff = 0;
+        diffCount = diffBytes = 0;
+        cancel = false;
+    }
+
+    HexDoc *doc1, *doc2;
+    bool firstSet;
+    THSIZE firstDiff, lastDiff;  // absolute offsets in doc1
+    THSIZE diffCount, diffBytes;
+    wxFFile df;
+    int ad, cd;  // address digits, count digits
+
+    bool cancel;  // set if user clicks cancel on progress dialog
+};
+
+
 class thFrame : public wxFrame
 {
 public:
@@ -116,7 +141,6 @@ public:
     void CmdOpenFile(wxCommandEvent &event);
     void CmdOpenDrive(wxCommandEvent &event);
     void CmdOpenProcess(wxCommandEvent &event);
-    void CmdOpenLC1(wxCommandEvent &event);
     void CmdNewFile(wxCommandEvent &event);
     void CmdCopyAsDlg(wxCommandEvent &event);
     void CmdPasteDlg(wxCommandEvent &event);
@@ -179,7 +203,7 @@ public:
     WINDOWPLACEMENT m_wndPlacement;
     virtual bool Show(bool show = true);
 
-    void ProcessCommandLine(LPCTSTR cmdLine, wxString cwd = wxEmptyString);
+    void ProcessCommandLine(wxString cmdLine = wxEmptyString, wxString cwd = wxEmptyString);
 
     //! placeholder methods for ExitSaveDialog
     void SaveAll() {}
@@ -187,6 +211,8 @@ public:
 
     bool GetDocsFromUser(int n, int *pnDoc);
     void CompareBuffers(); // temporary function to compare the first two documents and log to diffs.txt
+    bool CompareBuffersDetail(CompareData &d, THSIZE base1, THSIZE base2, THSIZE compareSize);
+    THSIZE CompareBuffersChecksum(CompareData &d, THSIZE base1, THSIZE base2, THSIZE compareSize);
     void PreloadFile(HexDoc *doc, wxString title);
 
     wxAuiManager m_mgr;

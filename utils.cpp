@@ -78,7 +78,7 @@ void CreateConsole(LPCTSTR title)
     HWND hWnd = FindWindow(NULL, tmp);
 #endif
     SetConsoleTitle(title);
-    SetWindowPos(hWnd, NULL, 0, 0, 0, 0, SWP_NOSIZE);
+    //SetWindowPos(hWnd, NULL, 0, 0, 0, 0, SWP_NOSIZE);
 }
 
 const char hexdigits[] = "0123456789ABCDEF";
@@ -1130,6 +1130,111 @@ wxString GetFileDescription(LPCTSTR szExeFile)
     return descr;
 }
 
+LRESULT EnableSeDebugPrivilege()
+{
+ /////////////////////////////////////////////////////////
+   //   Note: Enabling SeDebugPrivilege adapted from sample
+   //     MSDN @ http://msdn.microsoft.com/en-us/library/aa446619%28VS.85%29.aspx
+   // Enable SeDebugPrivilege
+   HANDLE hToken = NULL;
+   TOKEN_PRIVILEGES tokenPriv;
+   LUID luidDebug;
+   LRESULT err = 0;
+   bool success = false;
+   if(OpenProcessToken(GetCurrentProcess(), TOKEN_ADJUST_PRIVILEGES, &hToken) != FALSE) 
+   {
+      if(LookupPrivilegeValue(NULL, SE_DEBUG_NAME, &luidDebug) != FALSE)
+      {
+         tokenPriv.PrivilegeCount           = 1;
+         tokenPriv.Privileges[0].Luid       = luidDebug;
+         tokenPriv.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;
+         if(AdjustTokenPrivileges(hToken, FALSE, &tokenPriv, 0, NULL, NULL) != FALSE)
+         {
+            success = true;
+         }
+      }
+   }
+   if (!success)
+      err = GetLastError();
+   CloseHandle(hToken);
+   // Enable SeDebugPrivilege
+   /////////////////////////////////////////////////////////
+   return err;
+}
+
+wxString GetProcessPath(const PROCESSENTRY32 &proc)
+{
+    TCHAR path[MAX_PATH];
+    HMODULE hMods[1024];
+    DWORD cbNeeded;
+
+    HANDLE hProc = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, proc.th32ProcessID);
+    if (!hProc)
+    {
+        printf("OpenProcess error %d ", GetLastError());
+        return wxEmptyString;
+    }
+
+    ON_BLOCK_EXIT(CloseHandle, hProc);  // TODO
+    if (GetModuleFileNameEx(hProc, NULL, path, MAX_PATH))
+    {
+        // Works with 32-bit processes.
+        if (!_tcsnicmp(path, _T("\\??\\"), 4)) // temporary hack
+            return wxString(path + 4);
+        else
+            return wxString(path);
+    }
+
+    //! This doesn't work for some system procs (smss, csrss, winlogon, maybe svchost).
+    // How do we get the real file path?  How does Process Explorer do it?
+    // Task Manager doesn't even try.
+    // GetCommandLine()
+    // Dbghelp.dll (EnumerateLoadedModules64)
+    // Toolhelp32 snapshot, OpenProcess, GetMappedFileName
+
+    //  Works, but requires Vista.
+    cbNeeded = MAX_PATH;
+    if (QueryFullProcessImageName(hProc, 1, path, &cbNeeded))
+    {
+        // Returns a path like QueryDosDevice(), \Device\HarddiskVolume*
+        return path;
+    }
+
+    // Doesn't work yet.
+    //HANDLE hModuleSnap = CreateToolhelp32Snapshot( TH32CS_SNAPMODULE, proc.th32ProcessID );
+    //if( hModuleSnap != INVALID_HANDLE_VALUE )
+    //{
+    //    MODULEENTRY32 me = { sizeof(me) };
+    //    Module32First(hModuleSnap, &me);
+    //    CloseHandle(hModuleSnap);
+    //    if (me.szExePath[0])
+    //        return wxString(me.szExePath);
+    //}
+
+    // Seems to work about as well as GetModuleFileName(hProc, NULL...)
+    // Get a list of all the modules in this process.
+    //if (!EnumProcessModules(hProc, hMods, sizeof(hMods), &cbNeeded))
+    //    return wxEmptyString;
+
+    //for (size_t iMod = 0; iMod < cbNeeded / sizeof(HMODULE); iMod++)
+    //{
+    //    if (GetModuleFileNameEx(hProc, hMods[iMod], path, MAX_PATH))
+    //    {
+    //        PRINTF(_T("  %s\n"), path);
+    //        wxFileName fn(path);
+    //        if (fn.GetFullName().IsSameAs(proc.szExeFile, false))
+    //            return path;
+    //    }
+    //}
+
+    //if (!_tcsnicmp(path, _T("\\??\\"), 4)) // temporary hack
+    //    fullPaths.Add(path + 4);
+    //else
+    //    fullPaths.Add(path);
+
+    return wxEmptyString;
+}
+
 void ProcList::Init(HANDLE hSnapshot /*= NULL*/)
 {
     if (hSnapshot == NULL)
@@ -1141,43 +1246,25 @@ void ProcList::Init(HANDLE hSnapshot /*= NULL*/)
     if (!Process32First(hSnapshot, &proc))
         fatal(_T("Process32First() failed."));
 
-    TCHAR *path = new TCHAR[2000];
+    //LRESULT err = EnableSeDebugPrivilege();
+    //if (err)
+    //    wxMessageBox(wxString::Format("EnableSeDebugPrivilege() failed.  Win32 error %d", err));
 
     do {
-        procNames.Add(proc.szExeFile);
+        wxString spath, exeFile = proc.szExeFile;
+        procNames.Add(exeFile);
         pids.Add(proc.th32ProcessID);
 
-        HANDLE hProc = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, proc.th32ProcessID);
-        if (hProc)
-        {
-            if (GetModuleFileNameEx(hProc, NULL, path, 2000))
-            {
-                //! This doesn't work for some system procs (smss, csrss, winlogon, maybe svchost).
-                // How do we get the real file path?  How does Process Explorer do it?
-                // Task Manager doesn't even try.
-                // GetCommandLine()
-                // Dbghelp.dll (EnumerateLoadedModules64)
-                // Toolhelp32 snapshot, OpenProcess, GetMappedFileName
+        spath = GetProcessPath(proc);
 
-                if (!_tcsnicmp(path, _T("\\??\\"), 4)) // temporary hack
-                    fullPaths.Add(path + 4);
-                else
-                    fullPaths.Add(path);
-                descr.Add(GetFileDescription(path));
-            }
-            else
-                path[0] = 0;
-            CloseHandle(hProc);
-        }
-        if (!hProc || !path[0])
-        {
-            fullPaths.Add(wxEmptyString);
+        fullPaths.Add(spath);
+        if (spath.length())
+            descr.Add(GetFileDescription(spath));
+        else
             descr.Add(wxEmptyString);
-        }
+
     } while (Process32Next(hSnapshot, &proc));
     CloseHandle(hSnapshot);
-
-    delete [] path;
 
     windowTitle.Add(wxEmptyString, GetCount()); // insert placeholders
     //hIcons.Add(0, GetCount());
@@ -1243,17 +1330,31 @@ wxImageList* ProcList::MakeImageList()
     wxImageList *list = new wxImageList(16, 16, true, GetCount());
     int index = 0;
     SHFILEINFO shfi;
+
+    thStringHash iconCache;  // cache icon index to avoid repeating queries
+    ATimer timer;
+
     for (size_t n = 0; n < GetCount(); n++)
     {
-        PRINTF(_T("\n%2d: %s"), n, fullPaths[n].Len() ? fullPaths[n].c_str() : procNames[n].c_str());
-        if (fullPaths[n].Len() &&
+        wxString path = fullPaths[n];
+        PRINTF(_T("\n%2d: %s"), n, fullPaths[n].Len() ? (LPCTSTR)fullPaths[n] : (LPCTSTR)procNames[n]);
+        //PRINTF(_T("\n%2d: %s"), n, (LPCTSTR)procNames[n]);
+        timer.StartWatch();
+        if (path.length() && iconCache.has_key(path))
+        {
+            int ii = iconCache[path];
+            imageListIconIndex[n] = ii;
+            PRINTF(_T(" (copy #%d)"), ii);
+        }
+        else if (path.Len() &&
             SHGetFileInfo(fullPaths[n], 0, &shfi, sizeof(shfi),
                           SHGFI_ICON | SHGFI_SMALLICON))
         {
            wxIcon icon;
            icon.SetHICON(shfi.hIcon);
            list->Add(icon);
-           PRINTF(_T(" file #%d %dx%d"), index, icon.GetWidth(), icon.GetHeight());
+           PRINTF(_T(" file #%d %dx%d, %dms"), index, icon.GetWidth(), icon.GetHeight(), int(timer.elapsed() * 1000));
+           iconCache[path] = index;
            imageListIconIndex[n] = index++;
            // Our app _should_ delete this icon.
         }
@@ -1518,7 +1619,8 @@ thString thString::ToANSI(const wchar_t *pData, size_t chars /*= 0*/)
         wxStringBuffer wxbuf(retval, dstLen);
         char *wbuf = (char*)(TCHAR*)wxbuf;
         wxConvLibc.FromWChar(wbuf, dstLen, pData, chars);
-        dstLen--;  // remove trailing null
+        if (wbuf[dstLen-1] == 0)
+            dstLen--;  // remove trailing null, shouldn't happen.
     }
     return thString(retval, dstLen);
 }
@@ -1669,6 +1771,7 @@ updateTimer(ATimer::TICKCOUNT)  // imprecise, but fast.
     m_startTime = m_lastUpdateTime[0] = m_lastUpdateTime[1] = GetTickCount();
     m_msg = msg;
     SetUpdateInterval(updateInterval);
+    SetSpeedScale(1.0);
 }
 
 bool thProgressDialog::Update(THSIZE value, bool showSpeed /*= true*/, wxString extraMsg /*= ZSTR*/)
@@ -1683,8 +1786,8 @@ bool thProgressDialog::Update(THSIZE value, bool showSpeed /*= true*/, wxString 
         if (showSpeed)
         {
             //! Really need a better moving average here.
-            progressMsg << FormatBytes((value - m_lastStart[0]) * 1000.0 / (now - m_lastUpdateTime[0])) << _T("/s");
-            progressMsg << _T(", avg. ") << FormatBytes(value * 1000.0 / (now - m_startTime)) << _T("/s");
+            progressMsg << FormatBytes((value - m_lastStart[0]) * 1000.0 * m_speedScale / (now - m_lastUpdateTime[0])) << _T("/s");
+            progressMsg << _T(", avg. ") << FormatBytes(value * 1000.0 * m_speedScale / (now - m_startTime)) << _T("/s");
             //progressMsg += wxString::Format(_T("\n= %s bytes in %0.3f seconds"), FormatBytes(value - m_lastStart), (now - m_lastUpdateTime) * .001);
             m_lastStart[0] = m_lastStart[1];
         }
@@ -1703,6 +1806,11 @@ void thProgressDialog::SetUpdateInterval(DWORD updateInterval)
 {
     m_updateInterval = updateInterval;
     updateTimer.SetTimeout(updateInterval * 1000);
+}
+
+void thProgressDialog::SetSpeedScale(double scale)
+{
+    m_speedScale = scale;
 }
 
 bool Confirm(wxString msg, wxString caption /*= _T("T. Hex")*/, wxWindow *parent /*= NULL*/)

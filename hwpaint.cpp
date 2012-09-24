@@ -141,7 +141,7 @@ void HexWnd::OnPaint(wxPaintEvent &event)
     THSIZE firstVisibleByte = LineColToByte(m_iFirstLine, 0);
     THSIZE firstUpdateByte = LineColToByte(start_line, 0);
     THSIZE lastVisibleByte = LineColToByte(end_line, s.iLineBytes);
-    int count = wxMin(doc->size, lastVisibleByte) - firstUpdateByte;
+    int count = wxMin(doc->GetSize(), lastVisibleByte) - firstUpdateByte;
     if ((int)(firstUpdateByte - firstVisibleByte) < 0 || firstUpdateByte - firstVisibleByte + count > pageBytes)
         count = count; //! breakpoint
     if (end_line >= m_iTotalLines)

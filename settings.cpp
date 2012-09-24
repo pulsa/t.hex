@@ -34,6 +34,7 @@ void HexWndSettings::LoadDefaults()
     iCodePage = 0; // use default from font character set
     bFakeMonoSpace = true;
     bDrawNulAsSpace = true;  // VEDIT fonts actually have glyphs for control chars.  Cool.
+    bSelectOnPaste = true;
 
     TextPalette = _T("0 ( 0 93 30 ) - 128 ( 0 156 30 ) - 255 ( 127 210 157 )");
 
@@ -163,6 +164,7 @@ void HexWndSettings::Load(wxFileConfig &cfg)
     cfg.Read(_T("iCodePage"), &iCodePage);
     cfg.Read(_T("sFont"), &sFont);
     cfg.Read(_T("bFakeMonoSpace"), &bFakeMonoSpace);
+    cfg.Read(_T("bSelectOnPaste"), &bSelectOnPaste);
 
     cfg.Read(_T("TextPalette"), &TextPalette);
     //cfg.Read(_T("SelPalette"), &SelPalette);
@@ -226,6 +228,7 @@ void HexWndSettings::Save(wxFileConfig &cfg)
     cfg.Write(_T("iCodePage"), iCodePage);
     cfg.Write(_T("sFont"), sFont);
     cfg.Write(_T("bFakeMonoSpace"), bFakeMonoSpace);
+    cfg.Write(_T("bSelectOnPaste"), bSelectOnPaste);
 
     //cfg.Write(_T("TextPalette"), _T("(0, 60, 30) 128 (0, 124, 30) (127, 187, 157)"));
     // text, highlight CR and LF

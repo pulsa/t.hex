@@ -86,19 +86,7 @@
 #define IDM_OpenDrive                   186
 #define IDM_ReadPalette                 187
 #define IDM_ToggleReadOnly              188
-#define IDM_OpenLC1                     189
 
-#define IDM_GotoCluster                 190
-#define IDM_PrevBlock                   191
-#define IDM_NextBlock                   192
-#define IDM_PrevBlockTrack              193
-#define IDM_NextBlockTrack              194
-#define IDM_ViewFatView                 195
-#define IDM_JumpToFromFat               196
-#define IDM_FirstCluster                197
-#define IDM_LastCluster                 198
-#define IDM_GotoPath                    199
-#define IDM_FatAutoSave                 200
 #define IDM_ViewStickyAddr              201
 #define IDM_ViewUTF8                    202
 #define IDM_ViewUTF16                   203

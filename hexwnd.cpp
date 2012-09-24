@@ -11,7 +11,6 @@
 #include "settings.h"
 #include "utils.h"
 #include "datasource.h"
-#include "fatinfo.h"
 
 #define new New
 
@@ -91,17 +90,6 @@ BEGIN_EVENT_TABLE(HexWnd, wxWindow)
     EVT_MENU(IDM_ViewPrevRegion,    CmdViewPrevRegion)
     EVT_MENU(IDM_ViewNextRegion,    CmdViewNextRegion)
 
-    EVT_MENU(IDM_GotoCluster,       CmdGotoCluster)
-    EVT_MENU(IDM_JumpToFromFat,     CmdJumpToFromFat)
-    EVT_MENU(IDM_GotoPath,          CmdGotoPath)
-    EVT_MENU(IDM_NextBlock,         CmdNextBlock)
-    EVT_MENU(IDM_PrevBlock,         CmdPrevBlock)
-    EVT_MENU(IDM_NextBlockTrack,    CmdNextBlock)
-    EVT_MENU(IDM_PrevBlockTrack,    CmdPrevBlock)
-    EVT_MENU(IDM_FirstCluster,      CmdFirstCluster)
-    EVT_MENU(IDM_LastCluster,       CmdLastCluster)
-    EVT_MENU(IDM_FatAutoSave,       CmdFatAutoSave)
-    EVT_MENU(IDM_CopySector,        CmdCopySector)
     EVT_MENU(IDM_OpsCustom1,        CmdCustomOp1)
 END_EVENT_TABLE()
 
@@ -129,10 +117,6 @@ HexWnd::HexWnd(thFrame *frame, HexWndSettings *ps /*= NULL*/)
     entries[9].Set(wxACCEL_CTRL | wxACCEL_SHIFT, WXK_END, IDM_CursorEndOfFile);
     entries[10].Set(wxACCEL_ALT | wxACCEL_SHIFT, WXK_LEFT, IDM_OffsetLeft);
     entries[11].Set(wxACCEL_ALT | wxACCEL_SHIFT, WXK_RIGHT, IDM_OffsetRight);
-    entries[12].Set(wxACCEL_ALT, WXK_LEFT, IDM_PrevBlockTrack);
-    entries[13].Set(wxACCEL_ALT, WXK_RIGHT, IDM_NextBlockTrack);
-    entries[14].Set(wxACCEL_CTRL, WXK_LEFT, IDM_PrevBlock);
-    entries[15].Set(wxACCEL_CTRL, WXK_RIGHT, IDM_NextBlock);
     //entries[16].Set(wxACCEL_NORMAL, WXK_ESCAPE, IDM_FocusHexWnd);
     SetAcceleratorTable(wxAcceleratorTable(DIM(entries), entries));
 }
@@ -150,6 +134,7 @@ void HexWnd::Init()
     m_iTotalLines = 0;
     m_iSelStart = 0;
     m_bMouseSelecting = false;
+    m_bPopupActive = false;
     m_iAddressOffset = 0;
     m_caretHideFlags = 0;
     m_dvHighlight = NULL;
@@ -767,7 +752,7 @@ void HexWnd::OnLButtonDown(wxMouseEvent &event)
         m_iMouseDownDigit = digit;
         PRINTF(_T("byte %X, half %d, digit %d\n"), (int)mouseByte, half, digit);
     }
-    CmdMoveCursor(mouseByte, ShiftDown(), m_iMouseOverRegion, digit);
+    CmdMoveCursor(mouseByte, ShiftDown(), m_iMouseOverRegion, digit, J_SHORTEST);
 }
 
 void HexWnd::OnLButtonUp(wxMouseEvent &event)
@@ -931,6 +916,15 @@ void HexWnd::OnScrollTimer(wxTimerEvent &event)
 
 void HexWnd::OnMButtonDown(wxMouseEvent &event)
 {
+    if (m_bPopupActive)
+    {
+#ifdef WIN32
+        SendMessage(GetHWND(), WM_CANCELMODE, 0, 0);  // kill context menu
+#else
+        // TBDL
+#endif
+        return;
+    }
     CreateScrollOriginWnd(this, event.GetX(), event.GetY());
 }
 
@@ -1071,7 +1065,7 @@ void TestReadSpeed(HexDoc *doc)
     //}
 
     timer.StopWatch();
-    double MB = doc->size / 1048576.0;
+    double MB = doc->GetSize() / 1048576.0;
     wxString msg;
     msg.Printf(_T("%0.2fMB in %0.3fs = %0.3fMB/s \n  count = %d"),
        MB, timer.GetSeconds(),
@@ -1116,30 +1110,11 @@ void HexWnd::OnKey(wxKeyEvent &event)
         doc->InvalidateCache();
         Refresh(false);
         break;
-    case WXK_F6: {
-        THSIZE base = 0;
-        for (Segment *s = doc->m_head; s; s = s->next)
-        {
-            PRINTF(_T("%8I64X: %p size=%8I64X next=%p\n"), base, s, s->size, s->next);
-            base += s->size;
-        }
-
-        fatInfo.BuildBackwardFAT();
-    } break;
     case WXK_F7:
-    //    for (size_t n = 0; n < doc->modRanges.size(); n++)
-    //    {
-    //        ByteRange& range = doc->modRanges[n];
-    //        PRINTF("%8I64X - %8I64X\n", range.start, range.end);
-    //    }
+        for (size_t n = 0; n < doc->modRanges.size(); n++)
         {
-            THSIZE offset;
-            int area = fatInfo.HitTest(GetCursor(), offset);
-            if (area == FatInfo::AREA_ROOT)
-               offset = 0; // screwy hack for root directory on Fat12/16
-            else if (area != FatInfo::AREA_DATA)
-               break;
-            fatInfo.ReadDir(offset);
+            ByteRange& range = doc->modRanges[n];
+            PRINTF(_T("%8I64X - %8I64X\n"), range.start, range.end);
         }
         break;
     case WXK_F8:
@@ -1150,10 +1125,8 @@ void HexWnd::OnKey(wxKeyEvent &event)
         frame->CompareBuffers();
         break;
     // F10 works like Alt -- it sets keyboard focus to the menu bar.  Probably a Windows thing.
-    case WXK_F10:  // see WM_KEYDOWN in MSDN docs.
-        //RemoveMP3Metadata();
-        NextOddMp3Frame();
-        break;
+    //case WXK_F10:  // see WM_KEYDOWN in MSDN docs.
+    //    break;
     case WXK_PAGEUP: CmdCursorPageUp(/*event.ControlDown()*/); break;
     case WXK_PAGEDOWN: CmdCursorPageDown(/*event.ControlDown()*/); break;
     case WXK_RETURN:
@@ -1366,6 +1339,8 @@ bool HexWnd::ScrollToLine(uint64 line, int x /*= -1*/)
 bool HexWnd::ScrollToRange(THSIZE start, THSIZE end, int jumpiness, int pane /*= -1*/)
 {
     int hjump = (jumpiness >> 4) & 0x0F, vjump = jumpiness & 0x0F;
+    if (m_bMouseSelecting)
+        hjump = vjump = 0;  // Don't jump around while mouse selecting.
     if (pane < 0)
         pane = m_iCurPane;
 
@@ -1480,14 +1455,6 @@ x_done:
     return ScrollToLine(m_iFirstLine, x);
 }
 
-//bool HexWnd::CenterLine(THSIZE line)
-//{
-//    if (line < m_iVisibleLines / 2)
-//        line = 0;
-//    else
-//        line -= m_iVisibleLines / 2;
-//    return ScrollToLine(line);
-//}
 
 void HexWnd::set_caret_pos()
 {
@@ -1597,7 +1564,7 @@ bool HexWnd::SetDataSource(DataSource *pDS)
 
 bool HexWnd::SetDoc(HexDoc *pDoc)
 {
-    pDoc->pSettings = &s; //! is this OK?  NO!!!
+    pDoc->SetNativeEndian(s.iEndianMode == NATIVE_ENDIAN_MODE);
     int newdoc = -1;
     for (size_t n = 0; n < docinfo.size(); n++)
         if (docinfo[n].doc == pDoc)
@@ -1628,8 +1595,6 @@ bool HexWnd::SetDoc(HexDoc *pDoc)
     SetSelection(docinfo[newdoc].sel);
     ScrollToLine(docinfo[newdoc].firstLine);
     SetModified(false); //! WRONG
-
-    fatInfo.Init(this);
 
     curdoc = newdoc;
     return true;
@@ -1706,27 +1671,6 @@ bool HexWnd::OpenProcess(DWORD pid, wxString procName, bool bReadOnly)
     }
     SetDataSource(pDS);
     return true;
-}
-
-bool HexWnd::OpenLC1VectorMemory(wxString addr)
-{
-#ifdef LC1VECMEM
-    wxIPV4address ipv4;
-    ipv4.Hostname(addr);
-    ipv4.Service(0x721F);
-    
-    DataSource *pDS = new VecMemDataSource(ipv4, true);
-    if (!pDS->IsOpen())
-    {
-       delete pDS;
-       return false;
-    }
-    SetDataSource(pDS);
-    return true;
-#else
-    wxMessageBox(_T("LC-1 vector memory support disabled in this build."), _T("T. Hex"));
-    return false;
-#endif // LC1VECMEM
 }
 
 bool HexWnd::OpenTestFile(LPCTSTR filename)
@@ -2445,7 +2389,7 @@ void HexWnd::ResizeScrollBars()
         SetScrollbar(wxHORIZONTAL, m_iScrollX, csize2.x, m_iLineWidth);
 }
 
-void HexWnd::OnDataChange(THSIZE nAddress, THSIZE nOldSize, THSIZE nNewSize)
+void HexWnd::OnDataChange(THSIZE nAddress, THSIZE nOldSize, THSIZE nNewSize, bool modified /*= true*/)
 {
     int flags = DataView::DV_DATA;
     if (nNewSize == nOldSize)
@@ -2500,7 +2444,7 @@ int HexWnd::FormatAddress(THSIZE address, TCHAR *buffer, int bufsize)
     }
 }
 
-HexWndSettings *DisplayPane::s_pSettings; //! this is awful
+const HexWndSettings *DisplayPane::s_pSettings; //! this is awful
 
 void DisplayPane::Init(HexWnd *hw, int id, int iCharWidth, int extra /*= 1*/)
 {
@@ -2515,7 +2459,7 @@ void DisplayPane::Init(HexWnd *hw, int id, int iCharWidth, int extra /*= 1*/)
 
         // It's not actually the last address + 1 that matters, but that's easier to use,
         // and doesn't change during auto-layout.
-        m_iColChars = hw->FormatAddress(hw->DocSize(), NULL, 100);
+        //m_iColChars = hw->FormatAddress(hw->DocSize(), NULL, 100);
         m_iColChars = hw->FormatAddress(hw->GetLastDisplayAddress(), NULL, 100);
 
         m_iCols = 1;
@@ -2761,7 +2705,9 @@ void HexWnd::OnContextMenu(wxContextMenuEvent &event)
     }
     else
         menu.Append(-1, _T("Nothing"));
+    m_bPopupActive = true;
     PopupMenu(&menu, pt);
+    m_bPopupActive = false;
 }
 
 // 64-bit scrolling from James Brown (http://www.catch22.net/tuts/scroll64.asp)
@@ -2917,8 +2863,8 @@ bool HexWnd::ToggleReadOnly()
 {
     if (!m_pDS || !m_pDS->ToggleReadOnly())
         return false;
-    doc->bWriteable = m_pDS->IsWriteable();
-    return true;  //! what else do we need to do here?
+    return doc->SetWriteable(m_pDS->IsWriteable());
+    //! what else do we need to do here?
 }
 
 void HexWnd::Hyperlink(THSIZE offset, THSIZE size, THSIZE target)
@@ -2954,128 +2900,12 @@ void HexWnd::CenterTextOut(HDC hdc, int x, int y, int flags, RECT *pRC,
     ExtTextOut(hdc, x + lead, y, flags, pRC, text, charCount, m_pCharSpaces);
 }
 
-void HexWnd::RemoveMP3Metadata()
-{
-   int *score = new int[8192], *start = new int[8192];
-   int maxscore = 0, index = 0;
-   uint8 *data = new uint8[DocSize()];
-   int size = DocSize();
-   doc->Read(0, size, data);
-
-   //! Currently only handles zeros every 8192 bytes.
-   //for (int i = 0; i < 8192; i++)
-   //{
-   //   int run;
-   //   int offset = i;
-   //   score[i] = 0;
-   //   start[i] = 0;
-   //   bool lastZero = false;
-   //   for (run = 0; offset < size; run++, offset += 8192)
-   //   {
-   //      if (data[offset] == 0)
-   //      {
-   //         if (!lastZero) {
-   //            lastZero = true;
-   //            start[i] = offset;
-   //         }
-   //         score[i]++;
-   //         if (score[i] > maxscore) {
-   //            maxscore = score[i];
-   //            index = i;
-   //         }
-   //         offset++;
-   //      }
-   //      else
-   //         lastZero = false;
-   //   }
-   //}
-
-   for (int i = 0; i < size; i++)
-   {
-      if (data[i] == 0)
-      {
-         int run = 1;
-         for (int j = i + 8193; j < size && data[j] == 0; j += 8193, run++)
-            ;
-         if (run > maxscore) {
-            maxscore = run;
-            index = i;
-         }
-      }
-   }
-
-   int id = wxMessageBox(wxString::Format(_T("Index %d (0x%X): count %d (%0.1f%% coverage)"), index, index, maxscore, maxscore * 100.0 * 8192 / size), _T("Delete?"), wxYES_NO);
-   if (wxYES == id) //! wxMessageDialog doc says wxID_YES ?!?
-   {
-       for (int i = 0; i < maxscore; i++)
-       {
-          // was 8193, but we remove one byte each time.  Is this OK?
-          if (data[index + i * 8193] == 0)
-             doc->RemoveAt(index + i * 8192, 1);
-          else
-             wxMessageBox(_T("Error."));
-       }
-   }
-
-   //for (int pos = start[index]; data[pos] == 0; pos += 8192
-
-
-   delete [] score;
-   delete [] start;
-}
-
-void HexWnd::NextOddMp3Frame()
-{
-    THSIZE start = m_iCurByte, end = DocSize();
-    s.iEndianMode = BIGENDIAN_MODE;
-    const int bitrates[16] = {0,32,40,48,56,64,80,96,112,128,160,192,224,256,320,-1};
-    THSIZE expected = 0, laststart = 0, lastend;
-    if (doc->FindHex((const wxByte*)"\xFF\xFB", 2, start, end) <= 0)
-        return;
-    while (start < DocSize() - 4)
-    {
-        if (expected > 0 && start != expected)
-        {
-            CmdSetSelection(laststart, start);
-            SetCurrentView((DataView *)this); //! bad.
-            if (start < expected)
-                Highlight(start, expected - start, (DataView*)this); //! bad.
-            else
-                Highlight(expected, start - expected, (DataView*)this); //! bad.
-            return;
-        }
-        uint32 hdr = doc->Read32(start);
-        int br = bitrates[(hdr >> 12) & 0x0F];
-        if (br <= 0)
-        {
-            CmdSetSelection(start, start + 4);
-            wxMessageBox(_T("Bad MPEG-1 header."));
-            return;
-        }
-        int fs = 144 * br * 1000 / 44100;
-        if (hdr & 0x200)
-            fs++;
-        laststart = start;
-        lastend = end;
-        end = DocSize();
-        expected = start + fs;
-        if (doc->Read16(expected) == 0xFFFB)
-            start = expected;
-        else {
-            start++;
-            if (doc->FindHex((const wxByte*)"\xFF\xFB", 2, start, end) <= 0)
-                break;
-        }
-        end = DocSize();
-    }
-    wxMessageBox(_T("End of file."));
-}
 
 void HexWnd::UpdateSettings(HexWndSettings &ns)
 {
    HexWndSettings os = s;
    s = ns;
-   if (ns.sFont != os.sFont)
+   if (ns.sFont != os.sFont || os.iFontQuality != ns.iFontQuality)
       SetFont(GetFont());  // hey, it works.
    AdjustForNewDataSize();  // And this should pretty much take care of the rest.
 }

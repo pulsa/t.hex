@@ -146,128 +146,128 @@ bool SearchReverse(Iter &begin, Iter &end, const char_type *wanted, size_t count
 }
 
 // Hex Search
-struct ByteIterator
-{
-    typedef std::bidirectional_iterator_tag iterator_category;
-    typedef wxByte value_type;
-    typedef wxFileOffset difference_type;
-    typedef const value_type *pointer;
-    typedef const value_type &reference;
-
-    wxFileOffset    pos;
-    Segment         *pSeg;
-    wxFileOffset    linepos;
-
-    ByteIterator() {}
-
-    ByteIterator(const ByteIterator &it)
-    {
-        this->operator =( it );
-    }
-
-    ByteIterator(wxFileOffset pos0, Segment *pSeg0, wxFileOffset linepos0)
-        :pos(pos0), pSeg(pSeg0), linepos(linepos0)
-    {
-        if(linepos == pSeg->size && pSeg->next)
-        {
-            pSeg = pSeg->next;
-            linepos = 0;
-        }
-    }
-
-    ByteIterator & operator=(const ByteIterator & it)
-    {
-        pos=it.pos;
-        pSeg=it.pSeg;
-        linepos=it.linepos;
-        return *this;
-    }
-
-    const value_type operator*()
-    {
-        wxASSERT((uint64)linepos < pSeg->size);
-        return pSeg->Get(linepos);
-    }
-
-    /***
-    ucs4_t *operator->() const
-    {
-        return _ws_ + pos;
-    }
-    ***/
-
-    // pre-increment operator
-    ByteIterator & operator++()
-    {
-        ++pos;
-        ++linepos;
-
-        if(linepos == pSeg->size)
-        {
-            if(!pSeg->next) return *this; // end
-
-            pSeg = pSeg->next;
-            linepos = 0;
-        }
-
-        return *this;
-    }
-
-    /***
-    // post-increment operator
-    ByteIterator operator++(int)
-    {
-        ByteIterator tmp = *this;
-        ++*this;
-        return tmp;
-    }
-    ***/
-
-    //***
-    // pre-decrement operator
-    //ByteIterator & operator--()
-    //{
-    //    wxASSERT(pos>0);
-
-    //    --pos;
-
-    //    if(linepos == 0)
-    //    {
-    //        pSeg = pSeg->prev;
-    //        linepos = pSeg->size;
-    //    }
-    //    --linepos;
-
-    //    return *this;
-    //}
-    //***/
-
-    /***
-    // post-decrement operator
-    ByteIterator operator--(int)
-    {
-        ByteIterator tmp = *this;
-        --*this;
-        return tmp;
-    }
-    ***/
-
-    bool operator==(const ByteIterator & it) const
-    {
-        if(pos == it.pos) return true;
-        return (AtEnd() && it.AtEnd());
-    }
-
-    bool operator!=(const ByteIterator & it) const
-    {
-        return ! (this->operator==(it)) ;
-    }
-
-    bool AtEnd() const
-    {
-        return linepos == pSeg->size && pSeg->next == NULL;
-    }
-};
+//struct ByteIterator
+//{
+//    typedef std::bidirectional_iterator_tag iterator_category;
+//    typedef wxByte value_type;
+//    typedef wxFileOffset difference_type;
+//    typedef const value_type *pointer;
+//    typedef const value_type &reference;
+//
+//    wxFileOffset    pos;
+//    Segment         *pSeg;
+//    wxFileOffset    linepos;
+//
+//    ByteIterator() {}
+//
+//    ByteIterator(const ByteIterator &it)
+//    {
+//        this->operator =( it );
+//    }
+//
+//    ByteIterator(wxFileOffset pos0, Segment *pSeg0, wxFileOffset linepos0)
+//        :pos(pos0), pSeg(pSeg0), linepos(linepos0)
+//    {
+//        if(linepos == pSeg->size && pSeg->next)
+//        {
+//            pSeg = pSeg->next;
+//            linepos = 0;
+//        }
+//    }
+//
+//    ByteIterator & operator=(const ByteIterator & it)
+//    {
+//        pos=it.pos;
+//        pSeg=it.pSeg;
+//        linepos=it.linepos;
+//        return *this;
+//    }
+//
+//    const value_type operator*()
+//    {
+//        wxASSERT((uint64)linepos < pSeg->size);
+//        return pSeg->Get(linepos);
+//    }
+//
+//    /***
+//    ucs4_t *operator->() const
+//    {
+//        return _ws_ + pos;
+//    }
+//    ***/
+//
+//    // pre-increment operator
+//    ByteIterator & operator++()
+//    {
+//        ++pos;
+//        ++linepos;
+//
+//        if(linepos == pSeg->size)
+//        {
+//            if(!pSeg->next) return *this; // end
+//
+//            pSeg = pSeg->next;
+//            linepos = 0;
+//        }
+//
+//        return *this;
+//    }
+//
+//    /***
+//    // post-increment operator
+//    ByteIterator operator++(int)
+//    {
+//        ByteIterator tmp = *this;
+//        ++*this;
+//        return tmp;
+//    }
+//    ***/
+//
+//    //***
+//    // pre-decrement operator
+//    //ByteIterator & operator--()
+//    //{
+//    //    wxASSERT(pos>0);
+//
+//    //    --pos;
+//
+//    //    if(linepos == 0)
+//    //    {
+//    //        pSeg = pSeg->prev;
+//    //        linepos = pSeg->size;
+//    //    }
+//    //    --linepos;
+//
+//    //    return *this;
+//    //}
+//    //***/
+//
+//    /***
+//    // post-decrement operator
+//    ByteIterator operator--(int)
+//    {
+//        ByteIterator tmp = *this;
+//        --*this;
+//        return tmp;
+//    }
+//    ***/
+//
+//    bool operator==(const ByteIterator & it) const
+//    {
+//        if(pos == it.pos) return true;
+//        return (AtEnd() && it.AtEnd());
+//    }
+//
+//    bool operator!=(const ByteIterator & it) const
+//    {
+//        return ! (this->operator==(it)) ;
+//    }
+//
+//    bool AtEnd() const
+//    {
+//        return linepos == pSeg->size && pSeg->next == NULL;
+//    }
+//};
 
 // Boyer-Moore search from Hexplorer
 

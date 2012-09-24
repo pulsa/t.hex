@@ -8,8 +8,6 @@
 #include "clipboard.h"
 
 class HexWndSettings;
-//class FatInfo;
-#include "fatinfo.h"
 
 #include "undo.h"
 #include "utils.h"
@@ -68,7 +66,7 @@ public:
 
     wxBrush m_hbrBack;
 
-    static HexWndSettings *s_pSettings; //! this is awful
+    static const HexWndSettings *s_pSettings; //! this is awful
 };
 
 class UnicodePane : public DisplayPane
@@ -93,45 +91,25 @@ typedef struct {
 class HexWnd : public wxWindow
 {
 public:
-    HexWnd(); //! do we need this?
     HexWnd(thFrame *frame, HexWndSettings *ps = NULL);
     ~HexWnd();
-    //void SetData(Hex
 
-    thFrame *frame;
-    DataSource *m_pDS;
-    HexDoc *doc;
     bool SetDoc(HexDoc *pDoc);
     bool SetDataSource(DataSource *pDS);
-    FatInfo fatInfo;
-
-    //sequence *doc;
-    std::vector<DOC_INFO> docinfo;
-    std::vector<HexDoc*>  m_docs; // list of documents from current data source
-    int curdoc;
-
-    DisplayPane m_pane[10];
-
-    void thScrollWindowRaw(int dx, int dy, bool bUpdate = false);
-    void thScrollWindow(int dx, THSIZE oldLine, bool bUpdate = false);
-    LRESULT OnSmoothScroll(int dx, int dy);
-    void FinishSmoothScroll();
-    int m_iYOffset, m_iLastYScroll; // used for sub-line scrolling
+    std::vector<HexDoc*> GetDocList() { return m_docs; }
 
     bool OpenFile(LPCTSTR filename, bool bReadOnly);
     bool OpenDrive(LPCTSTR path, bool bReadOnly);
     bool OpenProcess(DWORD pid, wxString procName, bool bReadOnly);
     bool OpenBlank();
-    bool OpenLC1VectorMemory(wxString addr);
     bool OpenTestFile(LPCTSTR filename);
     bool OpenDataSource(DataSource *pDS);
 
     bool ToggleReadOnly(); // Only available with some data sources.
 
     void UpdateSettings(HexWndSettings &ns);
+    const HexWndSettings& GetSettings() const { return m_settings; }
 
-    Selection m_highlight;
-    DataView *m_dvHighlight; // which view window controls the highlighting?
     void Highlight(THSIZE start, THSIZE size, DataView *dv = NULL);
     void SetCurrentView(DataView *dv)
     {
@@ -140,7 +118,6 @@ public:
     }
 
     void Hyperlink(THSIZE offset, THSIZE size, THSIZE target);
-    THSIZE m_linkStart, m_linkSize, m_linkTarget;
 
     bool Ok() { return m_ok; }
     bool DataOk() const;
@@ -169,13 +146,14 @@ public:
         GetSelection(sel);
         return sel;
     }
-    Selection GetSelectionOrAll()
-    {
-        if (m_iCurByte == m_iSelStart)
-            return Selection(0, DocSize(), m_iCurPane, m_iCurDigit);
-        else
-            return GetSelection();
-    }
+    bool HasSelection() { return m_iCurByte != m_iSelStart; }
+    //Selection GetSelectionOrAll()
+    //{
+    //    if (m_iCurByte == m_iSelStart)
+    //        return Selection(0, DocSize(), m_iCurPane, m_iCurDigit);
+    //    else
+    //        return GetSelection();
+    //}
     void SetSelection(Selection &sel)
     {
         SetSelection(sel.nStart, sel.nEnd, sel.iRegion, sel.iDigit);
@@ -183,22 +161,12 @@ public:
     }
 
     uint64 GetCursor() { return m_iCurByte; }
-    uint64 GetCursorVirtual();
+    const DisplayPane& GetCurrentPane() { return m_pane[m_iCurPane]; }
 
     enum {RGN_RULER = -1, RGN_ADDRESS = 0, RGN_NONE = -2};  // I think stuff depends on having RGN_ADDRESS==0.
 
     int HitTest(const wxPoint &pt, uint64 &mouseByte, uint64 &mouseLine, int &digit, int &half);
     void SelectionHitTest(const wxPoint &pt, uint64 &mouseLine, int &col, int &digit, int &half);
-
-    uint64 LineColToByte(uint64 line, int col);
-    uint64 ByteToLineCol(uint64 byte, int *pCol); // returns byte in *pCol
-
-    THSIZE LineColToByte2(THSIZE line, int col); // uses real column
-    THSIZE ByteToLineCol2(THSIZE byte, int *pCol); // returns real column in *pCol
-
-    int LineToY(THSIZE line);
-    THSIZE YToLine(int y);
-    int GetPaneLeft(const DisplayPane &pane);
 
     THSIZE GetFirstVisibleByte() { return LineColToByte(m_iFirstLine, 0); }
     THSIZE GetLastVisibleByte();
@@ -212,8 +180,6 @@ public:
     //bool ScrollToSelection(bool lazy = false) { return ScrollToRange(m_iSelStart, m_iCurByte, lazy); }
     //bool ScrollToSelection(int jumpiness = 1) { return ScrollToRange(m_iSelStart, m_iCurByte, jumpiness); }
     bool ScrollToRange(THSIZE start, THSIZE end, int jumpiness, int pane = -1);
-    //bool CenterLine(THSIZE line);
-    //bool CenterByte(THSIZE byte) { return CenterLine(ByteToLineCol(byte, NULL)); }
     bool CenterByte(THSIZE byte) { return ScrollToRange(byte, byte, 2); }
 
     void MoveCursorIntoView();
@@ -222,13 +188,9 @@ public:
     bool Goto(uint64 offset, bool bExtendSel = false, int origin = 0); // uses virtual address
     uint64 GetFileOffset(uint64 address);
 
-    HexWndSettings s, &m_settings; //! m_settings is reference to s
-    //HexDoc doc;
-    //UndoManager undo;
-
-    void OnDataChange(THSIZE nAddress, THSIZE nOldSize, THSIZE nNewSize); // called by HexDoc
+    void OnDataChange(THSIZE nAddress, THSIZE nOldSize, THSIZE nNewSize, bool modified = true); // called by HexDoc
     bool SetModified(bool modified);
-    void SetSelection(uint64 iSelStart, uint64 iSelEnd, int region = 0, int digit = 0);
+
     int FormatAddress(THSIZE address, TCHAR *buf, int bufsize);
 
     // wxFrameManager calls p.window->Refresh(true), which used to make our background get redrawn.
@@ -247,12 +209,24 @@ public:
     uint32 GetVisibleLines(int height = -1) const;
     THSIZE GetLastDisplayAddress() const { return m_iLastDisplayAddress; }
 
-    void RemoveMP3Metadata(); // Heh.  This should be fun.
-    void NextOddMp3Frame();  // Seek to the next frame whose size is wrong.  For finding metadata, errors, and...?
+    LRESULT OnSmoothScroll(int dx, int dy);
+    void FinishSmoothScroll();
+
+//protected:  // Data
+public:
+    DataSource *m_pDS;
+    HexDoc *doc;
 
 protected:
-    void Init();
-    void ClearDocs();
+    thFrame *frame;
+    std::vector<DOC_INFO> docinfo;
+    std::vector<HexDoc*>  m_docs; // list of documents from current data source
+    int curdoc;
+
+    DisplayPane m_pane[10];
+
+    HexWndSettings s, &m_settings; //! m_settings is reference to s
+
     uint64 m_iFirstLine;
     uint64 m_iTotalLines;
     uint64 m_iMaxScroll;
@@ -278,9 +252,7 @@ protected:
     uint8 *m_pModified;
     int m_iLineBufferSize;
     int m_iSpaceCount, *m_pCharSpaces; // used by CenterTextOut
-
-    void CenterTextOut(HDC hdc, int x, int y, int flags, RECT *pRC,
-                       LPCTSTR text, int charCount, int cellWidth);
+    int m_iYOffset, m_iLastYScroll; // used for sub-line scrolling
 
     bool m_ok;
     wxString m_error;
@@ -295,8 +267,36 @@ protected:
 
     uint64 m_iSelStart; // m_iCurByte is always end of selection
     bool m_bMouseSelecting;
+    bool m_bPopupActive;
     wxTimer m_scrollTimer;
 
+    Selection m_highlight;
+    DataView *m_dvHighlight; // which view window controls the highlighting?
+    THSIZE m_linkStart, m_linkSize, m_linkTarget;
+
+protected:  // Internal methods
+    void Init();
+    void ClearDocs();
+
+    void thScrollWindowRaw(int dx, int dy, bool bUpdate = false);
+    void thScrollWindow(int dx, THSIZE oldLine, bool bUpdate = false);
+
+    void CenterTextOut(HDC hdc, int x, int y, int flags, RECT *pRC,
+                       LPCTSTR text, int charCount, int cellWidth);
+
+    uint64 LineColToByte(uint64 line, int col);
+    uint64 ByteToLineCol(uint64 byte, int *pCol); // returns byte in *pCol
+
+    THSIZE LineColToByte2(THSIZE line, int col); // uses real column
+    THSIZE ByteToLineCol2(THSIZE byte, int *pCol); // returns real column in *pCol
+
+    int LineToY(THSIZE line);
+    THSIZE YToLine(int y);
+    int GetPaneLeft(const DisplayPane &pane);
+
+    void SetSelection(uint64 iSelStart, uint64 iSelEnd, int region = 0, int digit = 0);
+
+public:  // Event handlers
     void OnPaint(wxPaintEvent &event);
     void OnErase(wxEraseEvent &event);
     void OnSize(wxSizeEvent &event);
@@ -327,6 +327,7 @@ protected:
     void OnSelectionMouseMove(uint64 mouseLine, int col, int half);
     void OnFileChange();
 
+protected:
     wxRect PaintRect(HDC hdc, wxDC &memDC, const wxRect &rcPaint);
     void PaintPane(wxDC &dc, int nPane, const THSIZE &firstLine, const THSIZE &lastLine, const wxRect &rcPaint);
     void PaintLine(uint64 line, wxDC &dc, int start_x, int width, int top = 0);
@@ -393,8 +394,6 @@ protected:
     }
 
     THSIZE NextBytePos(int dir, THSIZE current, int *pDigit = NULL);  // dir -1 = left, +1 = right
-
-    wxArrayString m_asGotoCluster;
 
 public:
     // Commands
@@ -465,12 +464,6 @@ public:
     void CmdViewPrevRegion(wxCommandEvent &event);
     void CmdViewNextRegion(wxCommandEvent &event);
 
-    void CmdGotoCluster(wxCommandEvent &event);
-    void CmdJumpToFromFat(wxCommandEvent &event);
-    void CmdFirstCluster(wxCommandEvent &event);
-    void CmdLastCluster(wxCommandEvent &event);
-    void CmdGotoPath(wxCommandEvent &event);
-    void CmdFatAutoSave(wxCommandEvent &event);
     void CmdCopyFontCodePoints(wxCommandEvent &WXUNUSED(event));
     void CmdFindDiffRec(wxCommandEvent &WXUNUSED(event));
     void CmdFindDiffRecBack(wxCommandEvent &WXUNUSED(event));

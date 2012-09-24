@@ -42,12 +42,12 @@ x	painting is really slow when searching many Segments
 	auto-panning sometimes gets off by one pixel.  Noticed with 2-pt font.
 	don't highlight OnMouseMove when window not active
 	figure out what Ctrl+PgUp/PgDn should do
-	update view window check boxes when closing the window with the button
+x	update view window check boxes when closing the window with the button
 	OFN_NODEREFERENCELINKS, OFN_HIDEREADONLY in wxFileDialog
 	real message dialogs for opening LNK files
 	gripper on map when horizontal, caption when it's vertical
 	keyboard action when selecting with the mouse
-	look at StrFormatByteSize64() in MSDN docs
+x	look at StrFormatByteSize64() in MSDN docs (cool, but Win32 only, so no.)
 	arrow navigation in Unicode/binary panes
 x	ScrollWindowEx() with ruler
 	MS uses "%I64", but wx-2.7.0 has replaced this with "%L".  Ouch.  See wxLongLongFmtSpec.
@@ -174,6 +174,7 @@ x	Generic numeric data type display pane
 	Deal with IPC opening a file with modal dialog shown.  No specific problem, yet...
 	dual leap-frogging HexDoc cache buffers, with garbage collection thread
 	- access pattern analysis and prediction
+	Get rid of console
 
 Middle Priority
 	stackable tool windows (use some variety of notebook control)

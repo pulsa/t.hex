@@ -10,6 +10,18 @@ void fatal(LPCTSTR msg);
 
 class thString;
 
+// declare a hash map with string keys and int values
+WX_DECLARE_STRING_HASH_MAP( int, thStringHash_internal );
+
+class thStringHash : public thStringHash_internal
+{
+public:
+    bool has_key(const wxString &k)
+    {
+        return find(k) != end();
+    }
+};
+
 void CreateConsole(LPCTSTR title);
 
 template<class T>void th_swap(T& x, T& y){
@@ -147,6 +159,7 @@ inline wxString FormatBin(uint64 n) { return FormatNumber(n,  2); }
 wxString FormatDec(int64 n);
 
 wxString FormatColour(const wxColour &clr);
+inline wxString FormatOffset(THSIZE n) { return _T("0x") + FormatHex(n); }
 
 extern void reverse(uint8 *data, uint32 len);
 inline void reverse(THSIZE *data) { reverse((uint8*)data, sizeof(THSIZE)); }
@@ -466,7 +479,7 @@ public:
     static thString ToUnicode(const wchar_t *data, size_t chars = 0);
 
     //const uint8 *data() const { return m_data; }
-    const uint8 *data() const { return (const uint8*)m_str.c_str(); }
+    const uint8 *data() const { return (const uint8*)(LPCTSTR)m_str.c_str(); }
     size_t len() const { return m_len; }
 
     //uint8 *GetWriteBuffer(size_t bytes);
@@ -499,6 +512,7 @@ public:
     virtual bool Update(THSIZE value, bool showSpeed = true, wxString extraMsg = ZSTR);
 
     virtual void SetUpdateInterval(DWORD updateInterval);
+    virtual void SetSpeedScale(double scale);
 
     THSIZE m_range, m_lastStart[2];
     DWORD m_startTime;
@@ -506,6 +520,7 @@ public:
     DWORD m_updateInterval;
     ATimer updateTimer;  // Update the speed message periodically.
     wxString m_msg;
+    double m_speedScale;
 };
 
 bool Confirm(wxString msg, wxString caption = _T("T. Hex"), wxWindow *parent = NULL);

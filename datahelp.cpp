@@ -9,7 +9,7 @@
 
 #define new New
 
-Segment::Segment(THSIZE size, THSIZE stored_offset, DataSource *pDS, THSIZE nCount /*= 1*/)
+void Segment::Init(THSIZE size, THSIZE stored_offset, DataSource *pDS, THSIZE nCount /*= 1*/)
 {
     //this->type = Segment::FILE;
     this->size = size * nCount;
@@ -19,20 +19,30 @@ Segment::Segment(THSIZE size, THSIZE stored_offset, DataSource *pDS, THSIZE nCou
     this->fill = (nCount > 1);
     if (pDS)
         pDS->AddRef();
-    //this->pData = NULL;
-    this->next = this->prev = NULL;
+}
+
+Segment::Segment(const Segment& other)
+{
+    *this = other;
 }
 
 Segment::~Segment()
 {
-    //if (pData)
-    //    delete [] pData;
     if (pDS)
         pDS->Release();
-    if (next)
-        next->prev = prev;
-    if (prev)
-        prev->next = next;
+}
+
+const Segment& Segment::operator=(const Segment& other)
+{
+    this->stored_offset = other.stored_offset;
+    this->size = other.size;
+    this->srcSize = other.srcSize;
+    this->fill = other.fill;
+    this->pDS = other.pDS;
+    if (pDS)
+        pDS->AddRef();
+
+    return *this;
 }
 
 //void Segment::InsertBefore(Segment *ts)
@@ -57,21 +67,22 @@ Segment::~Segment()
 //    this->next = ts;
 //}
 
-Segment* Segment::RemoveMid(THSIZE nOffset, THSIZE nSize)
+Segment Segment::RemoveMid(THSIZE nOffset, THSIZE nSize)
 {
     THSIZE right = nOffset + nSize;
 
     if (right > size)
         return NULL;
 
-    Segment *tmp;
+    Segment tmp;
     if (fill)
     {
         //! Fuck.
-        return NULL;
+        //return NULL;
+        return tmp;
     }
     else
-        tmp = new Segment(size - right, stored_offset + right, pDS);
+        tmp.Init(size - right, stored_offset + right, pDS);
 
     RemoveRight(nOffset);
     return tmp;
@@ -98,17 +109,17 @@ bool Segment::RemoveLeft(uint64 nRemoveSize)
 }
 
 //! This doesn't look very safe.  More thought needed.
-void Segment::ExtendForward(uint64 nAddSize)
-{
-    this->size += nAddSize;
-}
-
-void Segment::ExtendBackward(uint64 nAddSize)
-{
-    this->size += nAddSize;
-    if (!fill)
-        stored_offset -= nAddSize;
-}
+//void Segment::ExtendForward(uint64 nAddSize)
+//{
+//    this->size += nAddSize;
+//}
+//
+//void Segment::ExtendBackward(uint64 nAddSize)
+//{
+//    this->size += nAddSize;
+//    if (!fill)
+//        stored_offset -= nAddSize;
+//}
 
 uint8 Segment::Get(THSIZE offset)
 {
@@ -133,10 +144,10 @@ void Segment::Serialize(THSIZE nOffset, THSIZE nSize, int nSource, uint8 *target
     //! todo: handle fill data.  This doesn't work.
 
     SerialDataSegment *st = (SerialDataSegment*)target;
-    memcpy(st, this, sizeof(SerialDataSegment));
-    st->stored_offset += nOffset;
-    //st->size -= nOffset;  // wtf?!  2008-07-24
+    st->stored_offset = this->stored_offset + nOffset;
     st->size = st->srcSize = nSize;
+    st->fill = this->fill;
+    //st->src = ???
 }
 
 Segment* Segment::Unserialize(SerialData sdata, int iSeg)

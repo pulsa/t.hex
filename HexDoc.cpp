@@ -19,20 +19,10 @@ HexDoc::HexDoc(DataSource *pDS, THSIZE start, THSIZE size, DWORD dwFlags)
 {
     m_pDS = pDS;
     pDS->AddRef();
-    m_head = new Segment(0, 0, NULL);
-    m_tail = new Segment(0, 0, NULL);
     if (size)
     {
-        m_current = new Segment(size, start, pDS);
-        m_head->next = m_current;
-        m_current->prev = m_head;
-        m_current->next = m_tail;
-        m_tail->prev = m_current;
-    }
-    else
-    {
-        m_head->next = m_current = m_tail;
-        m_tail->prev = m_head;
+        m_segments.push_back(Segment(size, start, pDS));
+        m_curSeg = m_segments.begin();
     }
     this->size = size;
     this->display_address = start;
@@ -52,7 +42,8 @@ HexDoc::HexDoc(DataSource *pDS, THSIZE start, THSIZE size, DWORD dwFlags)
 HexDoc::~HexDoc()
 {
     //! Can closing our stuff ever fail?  Do we care?
-    DeleteSegments();
+    //DeleteSegments();
+    m_segments.clear();
 
     free(m_pCacheBuffer);
 
@@ -67,16 +58,6 @@ HexDoc::~HexDoc()
     undo = NULL;
 }
 
-// delete all segments, including m_head and m_tail
-void HexDoc::DeleteSegments()
-{
-    while (m_head)
-    {
-        m_current = m_head->next;
-        delete m_head;
-        m_head = m_current;
-    }
-}
 
 //*****************************************************************************
 //*****************************************************************************
@@ -161,9 +142,10 @@ bool HexDoc::ReplaceSerialized(THSIZE nAddress, THSIZE ToReplaceLength, SerialDa
     THSIZE tmpAddress = nAddress;
     for (int iSeg = 0; iSeg < sInsert.hdr.nSegments; iSeg++)
     {
-        Segment *ts = Segment::Unserialize(sInsert, iSeg);
+        Segment ts;
+        ts.Unserialize(sInsert, iSeg);
         DoInsertSegment(tmpAddress, ts);
-        tmpAddress += ts->size;
+        tmpAddress += ts.size;
     }
 
     InvalidateCache(nAddress, ToReplaceLength, sInsert.m_nTotalSize);
@@ -184,7 +166,7 @@ bool HexDoc::DoInsertAt(THSIZE nIndex, const uint8 *psrc, int nSize, THSIZE nCou
     // copy data to the permanent buffer
         THSIZE tmp = modbuf->GetSize();
             modbuf->Append(psrc, nSize);
-    Segment *ts = new Segment(nSize, tmp, modbuf, nCount);
+    Segment ts(nSize, tmp, modbuf, nCount);
 
     if (!DoInsertSegment(nIndex, ts))
         return false;
@@ -196,40 +178,36 @@ bool HexDoc::DoRemoveAt(uint64 nIndex, uint64 nSize)
     if (nIndex == this->size)
         return nSize == 0;
 
-    MoveToSegment(nIndex);
+    if (!MoveToSegment(nIndex))
+        return false;
 
     const THSIZE removeSize = nSize; // nSize gets modified
 
     while (nSize)
     {
-        //Segment* ts = segments[n];
-        Segment* ts = m_current;
-        if (nIndex > 0 && ts->contains(nIndex - 1, nSize + 2, m_curBase))
+        Segment& ts = *m_curSeg;
+        if (nIndex > 0 && ts.contains(nIndex - 1, nSize + 2, m_curBase))
         { //---xxx---
-            Segment* ts2 = ts->RemoveMid(nIndex - m_curBase, nSize);
-            ts2->prev = ts;
-            ts2->next = ts->next;
-            ts->next->prev = ts2;
-            ts->next = ts2;
+            Segment ts2 = ts.RemoveMid(nIndex - m_curBase, nSize);
+            m_segments.insert(m_curSeg + 1, ts2);
             break;
         }
-        else if (nIndex > 0 && ts->contains(nIndex - 1, m_curBase))
+        else if (nIndex > 0 && ts.contains(nIndex - 1, m_curBase))
         { // ---xxx
-            nSize -= ts->size - (nIndex - m_curBase);
-            ts->RemoveRight(nIndex - m_curBase);
-            m_curBase += ts->size;
-            m_current = m_current->next;
+            nSize -= ts.size - (nIndex - m_curBase);
+            ts.RemoveRight(nIndex - m_curBase);
+            m_curBase += ts.size;
+            m_curSeg++;
         }
-        else if (ts->contains(nIndex + nSize, m_curBase))
+        else if (ts.contains(nIndex + nSize, m_curBase))
         { // xxx---
-            ts->RemoveLeft(nSize);
+            ts.RemoveLeft(nSize);
             break;
         }
         else
         { // xxx
-            m_current = m_current->next; // m_curBase doesn't change
-            nSize -= ts->size;
-            delete ts; //! destructor fixes up the list pointers.  Sneaky, ain't it?
+            nSize -= ts.size;
+            m_segments.erase(m_curSeg); // m_curBase doesn't change
         }
     }
 
@@ -241,60 +219,54 @@ bool HexDoc::DoRemoveAt(uint64 nIndex, uint64 nSize)
 }
 
 
-bool HexDoc::DoInsertSegment(THSIZE nAddress, Segment *newSegment)
+bool HexDoc::DoInsertSegment(THSIZE nAddress, const Segment& newSegment)
 {
-    THSIZE addedSize = newSegment->size;
-    if (size == 0) // special case for first segment
+    THSIZE addedSize = newSegment.size;
+    if (nAddress == 0)
     {
-        m_head->next = m_current = newSegment;
-        newSegment->prev = m_head;
-        m_tail->prev = newSegment;
-        newSegment->next = m_tail;
+        m_segments.push_front(newSegment);
+        m_curSeg = m_segments.begin();
+    }
+    else if (nAddress = this->size)
+    {
+        m_segments.push_back(newSegment);
     }
     else
     {
         if (!MoveToSegment(nAddress))
             return false; // Only happens if nAddress > size, and that should be caught before here
-        Segment *prev = m_current->prev;
+        //! TODO: what if we are inserting at end of document?
         if (nAddress != m_curBase) // insert new segment inside existing segment
         {
-            Segment* ts2 = m_current->Split(nAddress - m_curBase);
-            m_current->next->prev = ts2;
-            ts2->next = m_current->next;
-            ts2->prev = newSegment;
-            newSegment->next = ts2;
-            newSegment->prev = m_current;
-            m_current->next = newSegment;
+            Segment ts2 = m_curSeg->Split(nAddress - m_curBase);
+            m_segments.insert(m_curSeg + 1, ts2);
+            m_segments.insert(m_curSeg + 1, newSegment);
         }
-        else if (newSegment->fill == false &&
-                 prev->fill == false &&
-                 newSegment->pDS == prev->pDS &&
-                 newSegment->stored_offset == prev->stored_offset + prev->size)
-        {
-            // extend range of previous segment forward
-            prev->ExtendForward(newSegment->size);
-            m_curBase += newSegment->size;
-            delete newSegment;
-            //!!! HOW DO WE UNDO THIS?
-        }
-        else if (newSegment->fill == false &&
-                 prev->fill == false &&
-                 newSegment->pDS == m_current->pDS &&
-                 newSegment->stored_offset + newSegment->size == m_current->stored_offset)
-        {
-            // extend range of current segment backward
-            m_current->ExtendBackward(newSegment->size);
-            m_curBase -= newSegment->size;
-            delete newSegment;
-            //!!! HOW DO WE UNDO THIS?
-        }
+        //else if (newSegment.fill == false &&
+        //         prev->fill == false &&
+        //         newSegment->pDS == prev->pDS &&
+        //         newSegment->stored_offset == prev->stored_offset + prev->size)
+        //{
+        //    // extend range of previous segment forward
+        //    prev->ExtendForward(newSegment->size);
+        //    m_curBase += newSegment->size;
+        //    delete newSegment;
+        //    //!!! HOW DO WE UNDO THIS?
+        //}
+        //else if (newSegment->fill == false &&
+        //         prev->fill == false &&
+        //         newSegment->pDS == m_current->pDS &&
+        //         newSegment->stored_offset + newSegment->size == m_current->stored_offset)
+        //{
+        //    // extend range of current segment backward
+        //    m_current->ExtendBackward(newSegment->size);
+        //    m_curBase -= newSegment->size;
+        //    delete newSegment;
+        //    //!!! HOW DO WE UNDO THIS?
+        //}
         else // insert new segment at beginning of current segment.
         {
-            m_current->prev->next = newSegment;
-            newSegment->prev = m_current->prev;
-            newSegment->next = m_current;
-            m_current->prev = newSegment;
-            m_current = newSegment;
+            m_segments.insert(m_curSeg, newSegment);
         }
     }
 
@@ -310,15 +282,17 @@ bool HexDoc::DoInsertSegment(THSIZE nAddress, Segment *newSegment)
 // Whether this is helpful remains to be seen.
 bool HexDoc::RejoinSegments()
 {
-    Segment *prev = m_current->prev;
-    if (m_curBase > 0 &&
-        m_current->pDS == prev->pDS &&
-        m_current->stored_offset == prev->stored_offset + prev->size)
+    if (m_curBase == 0)
+        return true;
+    Segment& cur = *m_curSeg;
+    Segment& prev = *(m_curSeg - 1);
+    if (cur.pDS == prev.pDS &&
+        cur.stored_offset == prev.stored_offset + prev.size)
     {
-        m_curBase -= prev->size;
-        prev->size += m_current->size;
-        delete m_current;
-        m_current = prev;
+        m_curBase -= prev.size;
+        prev.size += cur.size;
+        m_segments.erase(m_curSeg);
+        m_curSeg--;
         return true;
     }
     return false;
@@ -392,12 +366,16 @@ const uint8* HexDoc::Load(uint64 nIndex, uint32 nSize, uint32 *pCachedSize /*= 0
 
 bool HexDoc::MoveToSegment(uint64 nIndex)
 {
-    if (nIndex > size) //! special case of (nIndex == size) is handled later
+    if (nIndex >= size)
+    {
+        m_curSeg = m_segments.end();
+        m_curBase = size;
         return false;
+    }
 
     if (nIndex == 0)
     {
-        m_current = m_head->next;
+        m_curSeg = m_segments.begin();
         m_curBase = 0;
         return true;
     }
@@ -406,17 +384,19 @@ bool HexDoc::MoveToSegment(uint64 nIndex)
     {
         while (nIndex < m_curBase)
         {
-            wxASSERT(m_current->prev != NULL); // check for underflow
-            m_curBase -= m_current->prev->size;
-            m_current = m_current->prev;
+            wxASSERT(m_curSeg != m_segments.begin()); // check for underflow
+            m_curSeg--;
+            m_curBase -= m_curSeg->size;
         }
+        return true;
     }
-    else while (m_curBase + m_current->size <= nIndex)
+
+    THSIZE curSize = m_curSeg->size;
+    while (m_curBase + curSize <= nIndex)
     {
-        m_curBase += m_current->size;
-        if (!m_current->next)            //! special weirdness for EOF
-            break;
-        m_current = m_current->next;
+        m_curBase += curSize;
+        m_curSeg++;
+        curSize = m_curSeg->size;
     }
 
     return true;
@@ -455,11 +435,12 @@ bool HexDoc::Cache(THSIZE nIndex, THSIZE nSize)
         nEnd = wxMin(nIndex + m_pDS->BlockAlign, this->size);  // or until end of document.
 
     // See if we can get a base pointer.
-    if (nIndex >= m_curBase && nEnd <= m_curBase + m_current->size)
+    THSIZE curEnd = m_curBase + m_curSeg->size;
+    if (nIndex >= m_curBase && nEnd <= curEnd)
     {
         // Adjust nSize upward to 1M or segment end, whichever is closest.
-        nSize = wxMax(nEnd, wxMin(nIndex + MEGA + 8192, m_curBase + m_current->size)) - nIndex;
-        const uint8 *tmp = m_current->GetBasePointer(nIndex - m_curBase, + nSize);
+        nSize = wxMax(nEnd, wxMin(nIndex + MEGA + 8192, curEnd)) - nIndex;
+        const uint8 *tmp = m_curSeg->GetBasePointer(nIndex - m_curBase, + nSize);
         if (tmp)  // It will probably be NULL, but maybe we'll get lucky.
         {
             m_pCacheData = tmp;
@@ -571,18 +552,22 @@ bool HexDoc::Read(uint64 nOffset, uint32 nSize, uint8 *target, uint8 *pModified 
         //    pModified[n] = IsModified(nOffset + n); //! much room for improvement here.
         //}
 
+        // Moves m_curSeg and m_curBase.
         MoveToSegment(nOffset);
         THSIZE segOffset = nOffset - m_curBase;
-        uint8 flag = (m_current->pDS != this->m_pDS);
+        uint8 flag = (m_curSeg->pDS != this->m_pDS);
         for (uint32 n = 0; n < nSize; )
         {
-            uint32 blockSize = wxMin(m_current->size - segOffset, nSize - n);
+            uint32 blockSize = wxMin(m_curSeg->size - segOffset, nSize - n);
             memset(pModified + n, flag, blockSize);
-            m_curBase += m_current->size;
-            m_current = m_current->next;
-            flag = (m_current->pDS != this->m_pDS);
-            n += blockSize;
             segOffset = 0;
+            n += blockSize;
+            if (n >= nSize)
+                break;
+
+            m_curBase += m_curSeg->size;
+            m_curSeg++;
+            flag = (m_curSeg->pDS != this->m_pDS);
         }
     }
 
@@ -594,14 +579,14 @@ bool HexDoc::DoRead(THSIZE nOffset, size_t nSize, uint8* target)
     //if (!Load(nOffset))
     if (!MoveToSegment(nOffset))
         return false;
-    Segment *ts = m_current;
+    auto ts = m_curSeg;
 
     uint32 copySize, dstOffset = 0;
     uint64 srcOffset = nOffset - m_curBase;
     uint32 remaining = nSize;
     while (remaining > 0)
     {
-        if (ts == NULL)
+        if (ts == m_segments.end())
             return false; //! Help!
         copySize = min(remaining, ts->size - srcOffset);
         if (!ts->Read(srcOffset, copySize, target + dstOffset))
@@ -609,7 +594,7 @@ bool HexDoc::DoRead(THSIZE nOffset, size_t nSize, uint8* target)
         dstOffset += copySize;
         srcOffset = 0;
         remaining -= copySize;
-        ts = ts->next;
+        ts++;
     }
     return true;
 }
@@ -631,22 +616,20 @@ bool HexDoc::ReadNumber(uint64 nIndex, int nBytes, void *target)
 {
     //! I don't think this will work on big-endian machines.
     if (!Read(nIndex, nBytes, (uint8*)target)) return false;
-    if (pSettings->iEndianMode != NATIVE_ENDIAN_MODE)
+    if (!bIsNativeEndian)
         reverse((uint8*)target, nBytes);
     return true;
 }
 
-bool HexDoc::ReadInt(uint64 nIndex, int nBytes, UINT64 *target, int mode /*= -1*/)
+bool HexDoc::ReadInt(uint64 nIndex, int nBytes, UINT64 *target)
 {
     if (nBytes < 1 || nBytes > 8) return false;
-    if (mode == -1)
-        mode = pSettings->iEndianMode;
     *target = 0;
     uint8 *p8 = (uint8*)target;
     if (NATIVE_ENDIAN_MODE == BIGENDIAN_MODE)
         p8 += 8 - nBytes;
     if (!Read(nIndex, nBytes, p8)) return false;
-    if (mode != NATIVE_ENDIAN_MODE)
+    if (!bIsNativeEndian)
         reverse(p8, nBytes);
     return true;
 }
@@ -782,25 +765,25 @@ bool HexDoc::Save()
         //m_pDS->Flush();
 
         THSIZE base = 0;//display_address;  // fixed 2008-05-06.  Only need this for writing
-        for (Segment *s = m_head->next; s != m_tail; )
+        for (auto s = m_segments.begin(); s != m_segments.end(); )
         {
             if (s->pDS == m_pDS) //! do we need to check s->type?
             {
                 base += s->size;
-                s = s->next;
+                s++;
                 continue;
             }
 
             // Collect all the segments that need to be written,
             // until the next segment bigger than MinTransfer that we can skip.
             THSIZE blocksize = MEGA, firstSegSize, writeSize = firstSegSize = s->size;
-            s = s->next;
-            while (s != m_tail)
+            s++;
+            while (s != m_segments.end())
             {
                 if (s->pDS == m_pDS && s->size > m_pDS->MinTransfer)
                     break;
                 writeSize += s->size;
-                s = s->next;
+                s++;
             }
             
             for (THSIZE offset = 0; offset < writeSize; offset += blocksize)
@@ -865,32 +848,17 @@ bool HexDoc::Save()
         goto done;  // skip rebuilding the buffer
     }
 
-    Segment *ts = 0;
+    m_segments.clear();
     if (size)
-        ts = new Segment(size, display_address, m_pDS); // calls m_pDS->AddRef
-    DeleteSegments();
-    m_head = new Segment(0, 0, NULL);
-    m_tail = new Segment(0, 0, NULL);
+        m_segments.push_back(Segment(size, display_address, m_pDS)); // calls m_pDS->AddRef
+    m_curSeg = m_segments.begin();
     m_curBase = 0;
-    if (size)
-    {
-        m_current = ts;
-        m_head->next = m_current;
-        m_current->prev = m_head;
-        m_current->next = m_tail;
-        m_tail->prev = m_current;
-    }
-    else
-    {
-        m_head->next = m_current = m_tail;
-        m_tail->prev = m_head;
-    }
 
     //! To do: clear undo buffer
 
     InvalidateCache();
     if (hw)
-        hw->OnDataChange(0, size, size);
+        hw->OnDataChange(0, size, size, false);
 
 done:
     //delete [] buf;
@@ -903,9 +871,10 @@ bool HexDoc::CanWriteInPlace()
         return false;
     //! How do we handle file size changes?  (adding or removing bytes at EOF)
     THSIZE base = display_address;
-    for (Segment *s = m_head->next; s != m_tail; base += s->size, s = s->next)
+    for (auto iter = m_segments.begin(); iter != m_segments.end(); iter++)
     {
-        if (s->pDS == m_pDS && s->stored_offset != base)
+        const Segment& s = *iter;
+        if (s.pDS == m_pDS && s.stored_offset != base)
             return false;
     }
     return true;
@@ -1122,26 +1091,27 @@ int HexDoc::GetSerializedLength(THSIZE nOffset, THSIZE nSize)
     std::vector<DataSource*> sources;
     std::vector<DataSource*>::const_iterator iter;
 
-    THSIZE segStart;
-    Segment *ts = GetSegment(nOffset, &segStart);
+    MoveToSegment(nOffset);
+    auto segIter = m_curSeg;
+    THSIZE segStart = m_curBase;
     THSIZE segOffset = nOffset - segStart;
-    while (ts != NULL && segStart < nOffset + nSize)
+    while (segIter != m_segments.end() && segStart < nOffset + nSize)
     {
+        Segment& ts = *segIter;
         int nSource = 0;
-        if (ts->pDS)
+        if (ts.pDS)
         {
-            iter = std::find(sources.begin(), sources.end(), ts->pDS);
+            iter = std::find(sources.begin(), sources.end(), ts.pDS);
             if (iter == sources.end())
             {
-                sources.push_back(ts->pDS);
-                sSize += ts->pDS->GetSerializedLength();
+                sources.push_back(ts.pDS);
+                sSize += ts.pDS->GetSerializedLength();
             }
         }
-        THSIZE copySize = min(nSize, ts->size - segOffset);
-        sSize += ts->GetSerializedLength(segOffset, copySize);
-        segStart += ts->size;
+        THSIZE copySize = min(nSize, ts.size - segOffset);
+        sSize += ts.GetSerializedLength(segOffset, copySize);
+        segStart += ts.size;
         segOffset = 0;
-        ts = ts->next;
     }
     return sSize;
 }
@@ -1159,29 +1129,30 @@ void HexDoc::Serialize(THSIZE nOffset, THSIZE nSize, uint8 *target)
     std::vector<DataSource*> sources;
     std::vector<DataSource*>::const_iterator iter;
 
-    THSIZE segStart;
-    Segment *ts = GetSegment(nOffset, &segStart);
+    MoveToSegment(nOffset);
+    auto segIter = m_curSeg;
+    THSIZE segStart = m_curBase;
     THSIZE segOffset = nOffset - segStart;
-    while (ts != NULL && segStart < nOffset + nSize)
+    while (segIter != m_segments.end() && segStart < nOffset + nSize)
     {
+        Segment& ts = *segIter;
         hdr.nSegments++;
         int nSource = 0;
-        if (ts->pDS)
+        if (ts.pDS)
         {
-            iter = std::find(sources.begin(), sources.end(), ts->pDS);
+            iter = std::find(sources.begin(), sources.end(), ts.pDS);
             if (iter == sources.end())
             {
-                sources.push_back(ts->pDS);
+                sources.push_back(ts.pDS);
                 hdr.nSources++;
             }
         }
-        THSIZE copySize = min(nOffset + nSize, segStart + ts->size) - (segStart + segOffset);
-        int sSize = ts->GetSerializedLength(segOffset, copySize);
-        ts->Serialize(segOffset, copySize, nSource, target + sOffset);
+        THSIZE copySize = min(nOffset + nSize, segStart + ts.size) - (segStart + segOffset);
+        int sSize = ts.GetSerializedLength(segOffset, copySize);
+        ts.Serialize(segOffset, copySize, nSource, target + sOffset);
         sOffset += sSize;
-        segStart += ts->size;
+        segStart += ts.size;
         segOffset = 0;
-        ts = ts->next;
     }
 
     for (iter = sources.begin(); iter < sources.end(); iter++)
@@ -1302,13 +1273,14 @@ extern "C" ULONG adler32(ULONG adler, const char *buf, int size);
 bool HexDoc::ComputeAdler32(THSIZE offset, THSIZE size, ULONG &adler)
 {
     THSIZE runner, blockSize = MEGA;
-    thProgressDialog progress(size, NULL, _T("Computing Adler32 for\n") + info);
+    // Progress bar not needed, since we now show one in thFrame::FindFirstDiffChecksum().
+    //thProgressDialog progress(size, NULL, _T("Computing Adler32 for\n") + info);
     adler = 0;
     const uint8* buf;
     for (runner = 0; runner < size; runner += blockSize)
     {
-        if (!progress.Update(runner))
-            return false;
+        //if (!progress.Update(runner))
+        //    return false;
 
         if (size - runner < blockSize)
             blockSize = size - runner;
@@ -1321,4 +1293,10 @@ bool HexDoc::ComputeAdler32(THSIZE offset, THSIZE size, ULONG &adler)
         adler = adler32(adler, (const char*)buf, wxMin(blockSize, size - runner));
     }
     return true;
+}
+
+bool HexDoc::SetWriteable(bool writeable)
+{
+    this->bWriteable = writeable;
+    return bWriteable;
 }

@@ -26,7 +26,20 @@ bool thApp::OnInit()
             // The topic name must be less than 255 characters on Windows.
             wxString data = wxGetCwd();
             conn->Poke(_T("dir"), (const wxChar*)data.c_str());
-            data = GetCommandLine();
+
+            // GetCommandLine() includes the executable name,
+            // which wxCmdLineParser NO LONGER handles.  Boo.  -Adam  2011-10-21
+            //data = GetCommandLine();
+            data.Clear();
+            for (int i = 1; i < argc; i++)
+            {
+               if (i > 1)
+                  data += ' ';
+               if (argv[i].Contains(' '))
+                  data += '"' + argv[i] + '"';
+               else
+                  data += argv[i];
+            }
             conn->Poke(_T("cmd"), (const wxChar*)data.c_str());  //! What if this fails?
 
             char *swnd = (char*)conn->Request(_T("HWND"), NULL, wxIPC_TEXT);

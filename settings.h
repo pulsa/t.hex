@@ -31,6 +31,7 @@ public:
     wxArrayString asCodePages;
     wxString sFont;
     bool bFakeMonoSpace; // try to face a monospace look with proportional fonts
+    bool bSelectOnPaste;
 
     int iFontQuality; // LOGFONT.lfQuality setting, or -1 to use OS default
     BYTE GetFontQuality(); // return value is suitable for LOGFONT.lfQuality

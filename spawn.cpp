@@ -117,7 +117,7 @@ void SpawnHandler::SessionWriteShellThreadFn()
     while (bytesWritten < bytesTotal)
     {
         mutex.Lock();
-        THSIZE block = wxMin(bytesTotal - bytesWritten, BLOCKSIZE);
+        THSIZE block = wxMin(bytesTotal - bytesWritten, (THSIZE)BLOCKSIZE);
         frame->GetHexWnd()->doc->Read(offset, block, writeBuffer);
         PRINTF(_T("Writing %I64X bytes at offset %I64X... "), block, bytesWritten);
         mutex.Unlock();

@@ -17,6 +17,7 @@ typedef struct {
     bool hScroll, vScroll;
     DWORD nextActionTime;
     bool bMovedAnywhere;
+    HICON hIcon;
 } SCROLLORIGINPARAMS, UNALIGNED *PSCROLLORIGINPARAMS;
 
 static HCURSOR cursors[11] = {0};
@@ -114,10 +115,11 @@ void DoScroll(PSCROLLORIGINPARAMS psop)
         return;
 
     // ah, just repaint the whole damn circle.
-    pt.x = rcWindow.left;
-    pt.y = rcWindow.top;
-    ScreenToClient((HWND)psop->phw->GetHWND(), &pt);
-    psop->phw->RefreshRect(wxRect(pt.x, pt.y, 2 * SO_RADIUS + 1, 2 * SO_RADIUS + 1), false);
+    // Or maybe don't have to?
+    //pt.x = rcWindow.left;
+    //pt.y = rcWindow.top;
+    //ScreenToClient((HWND)psop->phw->GetHWND(), &pt);
+    //psop->phw->RefreshRect(wxRect(pt.x, pt.y, 2 * SO_RADIUS + 1, 2 * SO_RADIUS + 1), false);
 
     //PRINTF("x=%3d y=%3d   delay=%d\n", moveX, moveY, psop->delay);
     psop->phw->OnSmoothScroll(moveX, moveY);
@@ -139,7 +141,9 @@ LRESULT WINAPI ScrollOriginWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lP
         } break;
     case WM_PAINT:
         hdc = BeginPaint(hWnd, &ps);
-        DrawIcon(hdc, 0, 0, (HICON)LoadImage(GetModuleHandle(NULL), MAKEINTRESOURCE(IDI_SIZE1), IMAGE_ICON, 0, 0, LR_DEFAULTSIZE | LR_SHARED));
+        //DrawIcon(hdc, 0, 0, psop->hIcon);  // Always uses system default size.
+        // See http://blogs.msdn.com/b/oldnewthing/archive/2012/02/16/10268423.aspx
+        DrawIconEx(hdc, 0, 0, psop->hIcon, 0, 0, 0, 0, DI_NORMAL);
         EndPaint(hWnd, &ps);
         break;
     case WM_MOUSEMOVE:
@@ -204,6 +208,18 @@ BOOL CreateScrollOriginWnd(HexWnd *phw, int x, int y)
             cursors[i] = (HCURSOR)LoadImage(GetModuleHandle(NULL), MAKEINTRESOURCE(IDC_SCROLL1 + i), IMAGE_CURSOR, 0, 0, LR_DEFAULTSIZE);
         }
     }
+
+    sop.hIcon = (HICON)LoadImage(
+        GetModuleHandle(NULL), MAKEINTRESOURCE(IDI_SIZE1), IMAGE_ICON,
+        //0, 0, LR_DEFAULTSIZE | LR_SHARED);
+        32, 32, LR_SHARED);
+
+    // LR_DEFAULTSIZE seems to be scaling up the icon to match fonts or something stupid.
+    // It loads the 32-pixel icon at 40 pixels.
+    ICONINFO ii;
+    GetIconInfo(sop.hIcon, &ii);
+    BITMAPINFO bmpi;
+    GetObject(ii.hbmColor, sizeof(bmpi), &bmpi);
 
 #ifdef USE_WS_CHILD
     x = pt.x;

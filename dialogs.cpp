@@ -657,6 +657,7 @@ SettingsDialog::SettingsDialog(thFrame *frame, HexWndSettings *s)
     chkGridLines = new wxCheckBox(this, -1, _T("Grid lines"));
     chkHighlightModified = new wxCheckBox(this, -1, _T("Highlight modified data"));
     chkFontCharsOnly = new wxCheckBox(this, -1, _T("Restrict characters to font"));
+    chkSelectOnPaste = new wxCheckBox(this, -1, _T("Select on paste"));
     wxFlexGridSizer *fgs = new wxFlexGridSizer(2, pad, pad);
     fgs->Add(chkPrettyAddresses);
     fgs->Add(chkRelativeAddresses);
@@ -664,6 +665,7 @@ SettingsDialog::SettingsDialog(thFrame *frame, HexWndSettings *s)
     fgs->Add(chkGridLines);
     fgs->Add(chkHighlightModified);
     fgs->Add(chkFontCharsOnly);
+    fgs->Add(chkSelectOnPaste);
     szr->Add(fgs, 0, wxALL, pad);
 
     // Font
@@ -776,6 +778,7 @@ void SettingsDialog::InitControls()
     chkGridLines->SetValue(ps->bGridLines);
     chkHighlightModified->SetValue(ps->bHighlightModified);
     chkFontCharsOnly->SetValue(ps->bFontCharsOnly);
+    chkSelectOnPaste->SetValue(ps->bSelectOnPaste);
 
     AddColorRanges(lstValueColorRanges, ramp->pal);
 
@@ -819,6 +822,7 @@ bool SettingsDialog::UpdateData()
     ps->bGridLines = chkGridLines->GetValue();
     ps->bHighlightModified = chkHighlightModified->GetValue();
     ps->bFontCharsOnly = chkFontCharsOnly->GetValue();
+    ps->bSelectOnPaste = chkSelectOnPaste->GetValue();
 
     ps->SetPalette(ramp->pal.GetPalette());
 
@@ -967,13 +971,6 @@ void SettingsDialog::OnRangeSetAll(wxCommandEvent &event)
     }
 }
 
-bool SettingsDialog::FontChanged(HexWndSettings *old)
-{
-    if (old->iFontQuality != ps->iFontQuality)
-        return true;
-    //! More to do here.
-    return false;
-}
 
 //****************************************************************************
 //****************************************************************************
@@ -1781,11 +1778,12 @@ HistogramView::HistogramView(wxWindow *parent, HexWnd *hw, wxSize size /*= wxDef
     m_bSnapToPeak = true;
 
     // get colors from hw->m_settings
-    SetBackgroundColour(hw->m_settings.GetBackgroundColour());
-    m_pal = hw->s.palText;
-    m_bEvenOddColors = hw->s.bEvenOddColors;
-    m_clrEOText[0] = hw->s.clrEOText[0];
-    m_clrEOText[1] = hw->s.clrEOText[1];
+    HexWndSettings s = hw->GetSettings();
+    SetBackgroundColour(s.GetBackgroundColour());
+    m_pal = s.palText;
+    m_bEvenOddColors = s.bEvenOddColors;
+    m_clrEOText[0] = s.clrEOText[0];
+    m_clrEOText[1] = s.clrEOText[1];
 }
 
 HistogramView::~HistogramView()

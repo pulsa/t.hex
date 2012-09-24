@@ -149,7 +149,7 @@
     <ClCompile>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>.;$(WX)\lib\vc_lib\mswud;$(WX)\include;$(WX)\contrib\include;./iprof;./libdisasm;./akrip;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>_DEBUG;WIN32;_CRT_SECURE_NO_DEPRECATE;INCLUDE_LIBDISASM;PROFILE;ATIMER_USE_TICKCOUNT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;WIN32;_CRT_SECURE_NO_DEPRECATE;INCLUDE_LIBDISASM;ATIMER_USE_TICKCOUNT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ExceptionHandling>
       </ExceptionHandling>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -164,7 +164,7 @@
       <AdditionalIncludeDirectories>$(WX)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>user32.lib;gdi32.lib;rpcrt4.lib;advapi32.lib;comctl32.lib;comdlg32.lib;ole32.lib;shell32.lib;winmm.lib;ws2_32.lib;psapi.lib;version.lib;setupapi.lib;wxbase28ud.lib;wxmsw28ud_core.lib;wxmsw28ud_aui.lib;akrip.lib;wxmsw28ud_adv.lib;wxregexud.lib;wxbase28ud_net.lib;wxzlibd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>user32.lib;gdi32.lib;rpcrt4.lib;advapi32.lib;comctl32.lib;comdlg32.lib;ole32.lib;shell32.lib;winmm.lib;ws2_32.lib;psapi.lib;version.lib;setupapi.lib;akrip.lib;wxbase29ud.lib;wxmsw29ud_core.lib;wxmsw29ud_aui.lib;wxmsw29ud_adv.lib;wxbase29ud_net.lib;wxregexud.lib;wxzlibd.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(WX)/lib/vc_lib;./akrip/debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <DelayLoadDLLs>akrip.dll; psapi.dll; version.dll; shell32.dll; comdlg32.dll; ws2_32.dll;%(DelayLoadDLLs)</DelayLoadDLLs>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -185,10 +185,9 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <WholeProgramOptimization>true</WholeProgramOptimization>
       <AdditionalIncludeDirectories>.;$(WX)\lib\vc_lib\mswu;$(WX)\include;$(WX)\contrib\include;./iprof;./akrip;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;_CRT_SECURE_NO_DEPRECATE;INCLUDE_LIBDISASM;ATIMER_USE_TICKCOUNT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;TBDL;_CRT_SECURE_NO_DEPRECATE;INCLUDE_LIBDISASM;ATIMER_USE_TICKCOUNT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
-      <ExceptionHandling>
-      </ExceptionHandling>
+      <ExceptionHandling>Sync</ExceptionHandling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <BufferSecurityCheck>false</BufferSecurityCheck>
       <FloatingPointModel>Fast</FloatingPointModel>
@@ -199,9 +198,9 @@
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>user32.lib;gdi32.lib;rpcrt4.lib;advapi32.lib;comctl32.lib;comdlg32.lib;ole32.lib;oleaut32.lib;shell32.lib;winmm.lib;ws2_32.lib;psapi.lib;version.lib;setupapi.lib;wxbase28u.lib;wxmsw28u_core.lib;wxmsw28u_aui.lib;akrip.lib;wxmsw28u_adv.lib;wxregexu.lib;wxbase28u_net.lib;wxzlib.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>user32.lib;gdi32.lib;rpcrt4.lib;advapi32.lib;comctl32.lib;comdlg32.lib;ole32.lib;oleaut32.lib;shell32.lib;winmm.lib;ws2_32.lib;psapi.lib;version.lib;setupapi.lib;wxbase29u.lib;wxmsw29u_core.lib;wxmsw29u_aui.lib;akrip.lib;wxmsw29u_adv.lib;wxregexu.lib;wxbase29u_net.lib;wxzlib.lib;wxpng.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(WX)/lib/vc_lib;./akrip/release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <DelayLoadDLLs>akrip.dll; libdisasm.dll; psapi.dll; opengl32.dll; version.dll; shell32.dll; comdlg32.dll; ws2_32.lib;%(DelayLoadDLLs)</DelayLoadDLLs>
+      <DelayLoadDLLs>akrip.dll; libdisasm.dll; psapi.dll; opengl32.dll; version.dll; comdlg32.dll; ws2_32.lib;%(DelayLoadDLLs)</DelayLoadDLLs>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <GenerateMapFile>true</GenerateMapFile>
       <SubSystem>Windows</SubSystem>
@@ -212,12 +211,18 @@
       <DataExecutionPrevention>
       </DataExecutionPrevention>
     </Link>
+    <ResourceCompile>
+      <PreprocessorDefinitions>_UNICODE;UNICODE;wxUSE_NO_MANIFEST;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ResourceCompile>
+    <ResourceCompile>
+      <AdditionalIncludeDirectories>$(WX)\include</AdditionalIncludeDirectories>
+    </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug Unicode Static|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>.;$(WX)\lib\vc_lib\mswud;$(WX)\include;$(WX)\contrib\include;./iprof;./libdisasm;./akrip;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>_DEBUG;WIN32;_CRT_SECURE_NO_DEPRECATE;INCLUDE_LIBDISASM;ATIMER_USE_TICKCOUNT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;WIN32;TBDL;_CRT_SECURE_NO_DEPRECATE;INCLUDE_LIBDISASM;ATIMER_USE_TICKCOUNT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ExceptionHandling>Sync</ExceptionHandling>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -225,17 +230,17 @@
       <PrecompiledHeaderFile>precomp.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <ShowIncludes>false</ShowIncludes>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>_DEBUG;wxUSE_NO_MANIFEST;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(WX)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>user32.lib;gdi32.lib;rpcrt4.lib;advapi32.lib;comctl32.lib;comdlg32.lib;ole32.lib;shell32.lib;winmm.lib;ws2_32.lib;psapi.lib;version.lib;setupapi.lib;wxbase29ud.lib;wxmsw29ud_core.lib;wxmsw29ud_aui.lib;akrip.lib;wxmsw29ud_adv.lib;wxregexud.lib;wxbase29ud_net.lib;wxzlibd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>user32.lib;gdi32.lib;rpcrt4.lib;advapi32.lib;comctl32.lib;comdlg32.lib;ole32.lib;shell32.lib;winmm.lib;ws2_32.lib;psapi.lib;version.lib;setupapi.lib;wxbase29ud.lib;wxmsw29ud_core.lib;wxmsw29ud_aui.lib;akrip.lib;wxmsw29ud_adv.lib;wxregexud.lib;wxbase29ud_net.lib;wxzlibd.lib;wxpngd.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(WX)/lib/vc_lib;./akrip/$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <DelayLoadDLLs>akrip.dll; psapi.dll; version.dll; comdlg32.dll; ws2_32.dll;%(DelayLoadDLLs)</DelayLoadDLLs>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <GenerateMapFile>true</GenerateMapFile>
       <SubSystem>Windows</SubSystem>
       <LargeAddressAware>true</LargeAddressAware>
       <RandomizedBaseAddress>false</RandomizedBaseAddress>
@@ -257,7 +262,6 @@
     <ClCompile Include="datahelp.cpp" />
     <ClCompile Include="datasource.cpp" />
     <ClCompile Include="dialogs.cpp" />
-    <ClCompile Include="FatInfo.cpp" />
     <ClCompile Include="HexDoc.cpp">
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug Unicode|Win32'">/Gh /GH %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
@@ -549,7 +553,7 @@
 </Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug Unicode|Win32'">struct_lex.cpp;%(Outputs)</Outputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug Unicode Static|Win32'">Running GNU flex...</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug Unicode Static|Win32'">flex -Sflex.skl -ostruct_lex.cpp -+ struct.l
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug Unicode Static|Win32'">C:\utils\GnuWin32\bin\flex -Sflex.skl -ostruct_lex.cpp -+ struct.l
 </Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug Unicode Static|Win32'">struct_lex.cpp;%(Outputs)</Outputs>
     </CustomBuild>
@@ -559,13 +563,13 @@
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Running GNU bison...</Message>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">bison --skeleton=yacc.c -tvkdostruct_par.cpp --report=all struct.y
 </Command>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">struct_par.cpp;struct_par.hpp";%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">struct_par.cpp;struct_par.hpp;%(Outputs)</Outputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug Unicode|Win32'">Running GNU bison...</Message>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug Unicode|Win32'">bison --skeleton=yacc.c -tvkdostruct_par.cpp --report=all struct.y
 </Command>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug Unicode|Win32'">struct_par.cpp;struct_par.hpp";%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug Unicode|Win32'">struct_par.cpp;struct_par.hpp;%(Outputs)</Outputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug Unicode Static|Win32'">Running GNU bison...</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug Unicode Static|Win32'">bison --skeleton=yacc.c -tvkdostruct_par.cpp --report=all struct.y
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug Unicode Static|Win32'">C:\utils\GnuWin32\bin\bison --skeleton=yacc.c -tvkdostruct_par.cpp --report=all struct.y
 </Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug Unicode Static|Win32'">struct_par.cpp;struct_par.hpp</Outputs>
     </CustomBuild>
@@ -583,6 +587,7 @@
     <ClInclude Include="FatInfo.h" />
     <ClInclude Include="flexlexer.h" />
     <ClInclude Include="hexdoc.h" />
+    <ClInclude Include="hexview.h" />
     <ClInclude Include="hexwnd.h" />
     <ClInclude Include="iprof\prof.h" />
     <ClInclude Include="iprof\prof_gather.h" />
@@ -614,6 +619,7 @@
     <ClInclude Include="precomp.h" />
     <ClInclude Include="QString.h" />
     <ClInclude Include="resource.h" />
+    <ClInclude Include="scopeguard.h" />
     <ClInclude Include="scroll.h" />
     <ClInclude Include="settings.h" />
     <ClInclude Include="spawn.h" />

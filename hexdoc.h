@@ -14,38 +14,43 @@ class ModifyBuffer;
 
 class HexDoc
 {
+protected:
+    uint64 size;
+
+    std::deque<Segment> m_segments;
+    std::deque<Segment>::iterator m_curSeg;
+    THSIZE m_curBase; // base offset of m_curSeg
+
+    ModifyBuffer *modbuf;
+    bool NoCache; // for debugging only.  No UI.
+
+    bool bWriteable;
+    bool bCanChangeSize;
+    bool bIsNativeEndian;
+
+    //! this really shouldn't be here -- where does it belong?  HexView class?
+    Selection m_sel;
+    THSIZE m_iFirstLine;
+
+public: // Member variables that should not be public, but still are.
+    wxString info;
+    DataSource *m_pDS; // root data source from which this is created.  Store so we can save to it.
+    DWORD dwFlags; //! so far this holds protection flags from VirtualQueryEx()
+    THSIZE display_address;  // useful for memory regions, not so much for files.
+
 public:
     //HexDoc();
     HexDoc(DataSource *pDS, THSIZE start, THSIZE size, DWORD dwFlags);
     ~HexDoc();
 
-    HexWndSettings *pSettings;
-
     //enum { SUPPRESS_UPDATE = 1 }; // for InsertAt/RemoveAt flags
 
     inline THSIZE GetSize() const { return size; }
-    uint64 size;
-    wxString info;
-    Segment *m_current;
-    THSIZE m_curBase; // base offset of m_current
-    Segment *m_head, *m_tail;
-    ModifyBuffer *modbuf;
-    bool NoCache; // for debugging only.  No UI.
-
-    //THSIZE m_iCurSegOffset;
-    bool bWriteable;
-    bool bCanChangeSize;
-    DataSource *m_pDS; // root data source from which this is created.  Store so we can save to it.
-    //HexDoc *next;
-    DWORD dwFlags; //! so far this holds protection flags from VirtualQueryEx()
-
-    //! this really shouldn't be here -- where does it belong?  HexView class?
-    Selection m_sel;
-    THSIZE m_iFirstLine;
-    THSIZE display_address;
 
     bool IsWriteable() { return bWriteable; }
     bool IsReadOnly() { return !bWriteable; }
+    bool SetWriteable(bool writeable);  // probably stupid.  Needs work.
+    bool SetNativeEndian(bool nativeEndian) { return bIsNativeEndian = nativeEndian; }
 
     bool CanChangeSize() const { return bCanChangeSize; }
 
@@ -121,7 +126,7 @@ public:
     inline double ReadDouble(uint64 nIndex) { double t=0; ReadNumber(nIndex, sizeof(t), &t); return t; }
     inline float ReadFloat(uint64 nIndex) { float t=0; ReadNumber(nIndex, sizeof(t), &t); return t; }
     bool ReadNumber(uint64 nIndex, int nBytes, void *target);
-    bool ReadInt(uint64 nIndex, int nBytes, UINT64 *target, int mode = -1);
+    bool ReadInt(uint64 nIndex, int nBytes, UINT64 *target);
     wxString ReadString(THSIZE nIndex, size_t nSize, bool replaceNull = true);
     wxString ReadStringW(THSIZE nIndex, size_t nSize, bool replaceNull = true);
 
@@ -131,12 +136,17 @@ public:
     int Find(const uint8 *data, size_t count, int type, bool caseSensitive, THSIZE &start, THSIZE &end);
     int FindHex(const uint8 *data, size_t count, /*IN_OUT*/THSIZE &startpos, /*IN_OUT*/THSIZE &endpos, bool caseSensitive = true);
 
+    const std::deque<Segment>& GetSegments() const { return m_segments; }
     bool MoveToSegment(THSIZE nIndex); // sets m_current and m_curBase
-    Segment *GetSegment(THSIZE nIndex, THSIZE *pSegmentBase)
+    const Segment* GetSegment(THSIZE nIndex, THSIZE *pSegmentBase)
     {
-        if (!MoveToSegment(nIndex)) return NULL;
+        if (!MoveToSegment(nIndex))
+        {
+            *pSegmentBase = m_curBase;
+            return NULL;
+        }
         *pSegmentBase = m_curBase;
-        return m_current;
+        return &(*m_curSeg);
     }
     //int FindSegment(THSIZE nIndex);
     //Segment* SegmentAt(size_t n) { return (n < segments.size()) ? segments[n] : NULL; }
@@ -195,9 +205,9 @@ protected:
 
     bool DoRemoveAt(THSIZE nIndex, THSIZE nSize);
     bool DoInsertAt(THSIZE nIndex, const uint8* psrc, int32 nSize, THSIZE nCount = 1);
-    bool DoInsertSegment(THSIZE nAddress, Segment *ts); //! always returns true for now
+    bool DoInsertSegment(THSIZE nAddress, const Segment& newSegment); //! always returns true for now
 
-    void DeleteSegments(); // delete all segments, including m_head and m_tail
+    //void DeleteSegments(); // delete all segments, including m_head and m_tail
     bool RejoinSegments(); // try to recombine adjacent segments from the same DataSource
 
     friend class DataSource;

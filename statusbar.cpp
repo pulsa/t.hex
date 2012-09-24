@@ -100,8 +100,9 @@ void thStatusBar::SetSelection()
             uint8 byte[8];
         } data = { 0 };
         hw->doc->Read(sel.GetFirst(), size, data.byte);
-        if (hw->s.iEndianMode != NATIVE_ENDIAN_MODE) {
-            if (hw->s.iEndianMode == BIGENDIAN_MODE)
+        HexWndSettings s = hw->GetSettings();
+        if (s.iEndianMode != NATIVE_ENDIAN_MODE) {
+            if (s.iEndianMode == BIGENDIAN_MODE)
                 reverse(data.byte, size);
             else
                 reverse(data.byte, 8);
@@ -141,7 +142,7 @@ void thStatusBar::SetEndianMode()
     }
 
     wxString str;
-    if (hw->s.iEndianMode == LITTLEENDIAN_MODE)
+    if (hw->GetSettings().iEndianMode == LITTLEENDIAN_MODE)
         str = _T("Little");
     else
         str = _T("Big");

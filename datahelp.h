@@ -108,10 +108,7 @@ typedef struct
     uint64 srcSize;         // number of bytes used in data source
     //uint32 repCount;        // repeat count (Usually 0.  Never 1.)
     bool fill;              // fill flag can be inferred if size > srcSize... unless size changes.  Hmm.
-    union {
-        int src;
-        DataSource *pDS;
-    };
+    int src;
 } SerialDataSegment;
 
 typedef struct {
@@ -161,29 +158,39 @@ protected:
 //*****************************************************************************
 //*****************************************************************************
 
-class Segment : public SerialDataSegment
+class Segment
 {
+//protected:
 public:
-    Segment *next, *prev;
+    uint64 stored_offset;   // offset of data in source
+    uint64 size;            // number of bytes this segment displays, including repetition
+    uint64 srcSize;         // number of bytes used in data source
+    //uint32 repCount;        // repeat count (Usually 0.  Never 1.)
+    bool fill;              // fill flag can be inferred if size > srcSize... unless size changes.  Hmm.
+    DataSource *pDS;
 
-    //void InsertAfter(Segment *ts);
-    //void InsertBefore(Segment *ts);
+public:
 
-    Segment(uint64 size, uint64 stored_offset, DataSource *pDS, THSIZE nCount = 1);
-    //Segment(uint64 size);
-    //Segment(uint64 size, const uint8 *pData); // copies the data into a new buffer
-    // do we need a constructor that takes ownership of a pointer?  Not for now...
-    //Segment(uint64 size, uint8 fillData);
+    Segment(uint64 size = 0, uint64 stored_offset = 0, DataSource *pDS = 0, THSIZE nCount = 1)
+    {
+        Init(size, stored_offset, pDS, nCount);
+    }
+
+    Segment(const Segment& other);
+
+    const Segment& operator=(const Segment& other);
 
     ~Segment();
 
-    Segment* Split(uint64 nOffset) { return RemoveMid(nOffset, 0); }
+    void Init(uint64 size = 0, uint64 stored_offset = 0, DataSource *pDS = 0, THSIZE nCount = 1);
+
+    Segment Split(uint64 nOffset) { return RemoveMid(nOffset, 0); }
     void RemoveRight(uint64 nNewSize);
     bool RemoveLeft(uint64 nRemoveSize);
-    Segment* RemoveMid(THSIZE nIndex, THSIZE nSize); // returns the right remainder, doesn't update list
+    Segment RemoveMid(THSIZE nIndex, THSIZE nSize); // returns the right remainder, doesn't update list
 
-    void ExtendForward(uint64 nAddSize);
-    void ExtendBackward(uint64 nAddSize);
+    //void ExtendForward(uint64 nAddSize);
+    //void ExtendBackward(uint64 nAddSize);
 
     bool contains(uint64 nIndex, uint64 base)
     {

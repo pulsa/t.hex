@@ -106,7 +106,7 @@ public:
 
     int HitTest(const wxPoint pt, THSIZE &pos);
     int GetCoord(THSIZE pos);
-    wxBrush *GetBrush(const Segment *s, const DataSource *pDS, THSIZE offset);
+    wxBrush *GetBrush(const Segment& s, const DataSource *pDS, THSIZE offset);
 
     DECLARE_EVENT_TABLE()
 };

@@ -273,7 +273,7 @@ DWORD MSB2DWORD(const BYTE* b)
 
 DiskDataSource::DiskDataSource(LPCTSTR filename, bool bReadOnly)
 {
-    DWORD errcode;
+    //DWORD errcode;
     wxString errmsg;
 
     //m_pRootRegion = NULL;
@@ -795,9 +795,7 @@ ProcMemDataSource::ProcMemDataSource(DWORD pid, wxString procName, bool bReadOnl
         do {
             wxString tmp = _T("Module: ") + GetRealFilePath(me.szExePath, hProcess, me.modBaseAddr);
             THSIZE base = (THSIZE)me.modBaseAddr;
-            HexDoc* doc = AddRegion(base, base, me.modBaseSize, tmp);
-            doc->bWriteable = false;
-            doc->dwFlags = PAGE_READONLY;
+            HexDoc* doc = AddRegion(base, base, me.modBaseSize, tmp, false, PAGE_READONLY);
         } while (Module32Next(hSnap, &me));
     }
     else if (GetLastError() != ERROR_NO_MORE_FILES)
@@ -835,7 +833,7 @@ ProcMemDataSource::ProcMemDataSource(DWORD pid, wxString procName, bool bReadOnl
                 else if (he.dwFlags == LF32_FREE)     type = _T("free");
                 else if (he.dwFlags == LF32_MOVEABLE) type = _T("moveable");
                 else                                  type.Printf(_T("%d"), he.dwFlags);
-                tmp.Printf(_T("Heap (%s), handle 0x%X, flags 0x%X"), type.c_str(), he.hHandle, hl.dwFlags);
+                tmp.Printf(_T("Heap (%s), handle 0x%X, flags 0x%X"), type, (DWORD)he.hHandle, (DWORD)hl.dwFlags);  //what's wrong with %x HANDLE?
                 baseAddr = (LPCVOID)he.dwAddress;
             }
             else
@@ -854,10 +852,11 @@ ProcMemDataSource::ProcMemDataSource(DWORD pid, wxString procName, bool bReadOnl
             VirtualQueryEx(hProcess, baseAddr, &memInfo, sizeof(memInfo));
             THSIZE base = (THSIZE)memInfo.BaseAddress;
 
-            HexDoc* doc = AddRegion(base, base, memInfo.RegionSize, tmp);
+            bool bWriteable = true;
             if (!(memInfo.Protect & PAGE_READWRITE) &&
                 !(memInfo.Protect & PAGE_EXECUTE_READWRITE))
-               doc->bWriteable = false;
+               bWriteable = false;
+            HexDoc* doc = AddRegion(base, base, memInfo.RegionSize, tmp, bWriteable);
 
         } while (Heap32ListNext(hSnap, &hl));
     }
@@ -964,10 +963,9 @@ ProcMemDataSource::ProcMemDataSource(DWORD pid, wxString procName, bool bReadOnl
                     //! To do: Use wxTreeListCtrl or something to group these with the module entry.
 #if 1  // section-level view of modules.  Makes region list slow.
                     type = _T("- ") + wxFileName(olddoc->info).GetFullName();
-                    HexDoc* doc = AddRegion(begin, begin, size, type);
-                    if (!(memInfo.Protect & PAGE_READWRITE))
-                        doc->bWriteable = false;
-                    doc->dwFlags = memInfo.Protect;
+                    HexDoc* doc = AddRegion(begin, begin, size, type,
+                        (memInfo.Protect & PAGE_READWRITE) != 0,
+                        memInfo.Protect);
 #endif
                 }
                 else if (olddoc && begin == olddoc->display_address && size == olddoc->GetSize() &&
@@ -991,10 +989,9 @@ ProcMemDataSource::ProcMemDataSource(DWORD pid, wxString procName, bool bReadOnl
                             type.Printf(_T("Mapped file: %s"), devicepath);
                     }
 
-                    HexDoc* doc = AddRegion(begin, begin, size, type);
-                    if (!(memInfo.Protect & PAGE_READWRITE))
-                        doc->bWriteable = false;
-                    doc->dwFlags = memInfo.Protect;
+                    HexDoc* doc = AddRegion(begin, begin, size, type,
+                        (memInfo.Protect & PAGE_READWRITE) != 0,
+                        memInfo.Protect);
                 }
             }
 
@@ -1066,13 +1063,15 @@ void DataSource::Serialize(uint8 *target)
     *(DataSource**)target = this; //! quick hack
 }
 
-HexDoc* DataSource::AddRegion(uint64 display_address, uint64 stored_address, uint64 size, wxString info)
+HexDoc* DataSource::AddRegion(uint64 display_address, uint64 stored_address, uint64 size, wxString info,
+    bool bWriteable /*= true*/, DWORD dwFlags /*= 0*/)
 {
     //! needs help again after name change
     HexDoc *region = new HexDoc(this, display_address, size, 0);
     region->info = info;
-    region->bWriteable = this->IsWriteable();
+    region->bWriteable = bWriteable && this->IsWriteable();
     region->bCanChangeSize = this->CanChangeSize();
+    region->dwFlags = dwFlags;
 
     // Build vector of regions, ordered by starting address.
     //! todo: look for region overlap and data > MAX_ADDRESS
@@ -1191,209 +1190,6 @@ bool UnsavedDataSource::Read(uint64 nIndex, uint32 nSize, uint8 *pData)
 //}
 
 
-//*****************************************************************************
-//*****************************************************************************
-// VecMemDataSource
-//*****************************************************************************
-//*****************************************************************************
-
-#ifdef LC1VECMEM
-VecMemDataSource::VecMemDataSource(wxIPV4address addr, bool bReadOnly)
-{
-    m_bOpen = false;
-    RemoteSA.sin_family = AF_INET;
-    RemoteSA.sin_addr.s_addr = inet_addr(addr.IPAddress().mb_str(wxConvLibc));
-    RemoteSA.sin_port = htons(addr.Service());
-    sockfd = socket(AF_INET, SOCK_DGRAM, 0);
-    connect(sockfd, (sockaddr*)&RemoteSA, sizeof(RemoteSA));
-    inbuf = MCC_PACKET_ALLOC(1500);
-    outbuf = MCC_PACKET_ALLOC(1500);
-
-    hBusMutex = CreateMutexA(NULL, 0, "\\SEM32\\CTEST"); // DEFAULT_BUS_SEM_NAME
-
-    m_bWriteable = !bReadOnly;
-    m_bOpen = true;
-    m_title = _T("LC-1");
-
-    MinTransfer = 80;   // Must transfer at least one whole row at a time.
-    MaxTransfer = 1440;  // We can fit 15 96-byte words in a 1500-byte ethernet packet.
-    BlockAlign  = 80;
-
-    HexDoc* doc = AddRegion(0, 0, 0x400000 * 80, wxString(_T("LC-1 Vector Memory: ")) + addr.IPAddress());
-    doc->dwFlags = PAGE_READONLY;
-}
-
-VecMemDataSource::~VecMemDataSource()
-{
-    CloseHandle(hBusMutex);
-    closesocket(sockfd);
-    MCC_PACKET_FREE(inbuf);
-    MCC_PACKET_FREE(outbuf);
-}
-
-// convert from vector format
-void RemoveECC(const BYTE *vec96, BYTE *data80, int wordCount = 1)
-{
-   while (wordCount--)
-   {
-      int dst = 0;
-      for (int src = 0; src < 96; src++)
-      {
-         if ((src & 7) &&  // Don't copy ECC bytes.
-             (src < 19 ||  // Don't copy bytes 19 through 22.
-              src > 22))
-            data80[dst++] = vec96[src];
-      }
-      vec96 += 96;
-      data80 += 80;
-   }
-}
-
-bool VecMemDataSource::Read(uint64 nIndex, uint32 nSize, uint8 *pData)
-{
-    if (nIndex % MinTransfer || nSize % MinTransfer)
-        return false;
-
-    ULONG Sadr = nIndex / 80;
-    uint32 rows = (nIndex + nSize + 79) / 80 - Sadr;
-    int srcOffset = nIndex % 80;
-    while (rows)
-    {
-        uint32 block = wxMin(rows, 10);
-        uint32 tlen = wxMin(nSize, block * 80 - srcOffset);
-        if (!GetRows(Sadr, block))
-            return false;
-        //memcpy(pData, inbuf->mem(srcOffset), tlen);
-        RemoveECC(inbuf->mem(srcOffset), pData, block);
-        pData += tlen;
-        nSize -= tlen;
-        srcOffset = 0;
-        Sadr += block;
-        rows -= block;
-    }
-    return true;
-}
-
-bool VecMemDataSource::Write(uint64 nIndex, uint32 nSize, const uint8 *pData)
-{
-if (nIndex % MinTransfer || nSize % MinTransfer)
-   //return false;
-{
-    ULONG Sadr = nIndex / 128;
-    uint32 rows = (nIndex + nSize + 127) / 128 - Sadr;
-    int srcOffset = nIndex % 128;
-    while (rows)
-    {
-        uint32 block = wxMin(rows, MaxTransfer / MinTransfer);
-        uint32 tlen = wxMin(block * 128 - srcOffset, nSize);
-        if (srcOffset)
-        {
-            // read first row and fill in missing parts of output
-            if (!GetRows(Sadr, 1)) return false;
-            memcpy(outbuf->mem(), inbuf->mem(), 128);
-            memcpy(outbuf->mem(srcOffset), pData, tlen);
-        }
-        else if (nSize <= tlen && nSize % 128)
-        {
-            // read last row and fill in missing parts of output
-            if (!GetRows(Sadr, 1)) return false;
-            memcpy(&outbuf->ul[2], pData, tlen);
-            memcpy(outbuf->mem((block - 1) * 128 + nSize % 128),
-                   inbuf->mem(nSize % 128), 128 - nSize % 128);
-        }
-        else
-            memcpy(outbuf->mem(), pData, tlen);
-
-        if (!SetRows(Sadr, block))
-           return false;
-
-        pData += tlen;
-        nSize -= tlen;
-        Sadr += block;
-        rows -= block;
-        srcOffset = 0;
-    }
-}
-else
-{
-    size_t Sadr = nIndex / 128;
-    size_t rows = nSize / 128;
-    while (rows)
-    {
-        size_t block = wxMin(rows, MaxTransfer / MinTransfer);
-        memcpy(outbuf->mem(), pData, block * 128);
-        if (!SetRows(Sadr, block))
-            return false;
-        pData += block * 128;
-        Sadr += block;
-        rows -= block;
-    }
-}
-    return true;
-}
-
-bool VecMemDataSource::GetRows(ULONG Sadr, int length)
-{
-    MCC_NET_PACKET *packet = outbuf;
-    packet->seq = 0;
-    packet->cntl = MCC_TARGET_MEMORY | MCC_ACCESS_READ;
-    packet->len = htons(length);
-    packet->ul[0] = htonl(0xC000);
-    packet->ul[1] = htonl(Sadr);
-    return SendAndReceive(packet, MCC_PACKET_LEN(2), (MCC_NET_PACKET*)inbuf, 10000);
-}
-
-bool VecMemDataSource::SetRows(ULONG Sadr, int length)
-{
-    // Data is already in outbuf starting at ul[2].
-    MCC_NET_PACKET *packet = outbuf;
-    packet->seq = 0;
-    packet->cntl = MCC_TARGET_MEMORY | MCC_ACCESS_WRITE;
-    packet->len = htons(length);
-    packet->ul[0] = htonl(0xC000);
-    packet->ul[1] = htonl(Sadr);
-    return SendAndReceive(packet, MCC_PACKET_LEN(length * 96 / 4), (MCC_NET_PACKET*)inbuf, 10000);
-}
-
-bool VecMemDataSource::SendAndReceive(const MCC_NET_PACKET *cmd, size_t cmdLen,
-                                 MCC_NET_PACKET *response, size_t rspLen, int timeout_ms /*= 1000*/)
-{
-   thMutexLocker lock(hBusMutex);
-
-   int rc, attempt, save_rc = 0;
-   for (attempt = 0; attempt < 3; attempt++)
-   {
-      rc = send(sockfd, (const char*)cmd, cmdLen, 0);
-      if (rc != cmdLen) // something bad happened?
-      {
-         if (attempt == 0)
-            save_rc = WSAGetLastError(); // save the first error for reporting
-      }
-      else // packet sent OK, check for ACK
-      {
-         rc = recv(sockfd, (char*)response, rspLen, 0);
-         // "If the connection has been gracefully closed, the return value is zero."  Do we care?
-         // Are we really paranoid?  We could check FromSA against RemoteSA...
-         if (rc > 0)
-            return true;  // got ACK, everything OK
-         if (attempt == 0)
-            save_rc = WSAGetLastError(); // save the first error for reporting
-      }
-   }
-
-   if (save_rc)
-      PRINTF(_T("SendAndReceive() error %d\n"), save_rc);
-   else
-      PRINTF(_T("SendAndReceive() timed out.\n"));
-   return false;
-}
-
-bool VecMemDataSource::ToggleReadOnly()
-{
-    m_bWriteable = !m_bWriteable;
-    return true;  // That was easy.
-}
-#endif // LC1VECMEM
 
 ProcessFileDataSource::ProcessFileDataSource(DWORD procID, DWORD hForeignFile)
 : FileDataSource()

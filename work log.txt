@@ -875,3 +875,19 @@ Patched FatInfo to allow root directory in FAT16 as valid cluster.
 Monday, 2009-09-07
 Put together a Debug Unicode Static build and uploaded it to http://t-hex.com/hex, as I posted at
 http://lifehacker.com/5352885/check-out-early-in-this-weeks-open-thread#c15200258
+
+Sunday, 2012-07-15
+Worked on getting path and icon for 64-bit processes.
+
+Friday, 2012-08-03
+Added HexWndSettings::bSelectOnPaste.
+Fixed some ANSI/UNICODE paste glitches.
+
+Sunday, 2012-08-05
+Made most data members of HexWnd private.
+Decided not to do HexView class for now.
+Took out FatView.  *sigh*  It will never get used.  Same for MP3, VecMemDataSource.
+
+Sunday, 2012-09-23
+Converted HexDoc's linked list of Segments to std::deque.
+Made some members less public.

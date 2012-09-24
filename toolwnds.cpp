@@ -174,18 +174,20 @@ void FileMap::UpdateView(HexWnd *hw, int flags /*= -1*/)
     }
 
     //int availHeight = height - (regions + 1) * 4;
+    THSIZE docSize = hw->doc->GetSize();
     THSIZE topByte = hw->GetFirstVisibleByte();
     THSIZE bottomByte = hw->GetLastVisibleByte();
     THSIZE selTop, selBottom;
     hw->GetSelection(selTop, selBottom);
 
     const DataSource *pDS = hw->m_pDS;
-    wxBrush *mainBrush = GetBrush(hw->doc->m_head->next, pDS, hw->doc->display_address);
+    auto& segments = hw->doc->GetSegments();
+    wxBrush *mainBrush = GetBrush(*segments.begin(), pDS, hw->doc->display_address);
 
     int blockstart = 3;
     int blockend = m_majorSize - 3;
     int blocksize = blockend - blockstart;
-    double scale = (double)blocksize / (double)hw->doc->size;
+    double scale = (double)blocksize / (double)hw->doc->GetSize();
 
     *major1 = blockstart - 1;
     *major2 = blocksize + 2;
@@ -205,8 +207,9 @@ void FileMap::UpdateView(HexWnd *hw, int flags /*= -1*/)
     THSIZE segmentStart = hw->doc->display_address;
     wxBrush *brush, *curBrush = mainBrush;
     //for (size_t n = 0; n < hw->doc->segments.size(); n++)
-    for (Segment *s = hw->doc->m_head->next; s != hw->doc->m_tail; s = s->next)
+    for (auto iter = segments.begin(); iter != segments.end(); iter++)
     {
+        const Segment& s = *iter;
         //Segment* s = hw->doc->segments[n];
         //segmentStart = hw->doc->bases[n];
 
@@ -227,14 +230,14 @@ void FileMap::UpdateView(HexWnd *hw, int flags /*= -1*/)
             lastSegmentStart = segmentStart;
             curBrush = brush;
         }
-        segmentStart += s->size;
+        segmentStart += s.size;
     }
 
     //if (type != Segment::FILE)
     if (*curBrush != *mainBrush)
     {
         *major1 = blockstart + (int)(lastSegmentStart * scale);
-        *major2 = (int)((hw->doc->size - lastSegmentStart) * scale);
+        *major2 = (int)((hw->doc->GetSize() - lastSegmentStart) * scale);
         if (*major2 == 0)
             *major2 = 1;
         memDC.SetBrush(*curBrush);
@@ -292,13 +295,13 @@ void FileMap::UpdateView(HexWnd *hw, int flags /*= -1*/)
     Update();
 }
 
-wxBrush *FileMap::GetBrush(const Segment *s, const DataSource *pDS, THSIZE offset)
+wxBrush *FileMap::GetBrush(const Segment& s, const DataSource *pDS, THSIZE offset)
 {
-    if (s->pDS == pDS)
+    if (s.pDS == pDS)
     {
-        if (offset < s->stored_offset)
+        if (offset < s.stored_offset)
             return &brBackward;
-        if (offset > s->stored_offset)
+        if (offset > s.stored_offset)
             return &brForward;
         return &brFile;
     }
@@ -311,7 +314,7 @@ int FileMap::GetCoord(THSIZE pos)
     int blockstart = 3;
     int blockend = m_majorSize - 4;
     int blocksize = blockend - blockstart;
-    double scale = (double)blocksize / (double)m_hw->doc->size;
+    double scale = (double)blocksize / (double)m_hw->DocSize();
     return blockstart + (int)(scale * pos);
 }
 
@@ -350,6 +353,9 @@ void FileMap::OnMouseUp(wxMouseEvent &event)
 
 int FileMap::HitTest(const wxPoint pt, THSIZE &pos)
 {
+    if (m_hw == NULL)
+        return 0;
+
     if (m_rcInside.InsideContains(pt))
     {
         double d;
@@ -419,7 +425,7 @@ void FileMap::OnCommand(wxCommandEvent &event)
     case IDM_SELECTBLOCK:
         if (HitTest(m_mousePos, pos))
         {
-            Segment *ts = m_hw->doc->GetSegment(pos, &base);
+            const Segment *ts = m_hw->doc->GetSegment(pos, &base);
             if (ts)
             {
                 m_hw->CmdSetSelection(base, base + ts->size);
@@ -435,7 +441,7 @@ void FileMap::OnCommand(wxCommandEvent &event)
     case IDM_BLOCKSTART:
         if (HitTest(m_mousePos, pos))
         {
-            Segment *ts = m_hw->doc->GetSegment(pos, &base);
+            const Segment *ts = m_hw->doc->GetSegment(pos, &base);
             if (ts)
                 m_hw->CenterByte(base);
         }
@@ -443,7 +449,7 @@ void FileMap::OnCommand(wxCommandEvent &event)
     case IDM_BLOCKEND:
         if (HitTest(m_mousePos, pos))
         {
-            Segment *ts = m_hw->doc->GetSegment(pos, &base);
+            const Segment *ts = m_hw->doc->GetSegment(pos, &base);
             if (ts)
                 m_hw->CenterByte(base + ts->size - 1);
         }
@@ -486,17 +492,17 @@ int wxCALLBACK wxListCompareFunction(long item1, long item2, wxIntPtr data)
           result = 1;
        else if (r1->display_address < r2->display_address)
           result = -1;
-       else if (r1->size > r2->size)
+       else if (r1->GetSize() > r2->GetSize())
           result = -1; // backward on purpose
-       else if (r1->size < r2->size)
+       else if (r1->GetSize() < r2->GetSize())
           result = 1; // backward on purpose
        else
           result = 0;
        break;
     case 2: // Size
-       if (r1->size > r2->size)
+       if (r1->GetSize() > r2->GetSize())
           result = 1;
-       else if (r1->size < r2->size)
+       else if (r1->GetSize() < r2->GetSize())
           result = -1;
        else
           result = 0;
@@ -570,7 +576,7 @@ void DocList::UpdateView(HexWnd *hw, int flags /*= -1*/)
     if (bSkipUpdate)
         return;
     int selected;
-    if (hw == m_hw && FLAGS(flags, DV_NEWDOC) && flags != -1)
+    if (hw != NULL && hw == m_hw && FLAGS(flags, DV_NEWDOC) && flags != -1)
     {   // Update the selection because somebody else called HexWnd::SetDoc().
         SelectDoc(hw->doc);
         return;
@@ -589,47 +595,46 @@ void DocList::UpdateView(HexWnd *hw, int flags /*= -1*/)
     int item = 0;
     //for (HexDoc *r = hw->m_pRootRegion; r != NULL; r = r->next, item++)
     int offset_digits = 1, size_digits = 0;
-    const size_t nDocs = hw ? hw->m_docs.size() : 0;
-    for (size_t n = 0; n < nDocs; n++)
-    {
-        HexDoc *r = hw->m_docs[n];
-        offset_digits = wxMax(offset_digits, CountDigits(r->display_address, 16));
-        size_digits = wxMax(size_digits, CountDigits(r->size, 16));
-    }
-
-    for (size_t n = 0; n < nDocs; n++, item++)
-    {
-        HexDoc *r = hw->m_docs[n];
-        wxListItem li;
-        li.SetId(item);
-        li.SetText(r->info);
-        li.SetData(r);
-        list->InsertItem(li);
-        list->SetItem(item, 1, FormatNumber(r->display_address, 16, offset_digits));
-        list->SetItem(item, 2, FormatNumber(r->size, 16, size_digits));
-        list->SetItem(item, 3, ProtectFlagsAsString(r->dwFlags));
-    }
-    //list->SetColumnWidth(0, wxLIST_AUTOSIZE_USEHEADER);
-    //list->SetColumnWidth(1, wxLIST_AUTOSIZE_USEHEADER);
-    //list->SetColumnWidth(2, wxLIST_AUTOSIZE_USEHEADER);
-    //list->SetColumnWidth(3, wxLIST_AUTOSIZE_USEHEADER);
-    m_bListFrozen = true;
-
     if (hw)
     {
+        auto docs = hw->GetDocList();
+        const size_t nDocs = docs.size();
+        for (size_t n = 0; n < nDocs; n++)
+        {
+            const HexDoc *r = docs[n];
+            offset_digits = wxMax(offset_digits, CountDigits(r->display_address, 16));
+            size_digits = wxMax(size_digits, CountDigits(r->GetSize(), 16));
+        }
+
+        for (size_t n = 0; n < nDocs; n++, item++)
+        {
+            const HexDoc *r = docs[n];
+            wxListItem li;
+            li.SetId(item);
+            li.SetText(r->info);
+            li.SetData((wxUIntPtr)r);
+            list->InsertItem(li);
+            list->SetItem(item, 1, FormatNumber(r->display_address, 16, offset_digits));
+            list->SetItem(item, 2, FormatNumber(r->GetSize(), 16, size_digits));
+            list->SetItem(item, 3, ProtectFlagsAsString(r->dwFlags));
+        }
+        //list->SetColumnWidth(0, wxLIST_AUTOSIZE_USEHEADER);
+        //list->SetColumnWidth(1, wxLIST_AUTOSIZE_USEHEADER);
+        //list->SetColumnWidth(2, wxLIST_AUTOSIZE_USEHEADER);
+        //list->SetColumnWidth(3, wxLIST_AUTOSIZE_USEHEADER);
+        m_bListFrozen = true;
+
         sortColumn = hw->DocListSortColumn;
         for (size_t i = 0; i < 4; i++)
             sortOrder[i] = hw->DocListSortOrder[i];
-    }
-    list->SortItems(wxListCompareFunction, (long)this);
 
-    if (hw) {
         selected = list->FindItem(-1, (wxUIntPtr)hw->doc);
         if (selected) {
             list->EnsureVisible(selected);
             list->SetItemState(selected, selstate, selstate);
         }
     }
+    list->SortItems(wxListCompareFunction, (long)this);
 
     //list->Thaw();
 }
@@ -828,7 +833,7 @@ void StringView::ProcessUpdates()
     bool bUnicode = false;
     wxString str;
 
-    THSIZE addr, selSize, size8 = 0, size16 = 0;
+    THSIZE addr, selSize, size8 = 0, size16 = 0, docSize = m_hw->doc->GetSize();
     m_hw->GetSelection().Get(addr, selSize);
     int charBytes = 0; // 0 = not set, 1 or 2
 
@@ -838,7 +843,7 @@ void StringView::ProcessUpdates()
     //! todo: define how to auto-detect a string, then do that.
     if (selSize == 0) // look for beginning and end of string
     {
-        while (addr + size8 < m_hw->doc->size && size8 < 0xFFFF)
+        while (addr + size8 < docSize && size8 < 0xFFFF)
         {
             char c = m_hw->doc->GetAt(addr + size8);
             if (my_isprint[(uint8)c])
@@ -862,7 +867,7 @@ void StringView::ProcessUpdates()
     if (selSize == 0 && size8 <= 1) // look for beginning and end of UTF-16 string //! (is it really UTF-16?)
     {
         THSIZE addr16 = addr - addr % 2;
-        while (addr16 + size16 < m_hw->doc->size && size16 < 0xFFFF)
+        while (addr16 + size16 < docSize && size16 < 0xFFFF)
         {
             uint16 c = m_hw->doc->Read16(addr16 + size16);
             if (c <= 127 && my_isprint[(uint8)c])
@@ -1734,209 +1739,6 @@ void DocHistoryView::ProcessUpdates()
 #endif // INCLUDE_LIBDISASM
 
 
-//****************************************************************************
-//****************************************************************************
-// FatView
-//****************************************************************************
-//****************************************************************************
-
-//BEGIN_EVENT_TABLE(FatView, wxWindow)
-//END_EVENT_TABLE()
-
-FatView::FatView(wxWindow *parent)
-: DataView(this),
-  wxTextCtrl(parent, -1, ZSTR, wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE | wxTE_READONLY)
-{
-}
-
-FatView::~FatView()
-{
-}
-
-DWORD CHS_offset(const uint8 *pchs)
-{
-    DWORD chs = (0);
-    DWORD sectors = chs;
-    return sectors * 512;
-}
-
-#undef N_
-#include "sys_types.h"  // partition table types from GNU fdisk
-
-wxString GetPartitionType(BYTE type)
-{
-    wxString s;
-    for (int i = 0; i < DIM(msdos_systypes); i++)
-    {
-        if (type == msdos_systypes[i].type)
-            s = msdos_systypes[i].name;
-    }
-
-    for (int i = 0; i < DIM(bsd_systypes); i++)
-    {
-        if (type == bsd_systypes[i].type && type > 0)
-        {
-            if (s.Len())
-                s += _T(", ");
-            s += bsd_systypes[i].name;
-        }
-    }
-
-    if (s.Len() == 0)
-        s = _T("Unknown");
-    return s;
-}
-
-// Read a disk sector and display it as a partition table.  Experimental, 2008-03-09
-// Return false if we can't do it, with error in &text.
-// http://ata-atapi.com/hiwtab.htm
-// http://www.win.tue.nl/~aeb/partitions/partition_types-1.html
-//! This would be more useful as a dialog with the ability to modify the data.
-bool DescribePartitionTable(HexWnd *hw, wxString &text)
-{
-    text.Clear();
-    const uint8 *data = hw->doc->Load(hw->GetCursor() &~(THSIZE)0x1FF, 0x200);
-    if (!data) {
-        text = _T("Couldn't read sector.");
-        return false;
-    }
-    if (data[0x1FE] != 0x55 || data[0x1FF] != 0xAA)
-    {
-        text = _T("Not a master boot record -- last two bytes should be 55 AA.");
-        return false;
-    }
-    data += 0x1BE;  // point to beginning of partition table
-    if ((data[ 0] & 0x7F) ||
-        (data[16] & 0x7F) ||
-        (data[32] & 0x7F) ||
-        (data[48] & 0x7F) )
-    {
-        text = _T("Drive number is not zero; this is probably not an MBR.");
-        return false;
-    }
-
-    const uint8 zero[64] = {0};
-    int startDigits = 0, sizeDigits = 0;
-    for (int i = 0; i < 4; i++)
-    {
-        startDigits = wxMax(startDigits, CountDigits(Read4Little(data + i * 16 +  8) * (THSIZE)512, 16));
-        sizeDigits  = wxMax(sizeDigits,  CountDigits(Read4Little(data + i * 16 + 12) * (THSIZE)512, 16));
-    }
-    TCHAR buf[50];
-    int partitionCount = 0;
-    for (int i = 0; i < 4; i++, partitionCount++)
-    {
-        if (!memcmp(data, zero, (4 - i) * 16))
-        {
-            if (i == 0) {
-                text = _T("No partition records found.");
-                return false;
-            }
-            break;
-        }
-        FormatNumber(Read4Little(data+8) * (THSIZE)512, buf, 50, 16, startDigits);
-        text += _T("start=") + wxString(buf);
-        FormatNumber(Read4Little(data+12) * (THSIZE)512, buf, 50, 16, sizeDigits);
-        text += _T(", size=") + wxString(buf);
-        text += wxString::Format(_T(", type=0x%02X ("), data[4]) + GetPartitionType(data[4]) + _T(")");
-        text += _T(", active=") + wxString((data[0] & 0x80) ? _T("Y") : _T("n"));
-        //! todo: check CHS values against LBA values?
-        //text += 
-        //CHS_offset(data+5) - CHS_offset(data+1)
-        if (i < 3)
-            text += _T("\n");
-        data += 16;
-    }
-    text = wxString::Format(_T("Partition table with %d record"), partitionCount)
-        + Plural(partitionCount) + _T(":\n") + text;
-    return true;
-}
-
-void FatView::ProcessUpdates()
-{
-    if (!m_hw)
-        return;
-
-    if (!m_queuedUpdates)
-        return;
-
-    wxString text;
-    if (DescribePartitionTable(m_hw, text))
-    {
-        SetValue(text);
-        return;
-    }
-
-    FatInfo &fi = m_hw->fatInfo;
-
-    THSIZE offset = 0;
-    int area = fi.HitTest(m_hw->GetCursor(), offset);
-    wxString strOffset = FormatDec(offset) + _T(" (0x") + FormatHex(offset) + _T(")");
-    if (area == FatInfo::AREA_FAT1)
-        SetValue(_T("FAT 1  Cluster ") + strOffset);
-    else if (area == FatInfo::AREA_FAT2)
-        SetValue(_T("FAT 2  Cluster ") + strOffset);
-    else if (area == FatInfo::AREA_FAT1)
-        SetValue(_T("Data   Cluster ") + strOffset);
-    else if (area == FatInfo::AREA_BS)
-        SetValue(_T("Boot sector"));
-    else if (area == FatInfo::AREA_RESERVED)
-        SetValue(_T("Reserved ") + strOffset);
-    else if (area == FatInfo::AREA_ROOT)
-        SetValue(_T("Root directory ") + strOffset);
-    else
-        SetValue(wxString::Format(_T("%d  "), area) + strOffset);
-
-    FAT_CHAIN_INFO fci = {-1};
-    bool isDirectory = (area == FatInfo::AREA_ROOT);
-    if (!isDirectory && fi.AreaHasClusters(area))
-    {
-        if (fi.GetFatInfo(offset, &fci) && fi.IsValidCluster(fci.first))
-        {
-            AppendText(_T("\n This object starts at cluster 0x") + FormatHex(fci.first));
-            AppendText(_T("\n  Now at cluster ") + FormatDec((int64)fci.before) + _T(" of ") + FormatDec((int64)fci.count));
-        }
-        else
-        {
-            AppendText(_T("\n FAT reports this cluster is unused."));
-            fci.first = offset;
-        }
-        isDirectory = fi.IsDirectory(fci.first);
-    }
-
-    if (area == FatInfo::AREA_ROOT || isDirectory)
-    {
-        AppendText(_T("\n It is a directory."));
-
-        if (area == FatInfo::AREA_DATA || area == FatInfo::AREA_ROOT)
-        {
-            offset = RoundDown(m_hw->GetCursor(), 0x20);
-            FatDirEntry de;
-            uint8 buf[32];
-            m_hw->doc->Read(offset, 32, buf);
-            de.Read(buf, &fi);
-
-            if (de.attrib != 0x0F)
-            {
-                wxString info = _T("\n");
-                info += _T("\n ") + de.GetName();
-                info += _T("\n ") + de.GetStringInfo();
-                if (buf[0] == 0xE5)
-                    info += _T("\n Deleted.");
-                AppendText(info);
-                if (de.firstCluster != 0 || de.GetName() == _T(".."))
-                    m_hw->Hyperlink(offset, 0x20, fi.BytePos(FatInfo::AREA_DATA, de.firstCluster));
-            }
-        }
-    }
-
-    if (area == FatInfo::AREA_FAT1 || area == FatInfo::AREA_FAT2)
-    {
-        THSIZE start = fi.BytePos(area, offset - fci.contig[0]);
-        THSIZE size  = fi.BytePos(area, offset + fci.contig[1] + 1) - start;
-        m_hw->Highlight(start, size, this);
-    }
-}
 
 //****************************************************************************
 //****************************************************************************

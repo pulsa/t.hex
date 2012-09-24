@@ -324,38 +324,6 @@ void HexWnd::CmdGotoAgain(wxCommandEvent &event) { }
 //void HexWnd::CmdFindAgainForward(wxCommandEvent &event) { }
 //void HexWnd::CmdFindAgainBackward(wxCommandEvent &event) { }
 
-void HexWnd::CmdNextBlock(wxCommandEvent &event)
-{
-    THSIZE offset;
-    bool track = (event.GetId() == IDM_NextBlockTrack);
-    int area = fatInfo.HitTest(GetCursor(), offset);
-    if (area != FatInfo::AREA_FAT1 && area != FatInfo::AREA_FAT2 && area != FatInfo::AREA_DATA)
-        return;
-    offset = fatInfo.NextCluster(offset, track);
-    if (fatInfo.IsValidCluster(offset)) {
-        offset = fatInfo.BytePos(area, offset);
-        CmdMoveCursor(offset, ShiftDown());
-    }
-}
-
-void HexWnd::CmdPrevBlock(wxCommandEvent &event)
-{
-    THSIZE offset;
-    bool track = (event.GetId() == IDM_PrevBlockTrack);
-    int area = fatInfo.HitTest(GetCursor(), offset);
-    if (area != FatInfo::AREA_FAT1 && area != FatInfo::AREA_FAT2 && area != FatInfo::AREA_DATA)
-        return;
-    THSIZE tmp = fatInfo.BytePos(area, offset);  // go to beginning of current block
-    if (tmp == GetCursor())                      // already at beginning?
-    {
-        offset = fatInfo.PrevCluster(offset, track);    // go to previous block
-        if (!fatInfo.IsValidCluster(offset))
-            return;
-        tmp = fatInfo.BytePos(area, offset);
-    }
-    CmdMoveCursor(tmp, ShiftDown());
-}
-
 void HexWnd::CmdSelectAll(wxCommandEvent &event)
 {
     CmdSetSelection(0, DocSize());
@@ -630,7 +598,10 @@ bool HexWnd::DoPaste(thString byteData, SerialData *psData)
         doc->ReplaceAt(iSelStart, nOldSize, byteData.data(), byteData.len());
     doc->MarkModified(ByteRange::fromSize(iSelStart, newSize));
 
-    CmdMoveCursor(iSelStart + newSize);
+    if (s.bSelectOnPaste)
+        CmdSetSelection(iSelStart, iSelStart + newSize);
+    else
+        CmdMoveCursor(iSelStart + newSize);
 
     return true;
 end:
@@ -1147,126 +1118,6 @@ void HexWnd::CmdReadPalette(wxCommandEvent &event)
     Refresh();
 }
 
-// FAT MANIPULATION STUFF
-
-void HexWnd::CmdGotoCluster(wxCommandEvent &event)
-{
-    thRecentChoiceDialog dlg(this, _T("T.Hex"), _T("Go to cluster"), m_asGotoCluster);
-    if (dlg.ShowModal() == wxID_OK)
-    {
-        THSIZE cluster;
-        if (!ReadUserNumber(m_asGotoCluster[0], cluster))
-        {
-            wxMessageBox(_T("I didn't understand \"") + m_asGotoCluster[0] + wxChar('"'), _T("T.Hex"), wxICON_ERROR, this);
-            return;
-        }
-        THSIZE offset = fatInfo.BytePos(FatInfo::AREA_DATA, cluster);
-        CmdMoveCursor(offset);
-    }
-}
-
-void HexWnd::CmdJumpToFromFat(wxCommandEvent &event)
-{
-    THSIZE offset;
-    int area = fatInfo.HitTest(GetCursor(), offset);
-    if (area == FatInfo::AREA_DATA)
-        area = FatInfo::AREA_FAT1;
-    else if (area == FatInfo::AREA_FAT1 || area == FatInfo::AREA_FAT2)
-        area = FatInfo::AREA_DATA;
-    else
-        return;
-    offset = fatInfo.BytePos(area, offset);
-    CmdMoveCursor(offset);
-}
-
-void HexWnd::CmdFirstCluster(wxCommandEvent &event)
-{
-    THSIZE offset = 0;
-    int area = fatInfo.HitTest(GetCursor(), offset);
-    FAT_CHAIN_INFO fci = {FCI_FIRST};
-    
-    if (!fatInfo.AreaHasClusters(area) ||
-        !fatInfo.GetFatInfo(offset, &fci) ||
-        !fatInfo.IsValidCluster(fci.first))
-        return;
-    offset = fatInfo.BytePos(area, fci.first);
-    CmdMoveCursor(offset);
-}
-
-void HexWnd::CmdLastCluster(wxCommandEvent &event)
-{
-    THSIZE offset = 0;
-    int area = fatInfo.HitTest(GetCursor(), offset);
-    FAT_CHAIN_INFO fci = {FCI_LAST};
-    
-    if (!fatInfo.AreaHasClusters(area) ||
-        !fatInfo.GetFatInfo(offset, &fci) ||
-        !fatInfo.IsValidCluster(fci.last))
-        return;
-    offset = fatInfo.BytePos(area, fci.last);
-    CmdMoveCursor(offset);
-}
-
-void HexWnd::CmdGotoPath(wxCommandEvent &event)
-{
-    wxString path = ::wxGetTextFromUser(_T("Enter a path, relative to the root of this drive."), _T("Fatty T.Hex"));
-    if (!path.Len())
-        return;
-    int cluster = fatInfo.GotoPath(path);
-    if (fatInfo.IsValidCluster(cluster))
-        CmdMoveCursor(fatInfo.BytePos(FatInfo::AREA_DATA, cluster));
-}
-
-void HexWnd::CmdFatAutoSave(wxCommandEvent &event)
-{
-    if (!fatInfo.Ok())
-        return;
-    uint8 buf[32];
-    THSIZE dirEntryStart = RoundDown(GetCursor(), 32);
-    if (!doc->Read(dirEntryStart, 32, buf))
-        return;
-    FatDirEntry de, de2;
-    de.Read(buf, &fatInfo);
-    if (!fatInfo.IsValidCluster(de.firstCluster))
-        return;
-    THSIZE fileStart, fileEnd = 0;
-    int count = 0;
-    while (count++ < 100) {
-        dirEntryStart += 32;
-        if (!doc->Read(dirEntryStart, 32, buf))
-            return;
-        if (buf[0] == 0xE5) // deleted?
-            continue;
-        de2.Read(buf, &fatInfo);
-        if (de2.attrib != 0x0F && // not LFN
-            fatInfo.IsValidCluster(de2.firstCluster))
-        {
-            fileEnd = fatInfo.BytePos(FatInfo::AREA_DATA, de2.firstCluster);
-            break;
-        }
-    }
-    if (count >= 100)
-        return;
-    fileStart = fatInfo.BytePos(FatInfo::AREA_DATA, de.firstCluster);
-
-    wxFileDialog saveDlg(this, _T("Save File"), _T("C:\\"), de.GetName(), _T("*.*"), wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
-    if (saveDlg.ShowModal() == wxID_OK &&
-        doc->SaveRange(saveDlg.GetPath(), fileStart, fileEnd - fileStart))
-    {
-        // Set the created/modified/accessed time.
-        // We should probably use SYSTEMTIME in place of FATTIME inside FatDirEntry... maybe later.
-        FILETIME ftCreate, ftAccess, ftWrite;
-        de.create.ToLocalFileTime(&ftCreate);
-        de.access.ToLocalFileTime(&ftAccess);
-        de.modify.ToLocalFileTime(&ftWrite);
-
-        HANDLE hFile = CreateFile(saveDlg.GetPath(), GENERIC_WRITE, 0, 0, OPEN_EXISTING, 0, 0);
-        SetFileTime(hFile, &ftCreate, &ftAccess, &ftWrite);
-        CloseHandle(hFile);
-
-        wxMessageBox(FormatDec(fileEnd - fileStart) + _T(" bytes saved."));
-    }
-}
 
 //void HexWnd::CmdFocusHexWnd(wxCommandEvent &event)
 //{
@@ -1278,7 +1129,7 @@ void HexWnd::CmdToggleHexDec(wxCommandEvent &event)
     if (s.iAddressBase == 16)
     {
         s.iAddressBase = 10;
-        appSettings.sb.SelectionBase = 
+        appSettings.sb.SelectionBase =
         appSettings.sb.ValueBase     =
         appSettings.sb.FileSizeBase  =
             BASE_DEC;
@@ -1286,7 +1137,7 @@ void HexWnd::CmdToggleHexDec(wxCommandEvent &event)
     else
     {
         s.iAddressBase = 16;
-        appSettings.sb.SelectionBase = 
+        appSettings.sb.SelectionBase =
         appSettings.sb.ValueBase     =
         appSettings.sb.FileSizeBase  =
             BASE_HEX;
@@ -1553,7 +1404,7 @@ bool HexWnd::DoFind(const uint8 *data, size_t searchLength, int flags /*= 0*/)
                 else
                     start = end;
             }
-            end = doc->size;
+            end = doc->GetSize();
             restart = 0;
         }
         else  // find backward

@@ -250,7 +250,6 @@ public:
     bool UpdateData();
     void UpdatePalette();
     void OnOK(wxCommandEvent &event);
-    bool FontChanged(HexWndSettings *old);
     HexWndSettings *ps;
     DECLARE_EVENT_TABLE()
 
@@ -270,6 +269,7 @@ public:
     wxChoice        *cmbFontStyle;
     thRecentChoice  *cmbCodePage;
     wxCheckBox      *chkFontCharsOnly;
+    wxCheckBox      *chkSelectOnPaste;
 
     //! You could argue that this stuff belongs to each pane, and should be
     //  a separate class.  Maybe only some of it.

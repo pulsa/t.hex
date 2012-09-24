@@ -20,14 +20,19 @@ public:
         delete swnd;
     }
 
+#if wxCHECK_VERSION(2,9,2)
+    virtual bool OnPoke(const wxString& topic, const wxString& item, const void *data, size_t size, wxIPCFormat format)
+#else
     virtual bool OnPoke(const wxString& topic, const wxString& item, TCHAR* data, int size, wxIPCFormat format)
+#endif
     {
-        PRINTF(_T("%s\n"), item.c_str());
+        wxString sdata((TCHAR*)data);
+        PRINTF(_T("%s=%s\n"), item.c_str(), sdata.c_str());
         if (item == _T("dir"))
-            cwd = wxString(data);
+            cwd = sdata;
         else if (item == _T("cmd")) {
             frame->Raise(); // Bring T. Hex window the the foreground
-            frame->ProcessCommandLine(wxString(data), cwd);
+            frame->ProcessCommandLine(sdata, cwd);
         }
         // Note: If frame puts up a message box, this ipcConnection object will go away.
         return true;
@@ -36,7 +41,11 @@ public:
     // Added 2008-07-25 because sometimes frame->Raise() isn't enough.
     // Steps to test:  Close the program.
     // Find 3 files in Explorer.  Right-click and "SendTo T-Hex" on each, without switching focus otherwise.
+#if wxCHECK_VERSION(2,9,2)
+    virtual const void *OnRequest (const wxString &topic, const wxString &item, size_t *size, wxIPCFormat format)
+#else
     virtual wxChar *OnRequest(const wxString& topic, const wxString& item, int *size, wxIPCFormat format )
+#endif
     {
         if (item == _T("HWND"))
         {

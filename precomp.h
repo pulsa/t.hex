@@ -12,7 +12,8 @@
 //#define _HAS_EXCEPTIONS 0  // leave this out at work, where we use exceptions in WX
 //#define _INC_TYPEINFO  // VS.NET 2003 typeinfo.h always uses exception class
 
-#define _WIN32_WINNT 0x501 //! target Windows XP (dangerous!)
+//#define _WIN32_WINNT 0x501 //! target Windows XP (dangerous!)
+#define _WIN32_WINNT 0x0600  // Target Vista for QueryFullProcessImageName()
 //#define _WIN32_WINNT 0x500  // Today I need to run on Win2k
 //#define _WIN32_WINNT 0x0400   // or maybe Win98
 #define _SCL_SECURE_NO_DEPRECATE
@@ -79,11 +80,13 @@ inline T fnmax(const T& a, const T& b)
 #include <vector>
 #include <algorithm>
 #include <set>
+#include <deque>
 
 #include <strsafe.h>
 
 //#include "QString.h"
 #include "ATimer.h"
+#include "scopeguard.h"
 
 #ifdef INCLUDE_LIBDISASM
 extern "C" {
